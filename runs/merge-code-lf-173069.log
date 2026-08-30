@@ -1,0 +1,23 @@
+{
+  "humaneval/fused": {
+    "passed": 26,
+    "total": 164,
+    "accuracy": 0.15853658536585366
+  },
+  "humaneval/soft": {
+    "passed": 24,
+    "total": 164,
+    "accuracy": 0.14634146341463414
+  },
+  "mbpp_full/fused": {
+    "passed": 81,
+    "total": 500,
+    "accuracy": 0.162
+  },
+  "mbpp_full/soft": {
+    "passed": 57,
+    "total": 500,
+    "accuracy": 0.114
+  }
+}
+Wrote fbt_experiments/results/d20_lf_k3_stackedu_004407_code_eval_lf_modes_sharded/metrics.json

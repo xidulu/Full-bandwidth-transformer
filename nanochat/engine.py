@@ -78,6 +78,10 @@ def use_calculator(expr):
     # Evaluate with timeout
     return eval_with_timeout(expr)
 
+# Keep an unshadowed internal reference: Engine.generate exposes a
+# `use_calculator` boolean for callers while this helper remains public.
+_evaluate_calculator = use_calculator
+
 # -----------------------------------------------------------------------------
 class KVCache:
     """
@@ -173,9 +177,33 @@ class Engine:
         self.tokenizer = tokenizer # needed for tool use
 
     @torch.inference_mode()
-    def generate(self, tokens, num_samples=1, max_tokens=None, temperature=1.0, top_k=None, seed=42):
-        """Same as generate, but does single prefill and then clones the KV cache."""
+    def generate(
+        self,
+        tokens,
+        num_samples=1,
+        max_tokens=None,
+        temperature=1.0,
+        top_k=None,
+        seed=42,
+        decode_mode="standard",
+        use_calculator=True,
+    ):
+        """
+        Generate with a single batch-1 prompt prefill, then clone the KV cache.
+
+        decode_mode selects the input recurrence:
+        - standard: plain token inputs throughout.
+        - soft: ordinary prompt prefill, then latent feedback for generated tokens.
+        - fused: one ordinary prompt pass followed by a fresh-cache fused prompt pass,
+          then the same latent-feedback generation used by soft.
+        """
         assert isinstance(tokens, list) and isinstance(tokens[0], int), "expecting list of ints"
+        valid_decode_modes = {"standard", "soft", "fused"}
+        if decode_mode not in valid_decode_modes:
+            raise ValueError(f"decode_mode must be one of {sorted(valid_decode_modes)}, got {decode_mode!r}")
+        use_feedback = decode_mode != "standard"
+        if use_feedback and getattr(self.model, "latent_feedback", None) is None:
+            raise ValueError(f"decode_mode={decode_mode!r} requires a model trained with latent feedback")
         device = self.model.get_device()
         # Allocate the KV cache in the compute dtype so it matches what the forward pass emits
         dtype = COMPUTE_DTYPE
@@ -184,38 +212,69 @@ class Engine:
 
         # Get the special tokens we need to coordinate the tool use state machine
         get_special = lambda s: self.tokenizer.encode_special(s)
-        python_start = get_special("<|python_start|>")
-        python_end = get_special("<|python_end|>")
-        output_start = get_special("<|output_start|>")
-        output_end = get_special("<|output_end|>")
+        if use_calculator:
+            python_start = get_special("<|python_start|>")
+            python_end = get_special("<|python_end|>")
+            output_start = get_special("<|output_start|>")
+            output_end = get_special("<|output_end|>")
+        else:
+            python_start = python_end = output_start = output_end = None
         assistant_end = get_special("<|assistant_end|>") # if sampled, ends row
         bos = self.tokenizer.get_bos_token_id() # if sampled, ends row
 
         # 1) Run a batch 1 prefill of the prompt tokens
         m = self.model.config
         kv_model_kwargs = {"num_heads": m.n_kv_head, "head_dim": m.n_embd // m.n_head, "num_layers": m.n_layer}
-        kv_cache_prefill = KVCache(
-            batch_size=1,
-            seq_len=len(tokens),
-            device=device,
-            dtype=dtype,
-            **kv_model_kwargs,
-        )
+
+        def make_kv_cache(batch_size, seq_len):
+            return KVCache(
+                batch_size=batch_size,
+                seq_len=seq_len,
+                device=device,
+                dtype=dtype,
+                **kv_model_kwargs,
+            )
+
+        kv_cache_prefill = make_kv_cache(batch_size=1, seq_len=len(tokens))
         ids = torch.tensor([tokens], dtype=torch.long, device=device)
-        logits = self.model.forward(ids, kv_cache=kv_cache_prefill)
+        if use_feedback:
+            logits, prompt_hidden = self.model.forward(
+                ids,
+                kv_cache=kv_cache_prefill,
+                return_hidden=True,
+            )
+        else:
+            logits = self.model.forward(ids, kv_cache=kv_cache_prefill)
+
+        if decode_mode == "fused":
+            # The second prefill pass is a parallel Jacobi update based on pass-1
+            # hidden states. It must rebuild K/V from position zero: appending it to
+            # the ordinary prefill cache would give both wrong positions and context.
+            pass1_hidden = prompt_hidden
+            del logits, prompt_hidden, kv_cache_prefill
+            kv_cache_prefill = make_kv_cache(batch_size=1, seq_len=len(tokens))
+            shifted_hidden = torch.roll(pass1_hidden, shifts=1, dims=1)
+            feedback_mask = ids.ne(bos)
+            feedback_mask[:, 0] = False
+            logits, prompt_hidden = self.model.forward(
+                ids,
+                kv_cache=kv_cache_prefill,
+                feedback_hidden=shifted_hidden,
+                feedback_mask=feedback_mask,
+                return_hidden=True,
+            )
+            del pass1_hidden, shifted_hidden, feedback_mask
+
         logits = logits[:, -1, :].expand(num_samples, -1)  # (num_samples, vocab_size)
 
         # 2) Replicate the KV cache for each sample/row
         kv_length_hint = (len(tokens) + max_tokens) if max_tokens is not None else self.model.config.sequence_len
-        kv_cache_decode = KVCache(
-            batch_size=num_samples,
-            seq_len=kv_length_hint,
-            device=device,
-            dtype=dtype,
-            **kv_model_kwargs,
-        )
+        kv_cache_decode = make_kv_cache(batch_size=num_samples, seq_len=kv_length_hint)
         kv_cache_decode.prefill(kv_cache_prefill)
         del kv_cache_prefill # no need to keep this memory around
+        if use_feedback:
+            previous_hidden = prompt_hidden[:, -1:, :].expand(num_samples, -1, -1).clone()
+            del prompt_hidden
 
         # 3) Initialize states for each sample
         row_states = [RowState(tokens.copy()) for _ in range(num_samples)]
@@ -249,22 +308,23 @@ class Engine:
                 if next_token == assistant_end or next_token == bos:
                     state.completed = True
                 # Handle tool logic
-                if next_token == python_start:
-                    state.in_python_block = True
-                    state.python_expr_tokens = []
-                elif next_token == python_end and state.in_python_block:
-                    state.in_python_block = False
-                    if state.python_expr_tokens:
-                        expr = self.tokenizer.decode(state.python_expr_tokens)
-                        result = use_calculator(expr)
-                        if result is not None:
-                            result_tokens = self.tokenizer.encode(str(result))
-                            state.forced_tokens.append(output_start)
-                            state.forced_tokens.extend(result_tokens)
-                            state.forced_tokens.append(output_end)
-                    state.python_expr_tokens = []
-                elif state.in_python_block:
-                    state.python_expr_tokens.append(next_token)
+                if use_calculator:
+                    if next_token == python_start:
+                        state.in_python_block = True
+                        state.python_expr_tokens = []
+                    elif next_token == python_end and state.in_python_block:
+                        state.in_python_block = False
+                        if state.python_expr_tokens:
+                            expr = self.tokenizer.decode(state.python_expr_tokens)
+                            result = _evaluate_calculator(expr)
+                            if result is not None:
+                                result_tokens = self.tokenizer.encode(str(result))
+                                state.forced_tokens.append(output_start)
+                                state.forced_tokens.extend(result_tokens)
+                                state.forced_tokens.append(output_end)
+                        state.python_expr_tokens = []
+                    elif state.in_python_block:
+                        state.python_expr_tokens.append(next_token)
 
             # Yield the token column
             yield token_column, token_masks
@@ -272,7 +332,16 @@ class Engine:
 
             # Prepare logits for next iteration
             ids = torch.tensor(token_column, dtype=torch.long, device=device).unsqueeze(1)
-            logits = self.model.forward(ids, kv_cache=kv_cache_decode)[:, -1, :]  # (B, vocab_size)
+            if use_feedback:
+                logits, previous_hidden = self.model.forward(
+                    ids,
+                    kv_cache=kv_cache_decode,
+                    feedback_hidden=previous_hidden,
+                    return_hidden=True,
+                )
+            else:
+                logits = self.model.forward(ids, kv_cache=kv_cache_decode)
+            logits = logits[:, -1, :]  # (B, vocab_size)
 
     def generate_batch(self, tokens, num_samples=1, **kwargs):
         """

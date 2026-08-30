@@ -1,0 +1,3 @@
+[BILLING] loaded!
+[BILLING] Re-emitting cost at job start!
+srun: fatal: cpus-per-task set by two different environment variables SLURM_CPUS_PER_TASK=77 != SLURM_TRES_PER_TASK=cpu=64

@@ -1,0 +1,86 @@
+{
+  "checkpoint": "/weka/scratch/jhu/enalisn1/xiw/nanochat_cache/base_checkpoints/d16-lf-k1-smoke/model_050000.pt",
+  "step": 50000,
+  "modes": [
+    "standard",
+    "soft",
+    "fused"
+  ],
+  "gsm8k": {
+    "standard": {
+      "examples": 165,
+      "correct": 7,
+      "accuracy": 0.04242424242424243,
+      "answers_parsed": 165,
+      "answer_parse_rate": 1.0,
+      "completion_tokens": 10787,
+      "seconds": 159.25137396616628,
+      "tokens_per_second": 67.73567933104144,
+      "accuracy_wilson_95": [
+        0.020699850349129613,
+        0.08497004225492186
+      ]
+    },
+    "soft": {
+      "examples": 165,
+      "correct": 2,
+      "accuracy": 0.012121212121212121,
+      "answers_parsed": 165,
+      "answer_parse_rate": 1.0,
+      "completion_tokens": 12891,
+      "seconds": 191.93338055425556,
+      "tokens_per_second": 67.1639292903299,
+      "accuracy_wilson_95": [
+        0.0033303919097924517,
+        0.04311234126406374
+      ]
+    },
+    "fused": {
+      "examples": 165,
+      "correct": 3,
+      "accuracy": 0.01818181818181818,
+      "answers_parsed": 165,
+      "answer_parse_rate": 1.0,
+      "completion_tokens": 9836,
+      "seconds": 148.8477572533011,
+      "tokens_per_second": 66.08094190671362,
+      "accuracy_wilson_95": [
+        0.0062024105495363455,
+        0.05208575451035889
+      ]
+    },
+    "pairwise": {
+      "standard_soft_same_first_token": 1.0,
+      "standard_soft_identical": 0.08484848484848485,
+      "standard_fused_identical": 0.05454545454545454,
+      "soft_fused_identical": 0.09696969696969697
+    },
+    "paired_accuracy": {
+      "standard_vs_soft": {
+        "both_correct": 1,
+        "standard_only_correct": 6,
+        "soft_only_correct": 1,
+        "neither_correct": 157,
+        "accuracy_delta_soft_minus_standard": -0.030303030303030304,
+        "exact_mcnemar_p": 0.125
+      },
+      "standard_vs_fused": {
+        "both_correct": 1,
+        "standard_only_correct": 6,
+        "fused_only_correct": 2,
+        "neither_correct": 156,
+        "accuracy_delta_fused_minus_standard": -0.024242424242424242,
+        "exact_mcnemar_p": 0.2890625
+      },
+      "soft_vs_fused": {
+        "both_correct": 0,
+        "soft_only_correct": 2,
+        "fused_only_correct": 3,
+        "neither_correct": 160,
+        "accuracy_delta_fused_minus_soft": 0.006060606060606061,
+        "exact_mcnemar_p": 1.0
+      }
+    },
+    "num_shots": 5
+  }
+}

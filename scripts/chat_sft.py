@@ -19,7 +19,8 @@ import torch
 from nanochat.common import compute_init, compute_cleanup, print0, DummyWandb, get_base_dir, autodetect_device_type, get_peak_flops, COMPUTE_DTYPE, COMPUTE_DTYPE_REASON, is_ddp_initialized
 from nanochat.tokenizer import get_token_bytes
 from nanochat.checkpoint_manager import save_checkpoint, load_model, load_optimizer_state
-from nanochat.loss_eval import evaluate_bpb
+from nanochat.gpt import build_feedback_mask
+from nanochat.loss_eval import evaluate_bpb, evaluate_bpb_per_pass
 import torch.distributed as dist
 from nanochat.flash_attention import HAS_FA3
 from nanochat.engine import Engine
@@ -28,7 +29,9 @@ from scripts.chat_eval import run_chat_eval
 from tasks.common import TaskMixture
 from tasks.gsm8k import GSM8K
 from tasks.mmlu import MMLU
+from tasks.openmathinstruct import OpenMathInstruct2
 from tasks.smoltalk import SmolTalk
+from tasks.stackedu import StackEduText
 
 # -----------------------------------------------------------------------------
 # CLI arguments
@@ -41,6 +44,7 @@ parser.add_argument("--device-type", type=str, default="", help="cuda|cpu|mps (e
 parser.add_argument("--model-tag", type=str, default=None, help="model tag to load from")
 parser.add_argument("--model-step", type=int, default=None, help="model step to load from")
 parser.add_argument("--load-optimizer", type=int, default=1, help="warm-start optimizer from pretrained checkpoint (0=no, 1=yes)")
+parser.add_argument("--output-tag", type=str, default=None, help="checkpoint output tag (default: model tag, or d<depth>)")
 # Training horizon
 parser.add_argument("--num-iterations", type=int, default=-1, help="number of optimization steps (-1 = full epoch)")
 # Batch sizes (default: inherit from pretrained checkpoint)
@@ -55,16 +59,38 @@ parser.add_argument("--init-lr-frac", type=float, default=0.8, help="initial LR 
 parser.add_argument("--warmup-ratio", type=float, default=0.0, help="ratio of iterations for LR warmup")
 parser.add_argument("--warmdown-ratio", type=float, default=0.5, help="ratio of iterations for LR warmdown")
 parser.add_argument("--final-lr-frac", type=float, default=0.0, help="final LR as fraction of initial LR")
+# Latent-feedback objective
+parser.add_argument("--num-forward-passes", type=int, default=1, choices=[1, 2, 3], help="total model passes per batch; values above 1 use latent feedback")
+parser.add_argument("--feedback-jitter", type=float, default=0.02, help="half-width of uniform jitter applied to carried hidden states")
+parser.add_argument("--feedback-prefix-mixin", action=argparse.BooleanOptionalAction, default=True, help="sample an independent plain prefix for each packed document on feedback passes")
 # Evaluation
 parser.add_argument("--eval-every", type=int, default=200, help="evaluate val bpb every N steps (-1 = disable)")
 parser.add_argument("--eval-tokens", type=int, default=40*524288, help="number of tokens to evaluate val loss on")
 parser.add_argument("--chatcore-every", type=int, default=200, help="evaluate ChatCORE metric every N steps (-1 = disable)")
 parser.add_argument("--chatcore-max-cat", type=int, default=-1, help="max problems per categorical task for ChatCORE")
 parser.add_argument("--chatcore-max-sample", type=int, default=24, help="max problems per generative task for ChatCORE")
+parser.add_argument("--save-every", type=int, default=-1, help="save SFT checkpoint every N steps (-1 = final only)")
 # Data mixture
+parser.add_argument("--sft-dataset", type=str, default="default", choices=["default", "openmath", "stackedu"], help="SFT dataset recipe")
 parser.add_argument("--mmlu-epochs", type=int, default=3, help="number of epochs of MMLU in training mixture (teaches Multiple Choice)")
 parser.add_argument("--gsm8k-epochs", type=int, default=4, help="number of epochs of GSM8K in training mixture (teaches Math and Tool Use)")
+parser.add_argument("--openmath-split", type=str, default="train_1M", choices=sorted(OpenMathInstruct2.valid_splits), help="OpenMathInstruct-2 split for --sft-dataset=openmath")
+parser.add_argument("--openmath-val-examples", type=int, default=2048, help="held-out examples from the shuffled OpenMath split")
+parser.add_argument("--openmath-train-examples", type=int, default=-1, help="training examples after the held-out slice (-1 = all remaining)")
+parser.add_argument("--stackedu-path", type=str, default=None, help="materialized Stack-Edu parquet path for --sft-dataset=stackedu")
+parser.add_argument("--stackedu-val-examples", type=int, default=4096, help="held-out examples from the shuffled materialized Stack-Edu parquet")
+parser.add_argument("--stackedu-train-examples", type=int, default=-1, help="training examples after the held-out Stack-Edu slice (-1 = all remaining)")
 args = parser.parse_args()
+if args.feedback_jitter < 0:
+    parser.error("--feedback-jitter must be non-negative")
+if args.openmath_val_examples < 0:
+    parser.error("--openmath-val-examples must be non-negative")
+if args.openmath_train_examples == 0 or args.openmath_train_examples < -1:
+    parser.error("--openmath-train-examples must be -1 or positive")
+if args.stackedu_val_examples < 0:
+    parser.error("--stackedu-val-examples must be non-negative")
+if args.stackedu_train_examples == 0 or args.stackedu_train_examples < -1:
+    parser.error("--stackedu-train-examples must be -1 or positive")
 user_config = vars(args).copy()
 # -----------------------------------------------------------------------------
 
@@ -92,6 +118,8 @@ if not HAS_FA3:
 
 # Load the model and tokenizer
 model, tokenizer, meta = load_model("base", device, phase="train", model_tag=args.model_tag, step=args.model_step)
+if args.num_forward_passes > 1 and model.latent_feedback is None:
+    raise RuntimeError("--num-forward-passes > 1 requires a latent-feedback base checkpoint")
 
 # Inherit training hyperparameters from pretrained checkpoint (None = inherit, explicit value = override)
 pretrain_user_config = meta.get("user_config", {})
@@ -117,7 +145,7 @@ for name, fallback, source in [
 orig_model = model
 model = torch.compile(model, dynamic=False)
 depth = model.config.n_layer
-num_flops_per_token = model.estimate_flops()
+num_flops_per_token = model.estimate_flops(args.num_forward_passes)
 tokens_per_fwdbwd = args.device_batch_size * args.max_seq_len # tokens per iteration for a single rank
 world_tokens_per_fwdbwd = tokens_per_fwdbwd * ddp_world_size # total tokens per iteration for all ranks
 assert args.total_batch_size % world_tokens_per_fwdbwd == 0, f"total_batch_size ({args.total_batch_size}) must be a multiple of {world_tokens_per_fwdbwd}."
@@ -129,14 +157,31 @@ token_bytes = get_token_bytes(device=device)
 
 # Initialize the Optimizer (combined MuonAdamW: Muon for matrix params, AdamW for rest)
 # Note that pretraining ramps weight_decay to zero by end of pretraining, so SFT continues with zero
-optimizer = model.setup_optimizer(unembedding_lr=args.unembedding_lr, embedding_lr=args.embedding_lr, matrix_lr=args.matrix_lr, weight_decay=0.0)
+optimizer = model.setup_optimizer(
+    unembedding_lr=args.unembedding_lr,
+    embedding_lr=args.embedding_lr,
+    matrix_lr=args.matrix_lr,
+    weight_decay=0.0,
+    # Keep latent-feedback matrices in their own group. They are active when
+    # num_forward_passes > 1 and dormant otherwise.
+    separate_feedback_params=model.latent_feedback is not None,
+)
 
 # Optionally warm-start optimizer from pretrained checkpoint (momentum buffers etc.)
 # Note: load_state_dict overwrites param_group metadata (LRs, betas, etc.) with the
 # pretrained values. Since pretraining warmdown brings LRs to ~0, we must save and
 # restore our fresh SFT LRs after loading.
 base_dir = get_base_dir()
-if args.load_optimizer:
+base_optimizer_has_separate_feedback = (
+    model.latent_feedback is None
+    or pretrain_user_config.get("feedback_start_fraction", 0.0) > 0.0
+)
+if args.load_optimizer and not base_optimizer_has_separate_feedback:
+    print0(
+        "WARNING: fixed-K latent-feedback optimizer groups are incompatible with "
+        "one-pass SFT; starting with a fresh optimizer"
+    )
+elif args.load_optimizer:
     optimizer_data = load_optimizer_state("base", device, rank=ddp_rank, model_tag=args.model_tag, step=args.model_step)
     if optimizer_data is not None:
         base_lrs = [group["lr"] for group in optimizer.param_groups]
@@ -159,18 +204,49 @@ for group in optimizer.param_groups:
     group["initial_lr"] = group["lr"]
 
 # SFT data mixture and DataLoader
-train_tasks = [
-    SmolTalk(split="train"), # 460K rows of general conversations
-    *[MMLU(subset="all", split="auxiliary_train") for _ in range(args.mmlu_epochs)], # 100K rows per epoch
-    *[GSM8K(subset="main", split="train") for _ in range(args.gsm8k_epochs)], # 8K rows per epoch
-]
-train_dataset = TaskMixture(train_tasks)
-print0(f"Training mixture: {len(train_dataset):,} rows (MMLU x{args.mmlu_epochs}, GSM8K x{args.gsm8k_epochs})")
-val_dataset = TaskMixture([
-    SmolTalk(split="test"), # 24K rows in test set
-    MMLU(subset="all", split="test", stop=5200), # 14K rows in test set, use only 5.2K to match the train ratios
-    GSM8K(subset="main", split="test", stop=420), # 1.32K rows in test set, use only 420 to match the train ratios
-]) # total: 24K + 5.2K + 0.42K ~= 29.6K rows
+if args.sft_dataset == "default":
+    train_tasks = [
+        SmolTalk(split="train"), # 460K rows of general conversations
+        *[MMLU(subset="all", split="auxiliary_train") for _ in range(args.mmlu_epochs)], # 100K rows per epoch
+        *[GSM8K(subset="main", split="train") for _ in range(args.gsm8k_epochs)], # 8K rows per epoch
+    ]
+    train_dataset = TaskMixture(train_tasks)
+    val_dataset = TaskMixture([
+        SmolTalk(split="test"), # 24K rows in test set
+        MMLU(subset="all", split="test", stop=5200), # 14K rows in test set, use only 5.2K to match the train ratios
+        GSM8K(subset="main", split="test", stop=420), # 1.32K rows in test set, use only 420 to match the train ratios
+    ]) # total: 24K + 5.2K + 0.42K ~= 29.6K rows
+    print0(f"Training mixture: {len(train_dataset):,} rows (MMLU x{args.mmlu_epochs}, GSM8K x{args.gsm8k_epochs})")
+elif args.sft_dataset == "openmath":
+    openmath_full = OpenMathInstruct2(split=args.openmath_split)
+    openmath_total = len(openmath_full)
+    train_start = min(args.openmath_val_examples, openmath_total)
+    train_stop = None if args.openmath_train_examples < 0 else min(train_start + args.openmath_train_examples, openmath_total)
+    train_dataset = openmath_full.slice(start=train_start, stop=train_stop)
+    val_dataset = openmath_full.slice(stop=train_start)
+    if len(val_dataset) == 0:
+        raise RuntimeError("--openmath-val-examples must reserve at least one validation example")
+    if len(train_dataset) == 0:
+        raise RuntimeError("OpenMathInstruct-2 training slice is empty")
+    print0(
+        f"Training OpenMathInstruct-2 split={args.openmath_split}: "
+        f"{len(train_dataset):,} train rows, {len(val_dataset):,} validation rows"
+    )
+else:
+    stackedu_full = StackEduText(path=args.stackedu_path)
+    stackedu_total = len(stackedu_full)
+    train_start = min(args.stackedu_val_examples, stackedu_total)
+    train_stop = None if args.stackedu_train_examples < 0 else min(train_start + args.stackedu_train_examples, stackedu_total)
+    train_dataset = stackedu_full.slice(start=train_start, stop=train_stop)
+    val_dataset = stackedu_full.slice(stop=train_start)
+    if len(val_dataset) == 0:
+        raise RuntimeError("--stackedu-val-examples must reserve at least one validation example")
+    if len(train_dataset) == 0:
+        raise RuntimeError("Stack-Edu training slice is empty")
+    print0(
+        f"Training Stack-Edu text from {stackedu_full.path}: "
+        f"{len(train_dataset):,} train rows, {len(val_dataset):,} validation rows"
+    )
 # DataLoader is defined here, it emits inputs, targets : 2D tensors of shape (device_batch_size, max_seq_len)
 # A big problem is that we don't know the final num_iterations in advance. So we create
 # these two global variables and update them from within the data generator.
@@ -194,7 +270,9 @@ def sft_data_generator_bos_bestfit(split, buffer_size=100):
     row_capacity = args.max_seq_len + 1  # +1 for target at last position
     bos_token = tokenizer.get_bos_token_id()
 
-    # Conversation buffer: list of (token_ids, loss_mask) tuples
+    # Sample buffer: list of (token_ids, loss_mask) tuples. For conversational
+    # tasks, mask=1 only on assistant completions. For text-only coding data,
+    # mask=1 on every source token after BOS.
     conv_buffer = []
     cursor = ddp_rank  # Each rank processes different conversations (for fetching)
     consumed = ddp_rank  # Track actual consumption separately from buffering
@@ -204,8 +282,19 @@ def sft_data_generator_bos_bestfit(split, buffer_size=100):
     def refill_buffer():
         nonlocal cursor, epoch
         while len(conv_buffer) < buffer_size:
-            conversation = dataset[cursor]
-            ids, mask = tokenizer.render_conversation(conversation)
+            sample = dataset[cursor]
+            if "text" in sample:
+                ids = tokenizer.encode(sample["text"], prepend=bos_token)
+                ids = ids[:row_capacity]
+                if len(ids) <= 1:
+                    cursor += ddp_world_size
+                    if cursor >= dataset_size:
+                        cursor = cursor % dataset_size
+                        epoch += 1
+                    continue
+                mask = [0] + [1] * (len(ids) - 1)
+            else:
+                ids, mask = tokenizer.render_conversation(sample, max_tokens=row_capacity)
             conv_buffer.append((ids, mask))
             cursor += ddp_world_size
             if cursor >= dataset_size:
@@ -260,20 +349,21 @@ def sft_data_generator_bos_bestfit(split, buffer_size=100):
             rows.append(row[:row_capacity])
             mask_rows.append(mask_row[:row_capacity])
 
-        # Stopping condition to respect num_iterations, if given
+        # Local dataloader iteration counter. This counts microbatches, not
+        # optimizer steps, so it must not enforce args.num_iterations.
         it += 1
-        if 0 < args.num_iterations <= it and split == "train":
-            last_step = True
 
         # Update progress tracking (based on consumed, not cursor, to account for buffering)
         if split == "train":
             current_epoch = epoch
             if args.num_iterations > 0:
-                approx_progress = it / args.num_iterations
+                # Optimizer-step progress is updated in the training loop.
+                pass
             else:
                 approx_progress = consumed / dataset_size
-            # Trigger last_step when we've consumed enough (instead of when cursor wraps)
-            if consumed >= dataset_size:
+            # Trigger last_step when we've consumed enough (instead of when cursor wraps).
+            # If args.num_iterations is explicit, allow the dataset to cycle.
+            if args.num_iterations <= 0 and consumed >= dataset_size:
                 last_step = True
 
         # Build tensors
@@ -323,10 +413,44 @@ def get_muon_momentum(it):
 # Training loop
 x, y = next(train_loader) # prefetch the very first batch of data
 min_val_bpb = float("inf")
+val_bpb = None
 smooth_train_loss = 0 # EMA of training loss
 ema_beta = 0.9 # EMA decay factor
 total_training_time = 0 # total wall-clock time of training
 step = 0
+
+
+def save_sft_checkpoint():
+    weight_tying_suffix = "-wt" if model.config.weight_tying else ""
+    output_dirname = args.output_tag or args.model_tag or f"d{depth}{weight_tying_suffix}"
+    checkpoint_dir = os.path.join(base_dir, "chatsft_checkpoints", output_dirname)
+    save_checkpoint(
+        checkpoint_dir,
+        step,
+        orig_model.state_dict(),
+        optimizer.state_dict(),
+        {
+            "step": step,
+            "val_bpb": val_bpb,
+            "model_config": {
+                "sequence_len": args.max_seq_len,
+                "vocab_size": tokenizer.get_vocab_size(),
+                "n_layer": depth,
+                "n_head": model.config.n_head,
+                "n_kv_head": model.config.n_kv_head,
+                "n_embd": model.config.n_embd,
+                "window_pattern": model.config.window_pattern,
+                "latent_feedback": model.config.latent_feedback,
+                "weight_tying": model.config.weight_tying,
+            },
+            "user_config": user_config, # inputs to the training script
+            "num_forward_passes": args.num_forward_passes,
+            "sft_dataset": args.sft_dataset,
+        },
+        rank=ddp_rank,
+    )
+
+
 while True:
     flops_so_far = num_flops_per_token * args.total_batch_size * step
 
@@ -341,16 +465,36 @@ while True:
         model.eval()
         val_loader = build_val_loader()
         eval_steps = args.eval_tokens // (args.device_batch_size * args.max_seq_len * ddp_world_size)
-        val_bpb = evaluate_bpb(model, val_loader, eval_steps, token_bytes)
-        print0(f"Step {step:05d} | Validation bpb: {val_bpb:.4f}")
+        if args.num_forward_passes == 1:
+            val_bpbs = [evaluate_bpb(model, val_loader, eval_steps, token_bytes)]
+        else:
+            val_bpbs = evaluate_bpb_per_pass(
+                model,
+                val_loader,
+                eval_steps,
+                token_bytes,
+                num_forward_passes=args.num_forward_passes,
+                bos_token_id=tokenizer.get_bos_token_id(),
+            )
+        val_bpb = val_bpbs[-1]
+        val_pass_str = " | ".join(
+            f"L{pass_idx} bpb: {bpb:.4f}"
+            for pass_idx, bpb in enumerate(val_bpbs, start=1)
+        )
+        print0(f"Step {step:05d} | Validation {val_pass_str}")
         if val_bpb < min_val_bpb:
             min_val_bpb = val_bpb
-        wandb_run.log({
+        log_data = {
             "step": step,
             "total_training_flops": flops_so_far,
             "total_training_time": total_training_time,
             "val/bpb": val_bpb,
+        }
+        log_data.update({
+            f"val/bpb_l{pass_idx}": bpb
+            for pass_idx, bpb in enumerate(val_bpbs, start=1)
         })
+        wandb_run.log(log_data)
         model.train()
 
     # once in a while: estimate the ChatCORE metric (all ranks participate)
@@ -388,31 +532,9 @@ while True:
         })
         model.train()
 
-    # save checkpoint at the end of the run (all ranks participate so each saves its optimizer shard)
-    if last_step:
-        output_dirname = args.model_tag if args.model_tag else f"d{depth}" # e.g. d12
-        checkpoint_dir = os.path.join(base_dir, "chatsft_checkpoints", output_dirname)
-        save_checkpoint(
-            checkpoint_dir,
-            step,
-            orig_model.state_dict(),
-            optimizer.state_dict(),
-            {
-                "step": step,
-                "val_bpb": val_bpb, # loss at last step
-                "model_config": {
-                    "sequence_len": args.max_seq_len,
-                    "vocab_size": tokenizer.get_vocab_size(),
-                    "n_layer": depth,
-                    "n_head": model.config.n_head,
-                    "n_kv_head": model.config.n_kv_head,
-                    "n_embd": model.config.n_embd,
-                    "window_pattern": model.config.window_pattern,
-                },
-                "user_config": user_config, # inputs to the training script
-            },
-            rank=ddp_rank,
-        )
+    # save checkpoint at requested intervals and at the end of the run
+    if last_step or (args.save_every > 0 and step > 0 and step % args.save_every == 0):
+        save_sft_checkpoint()
 
     if last_step:
         break
@@ -422,16 +544,39 @@ while True:
     # evaluate the gradient
     synchronize()
     t0 = time.time()
+    train_loss = torch.zeros((), device=x.device)
+    train_pass_losses = torch.zeros(args.num_forward_passes, device=x.device)
     for micro_step in range(grad_accum_steps):
-        loss = model(x, y)
-        train_loss = loss.detach() # for logging
+        feedback_masks = None
+        if args.num_forward_passes > 1:
+            feedback_masks = torch.stack([
+                build_feedback_mask(
+                    x,
+                    tokenizer.get_bos_token_id(),
+                    prefix_mixin=args.feedback_prefix_mixin,
+                )
+                for _ in range(args.num_forward_passes - 1)
+            ])
+        loss, pass_losses = model(
+            x,
+            y,
+            num_forward_passes=args.num_forward_passes,
+            feedback_masks=feedback_masks,
+            feedback_jitter=args.feedback_jitter,
+            return_loss_components=True,
+        )
+        train_loss += loss.detach() / grad_accum_steps
+        train_pass_losses += pass_losses.detach() / grad_accum_steps
         loss = loss / grad_accum_steps # each .backward() is a grad sum => normalize loss here
         if scaler is not None:
             scaler.scale(loss).backward()
         else:
             loss.backward()
         x, y = next(train_loader) # prefetch the next batch while the GPU is busy with forward/backward
-        progress = max(progress, approx_progress) # only increase progress monotonically
+        if args.num_iterations <= 0:
+            progress = max(progress, approx_progress) # only increase progress monotonically
+    if args.num_iterations > 0:
+        progress = max(progress, min((step + 1) / args.num_iterations, 1.0))
     # step the optimizer
     lrm = get_lr_multiplier(progress)
     muon_momentum = get_muon_momentum(step)
@@ -456,29 +601,53 @@ while True:
 
     # State
     step += 1
+    if args.num_iterations > 0 and step >= args.num_iterations:
+        last_step = True
 
     # logging
-    smooth_train_loss = ema_beta * smooth_train_loss + (1 - ema_beta) * train_loss.item() # EMA the training loss
+    train_loss_f = train_loss.item()
+    train_pass_losses_f = train_pass_losses.tolist()
+    smooth_train_loss = ema_beta * smooth_train_loss + (1 - ema_beta) * train_loss_f # EMA the training loss
     debiased_smooth_loss = smooth_train_loss / (1 - ema_beta**(step + 1)) # debias the EMA
+    if step == 1:
+        smooth_pass_losses = [0.0] * args.num_forward_passes
+        smooth_pass_loss_weights = [0.0] * args.num_forward_passes
+    for pass_idx, current in enumerate(train_pass_losses_f):
+        smooth_pass_losses[pass_idx] = ema_beta * smooth_pass_losses[pass_idx] + (1 - ema_beta) * current
+        smooth_pass_loss_weights[pass_idx] = ema_beta * smooth_pass_loss_weights[pass_idx] + (1 - ema_beta)
+    debiased_pass_losses = [
+        smooth_pass_losses[pass_idx] / smooth_pass_loss_weights[pass_idx]
+        for pass_idx in range(args.num_forward_passes)
+    ]
     pct_done = 100 * progress
     tok_per_sec = int(args.total_batch_size / dt)
     flops_per_sec = num_flops_per_token * args.total_batch_size / dt
     mfu = 100 * flops_per_sec / (gpu_peak_flops * ddp_world_size)
     if step > 10:
         total_training_time += dt # only count the time after the first 10 steps
-    print0(f"step {step:05d} ({pct_done:.2f}%) | loss: {debiased_smooth_loss:.6f} | lrm: {lrm:.2f} | dt: {dt * 1000:.2f}ms | tok/sec: {tok_per_sec:,} | mfu: {mfu:.2f} | epoch: {current_epoch} | total time: {total_training_time/60:.2f}m")
+    pass_loss_str = " | ".join(
+        f"L{pass_idx}: {pass_loss:.6f}"
+        for pass_idx, pass_loss in enumerate(debiased_pass_losses, start=1)
+    )
+    print0(f"step {step:05d} ({pct_done:.2f}%) | K: {args.num_forward_passes} | loss: {debiased_smooth_loss:.6f} | {pass_loss_str} | lrm: {lrm:.2f} | dt: {dt * 1000:.2f}ms | tok/sec: {tok_per_sec:,} | mfu: {mfu:.2f} | epoch: {current_epoch} | total time: {total_training_time/60:.2f}m")
     if step % 10 == 0:
-        wandb_run.log({
+        log_data = {
             "step": step,
             "total_training_flops": flops_so_far,
             "total_training_time": total_training_time,
             "train/loss": debiased_smooth_loss,
+            "train/active_forward_passes": args.num_forward_passes,
             "train/lrm": lrm,
             "train/dt": dt,
             "train/tok_per_sec": tok_per_sec,
             "train/mfu": mfu,
             "train/epoch": current_epoch,
+        }
+        log_data.update({
+            f"train/loss_l{pass_idx}": pass_loss
+            for pass_idx, pass_loss in enumerate(debiased_pass_losses, start=1)
         })
+        wandb_run.log(log_data)
 
     # The garbage collector spends ~500ms scanning for cycles quite frequently.
     # We manually manage it to avoid these pauses during training.

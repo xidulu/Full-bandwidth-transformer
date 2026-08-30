@@ -1,0 +1,200 @@
+{
+  "command": [
+    "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/bin/python",
+    "fbt_experiments/evaluate_checkpoint.py",
+    "--checkpoint",
+    "/home/jhu/xwang457/work/nanochat_cache/base_checkpoints/d16-lf-k1-smoke/model_010000.pt",
+    "--output-dir",
+    "fbt_experiments/results/model_010000",
+    "--num-docs",
+    "32",
+    "--prefix-tokens",
+    "64",
+    "--continuation-tokens",
+    "64",
+    "--num-gsm8k",
+    "20",
+    "--max-new-tokens",
+    "192"
+  ],
+  "checkpoint": "/weka/scratch/jhu/enalisn1/xiw/nanochat_cache/base_checkpoints/d16-lf-k1-smoke/model_010000.pt",
+  "checkpoint_size_bytes": 1551944136,
+  "matching_meta": "/weka/scratch/jhu/enalisn1/xiw/nanochat_cache/base_checkpoints/d16-lf-k1-smoke/meta_010000.json",
+  "nanochat_base_dir": "/weka/scratch/jhu/enalisn1/xiw/nanochat_cache",
+  "step": 10000,
+  "device": "cuda",
+  "torch_version": "2.9.1+cu128",
+  "compute_dtype": "torch.bfloat16",
+  "compute_dtype_reason": "auto-detected: CUDA SM 80 (bf16 supported)",
+  "cuda_device": "NVIDIA A100-SXM4-80GB",
+  "seed": 42,
+  "num_docs": 32,
+  "prefix_tokens": 64,
+  "continuation_tokens": 64,
+  "num_gsm8k": 20,
+  "max_new_tokens": 192,
+  "modes": [
+    "standard",
+    "soft",
+    "fused"
+  ]
+}
+2026-08-19 10:20:56,766 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Building model with config: {'sequence_len': 2048, 'vocab_size': 32768, 'n_layer': 16, 'n_head': 8, 'n_kv_head': 8, 'n_embd': 1024, 'window_pattern': 'SSSL', 'latent_feedback': True}
+loaded model parameters=538,968,890
+continuation doc=1/32 mode=standard bpb=0.642594 seconds=0.922
+continuation doc=1/32 mode=soft bpb=0.652469 seconds=0.796
+continuation doc=1/32 mode=fused bpb=0.652564 seconds=0.828
+continuation doc=2/32 mode=standard bpb=0.907162 seconds=0.786
+continuation doc=2/32 mode=soft bpb=0.896927 seconds=0.787
+continuation doc=2/32 mode=fused bpb=0.895131 seconds=0.804
+continuation doc=3/32 mode=standard bpb=0.863531 seconds=0.778
+continuation doc=3/32 mode=soft bpb=0.875689 seconds=0.787
+continuation doc=3/32 mode=fused bpb=0.872123 seconds=0.797
+continuation doc=4/32 mode=standard bpb=0.528825 seconds=0.783
+continuation doc=4/32 mode=soft bpb=0.521198 seconds=0.795
+continuation doc=4/32 mode=fused bpb=0.534959 seconds=0.815
+continuation doc=5/32 mode=standard bpb=1.214677 seconds=0.790
+continuation doc=5/32 mode=soft bpb=1.196795 seconds=0.787
+continuation doc=5/32 mode=fused bpb=1.207567 seconds=0.817
+continuation doc=6/32 mode=standard bpb=1.074763 seconds=0.779
+continuation doc=6/32 mode=soft bpb=1.063215 seconds=0.792
+continuation doc=6/32 mode=fused bpb=1.064004 seconds=0.813
+continuation doc=7/32 mode=standard bpb=0.844385 seconds=0.781
+continuation doc=7/32 mode=soft bpb=0.848718 seconds=0.791
+continuation doc=7/32 mode=fused bpb=0.838967 seconds=0.823
+continuation doc=8/32 mode=standard bpb=0.763201 seconds=0.790
+continuation doc=8/32 mode=soft bpb=0.756897 seconds=0.806
+continuation doc=8/32 mode=fused bpb=0.751775 seconds=0.798
+continuation doc=9/32 mode=standard bpb=0.823616 seconds=0.789
+continuation doc=9/32 mode=soft bpb=0.822889 seconds=0.801
+continuation doc=9/32 mode=fused bpb=0.815156 seconds=0.808
+continuation doc=10/32 mode=standard bpb=0.781683 seconds=0.779
+continuation doc=10/32 mode=soft bpb=0.795801 seconds=0.788
+continuation doc=10/32 mode=fused bpb=0.795457 seconds=0.814
+continuation doc=11/32 mode=standard bpb=0.728897 seconds=0.781
+continuation doc=11/32 mode=soft bpb=0.727771 seconds=0.786
+continuation doc=11/32 mode=fused bpb=0.733524 seconds=0.801
+continuation doc=12/32 mode=standard bpb=0.952519 seconds=0.777
+continuation doc=12/32 mode=soft bpb=0.975029 seconds=0.786
+continuation doc=12/32 mode=fused bpb=0.973164 seconds=0.798
+continuation doc=13/32 mode=standard bpb=0.745298 seconds=0.783
+continuation doc=13/32 mode=soft bpb=0.738440 seconds=0.786
+continuation doc=13/32 mode=fused bpb=0.731296 seconds=0.807
+continuation doc=14/32 mode=standard bpb=0.444829 seconds=0.782
+continuation doc=14/32 mode=soft bpb=0.439748 seconds=0.784
+continuation doc=14/32 mode=fused bpb=0.439727 seconds=0.800
+continuation doc=15/32 mode=standard bpb=0.843508 seconds=0.779
+continuation doc=15/32 mode=soft bpb=0.851011 seconds=0.798
+continuation doc=15/32 mode=fused bpb=0.841515 seconds=0.798
+continuation doc=16/32 mode=standard bpb=0.625648 seconds=0.780
+continuation doc=16/32 mode=soft bpb=0.617667 seconds=0.789
+continuation doc=16/32 mode=fused bpb=0.619280 seconds=0.801
+continuation doc=17/32 mode=standard bpb=0.865983 seconds=0.780
+continuation doc=17/32 mode=soft bpb=0.859163 seconds=0.788
+continuation doc=17/32 mode=fused bpb=0.864246 seconds=0.802
+continuation doc=18/32 mode=standard bpb=0.894017 seconds=0.779
+continuation doc=18/32 mode=soft bpb=0.893549 seconds=0.788
+continuation doc=18/32 mode=fused bpb=0.888828 seconds=0.799
+continuation doc=19/32 mode=standard bpb=1.081950 seconds=0.780
+continuation doc=19/32 mode=soft bpb=1.088983 seconds=0.800
+continuation doc=19/32 mode=fused bpb=1.083470 seconds=0.811
+continuation doc=20/32 mode=standard bpb=0.941633 seconds=0.779
+continuation doc=20/32 mode=soft bpb=0.959695 seconds=0.791
+continuation doc=20/32 mode=fused bpb=0.947402 seconds=0.802
+continuation doc=21/32 mode=standard bpb=0.775121 seconds=0.782
+continuation doc=21/32 mode=soft bpb=0.792829 seconds=0.788
+continuation doc=21/32 mode=fused bpb=0.770339 seconds=0.804
+continuation doc=22/32 mode=standard bpb=0.815540 seconds=0.781
+continuation doc=22/32 mode=soft bpb=0.819252 seconds=0.787
+continuation doc=22/32 mode=fused bpb=0.818861 seconds=0.801
+continuation doc=23/32 mode=standard bpb=0.793577 seconds=0.780
+continuation doc=23/32 mode=soft bpb=0.790499 seconds=0.786
+continuation doc=23/32 mode=fused bpb=0.791392 seconds=0.799
+continuation doc=24/32 mode=standard bpb=1.002636 seconds=0.782
+continuation doc=24/32 mode=soft bpb=1.006877 seconds=0.787
+continuation doc=24/32 mode=fused bpb=0.996747 seconds=0.799
+continuation doc=25/32 mode=standard bpb=0.748976 seconds=0.780
+continuation doc=25/32 mode=soft bpb=0.755936 seconds=0.790
+continuation doc=25/32 mode=fused bpb=0.749624 seconds=0.799
+continuation doc=26/32 mode=standard bpb=0.286302 seconds=0.780
+continuation doc=26/32 mode=soft bpb=0.292338 seconds=0.787
+continuation doc=26/32 mode=fused bpb=0.285300 seconds=0.802
+continuation doc=27/32 mode=standard bpb=0.773807 seconds=0.778
+continuation doc=27/32 mode=soft bpb=0.775454 seconds=0.787
+continuation doc=27/32 mode=fused bpb=0.776863 seconds=0.800
+continuation doc=28/32 mode=standard bpb=1.325699 seconds=0.779
+continuation doc=28/32 mode=soft bpb=1.340264 seconds=0.786
+continuation doc=28/32 mode=fused bpb=1.331746 seconds=0.798
+continuation doc=29/32 mode=standard bpb=1.917634 seconds=0.780
+continuation doc=29/32 mode=soft bpb=1.936869 seconds=0.786
+continuation doc=29/32 mode=fused bpb=1.930076 seconds=0.799
+continuation doc=30/32 mode=standard bpb=1.328275 seconds=0.781
+continuation doc=30/32 mode=soft bpb=1.348471 seconds=0.788
+continuation doc=30/32 mode=fused bpb=1.341783 seconds=0.814
+continuation doc=31/32 mode=standard bpb=0.544984 seconds=0.801
+continuation doc=31/32 mode=soft bpb=0.545453 seconds=0.790
+continuation doc=31/32 mode=fused bpb=0.544103 seconds=0.799
+continuation doc=32/32 mode=standard bpb=0.687542 seconds=0.779
+continuation doc=32/32 mode=soft bpb=0.674887 seconds=0.788
+continuation doc=32/32 mode=fused bpb=0.677190 seconds=0.799
+gsm8k example=1/20 mode=standard pred='2' ref='18' tokens=192 seconds=2.348
+gsm8k example=1/20 mode=soft pred='2.5' ref='18' tokens=59 seconds=0.729
+gsm8k example=1/20 mode=fused pred='2.5' ref='18' tokens=59 seconds=0.739
+gsm8k example=2/20 mode=standard pred='6' ref='3' tokens=56 seconds=0.683
+gsm8k example=2/20 mode=soft pred='1288' ref='3' tokens=192 seconds=2.384
+gsm8k example=2/20 mode=fused pred='6' ref='3' tokens=55 seconds=0.692
+gsm8k example=3/20 mode=standard pred='10' ref='70000' tokens=51 seconds=0.622
+gsm8k example=3/20 mode=soft pred='100' ref='70000' tokens=47 seconds=0.581
+gsm8k example=3/20 mode=fused pred='150' ref='70000' tokens=45 seconds=0.570
+gsm8k example=4/20 mode=standard pred='12' ref='540' tokens=32 seconds=0.394
+gsm8k example=4/20 mode=soft pred='6' ref='540' tokens=32 seconds=0.396
+gsm8k example=4/20 mode=fused pred='6' ref='540' tokens=32 seconds=0.410
+gsm8k example=5/20 mode=standard pred='3' ref='20' tokens=58 seconds=0.708
+gsm8k example=5/20 mode=soft pred='20' ref='20' tokens=40 seconds=0.495
+gsm8k example=5/20 mode=fused pred='20' ref='20' tokens=40 seconds=0.505
+gsm8k example=6/20 mode=standard pred='15' ref='64' tokens=44 seconds=0.523
+gsm8k example=6/20 mode=soft pred='2' ref='64' tokens=44 seconds=0.540
+gsm8k example=6/20 mode=fused pred='15' ref='64' tokens=43 seconds=0.547
+gsm8k example=7/20 mode=standard pred='4' ref='260' tokens=42 seconds=0.515
+gsm8k example=7/20 mode=soft pred='4' ref='260' tokens=55 seconds=0.678
+gsm8k example=7/20 mode=fused pred='4' ref='260' tokens=46 seconds=0.570
+gsm8k example=8/20 mode=standard pred='20' ref='160' tokens=192 seconds=2.355
+gsm8k example=8/20 mode=soft pred='20' ref='160' tokens=192 seconds=2.318
+gsm8k example=8/20 mode=fused pred='20' ref='160' tokens=192 seconds=2.329
+gsm8k example=9/20 mode=standard pred='4' ref='45' tokens=104 seconds=1.252
+gsm8k example=9/20 mode=soft pred='5' ref='45' tokens=67 seconds=0.828
+gsm8k example=9/20 mode=fused pred='4' ref='45' tokens=104 seconds=1.291
+gsm8k example=10/20 mode=standard pred='45' ref='460' tokens=60 seconds=0.727
+gsm8k example=10/20 mode=soft pred='45' ref='460' tokens=60 seconds=0.720
+gsm8k example=10/20 mode=fused pred='45' ref='460' tokens=60 seconds=0.751
+gsm8k example=11/20 mode=standard pred='30' ref='366' tokens=59 seconds=0.721
+gsm8k example=11/20 mode=soft pred='30' ref='366' tokens=52 seconds=0.641
+gsm8k example=11/20 mode=fused pred='30' ref='366' tokens=52 seconds=0.656
+gsm8k example=12/20 mode=standard pred='55' ref='694' tokens=49 seconds=0.599
+gsm8k example=12/20 mode=soft pred='68' ref='694' tokens=41 seconds=0.507
+gsm8k example=12/20 mode=fused pred='6' ref='694' tokens=47 seconds=0.596
+gsm8k example=13/20 mode=standard pred='7' ref='13' tokens=58 seconds=0.708
+gsm8k example=13/20 mode=soft pred='6' ref='13' tokens=32 seconds=0.396
+gsm8k example=13/20 mode=fused pred='3' ref='13' tokens=47 seconds=0.595
+gsm8k example=14/20 mode=standard pred='4' ref='18' tokens=49 seconds=0.599
+gsm8k example=14/20 mode=soft pred='4' ref='18' tokens=55 seconds=0.680
+gsm8k example=14/20 mode=fused pred='4' ref='18' tokens=55 seconds=0.693
+gsm8k example=15/20 mode=standard pred='10' ref='60' tokens=31 seconds=0.379
+gsm8k example=15/20 mode=soft pred='25' ref='60' tokens=38 seconds=0.466
+gsm8k example=15/20 mode=fused pred='25' ref='60' tokens=53 seconds=0.665
+gsm8k example=16/20 mode=standard pred='4.5' ref='125' tokens=59 seconds=0.722
+gsm8k example=16/20 mode=soft pred='2.5' ref='125' tokens=192 seconds=2.378
+gsm8k example=16/20 mode=fused pred='1.5' ref='125' tokens=64 seconds=0.803
+gsm8k example=17/20 mode=standard pred='80' ref='230' tokens=192 seconds=2.315
+gsm8k example=17/20 mode=soft pred='80' ref='230' tokens=192 seconds=2.381
+gsm8k example=17/20 mode=fused pred='80' ref='230' tokens=55 seconds=0.693
+gsm8k example=18/20 mode=standard pred='15' ref='57500' tokens=55 seconds=0.674
+gsm8k example=18/20 mode=soft pred='10' ref='57500' tokens=72 seconds=0.884
+gsm8k example=18/20 mode=fused pred='15' ref='57500' tokens=55 seconds=0.692
+gsm8k example=19/20 mode=standard pred='9' ref='7' tokens=42 seconds=0.512
+gsm8k example=19/20 mode=soft pred='9' ref='7' tokens=44 seconds=0.543
+gsm8k example=19/20 mode=fused pred='4' ref='7' tokens=45 seconds=0.572
+gsm8k example=20/20 mode=standard pred='15' ref='6' tokens=38 seconds=0.462
+gsm8k example=20/20 mode=soft pred='4' ref='6' tokens=78 seconds=0.955
+gsm8k example=20/20 mode=fused pred='6' ref='6' tokens=47 seconds=0.596
+wrote evaluation assets to /weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_010000

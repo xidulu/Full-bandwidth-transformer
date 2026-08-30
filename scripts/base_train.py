@@ -25,12 +25,13 @@ import wandb
 import torch
 import torch.distributed as dist
 
-from nanochat.gpt import GPT, GPTConfig, Linear
+from nanochat.gpt import GPT, GPTConfig, Linear, build_feedback_mask
 from nanochat.dataloader import tokenizing_distributed_data_loader_bos_bestfit, tokenizing_distributed_data_loader_with_state_bos_bestfit
 from nanochat.common import compute_init, compute_cleanup, print0, DummyWandb, print_banner, get_base_dir, autodetect_device_type, get_peak_flops, COMPUTE_DTYPE, COMPUTE_DTYPE_REASON, is_ddp_initialized
 from nanochat.tokenizer import get_tokenizer, get_token_bytes
 from nanochat.checkpoint_manager import save_checkpoint, load_checkpoint
-from nanochat.loss_eval import evaluate_bpb
+from nanochat.loss_eval import evaluate_bpb_per_pass
+from nanochat.train_utils import get_active_forward_passes, get_feedback_start_step
 from nanochat.engine import Engine
 from nanochat.flash_attention import HAS_FA3
 from scripts.base_eval import evaluate_core
@@ -52,6 +53,12 @@ parser.add_argument("--aspect-ratio", type=int, default=64, help="model_dim = de
 parser.add_argument("--head-dim", type=int, default=128, help="target head dimension for attention")
 parser.add_argument("--max-seq-len", type=int, default=2048, help="max context length")
 parser.add_argument("--window-pattern", type=str, default="SSSL", help="sliding window pattern tiled across layers: L=full, S=half context (e.g. 'SSL')")
+parser.add_argument("--weight-tying", action=argparse.BooleanOptionalAction, default=False, help="share the token embedding and language-model head weights")
+# Latent-feedback training
+parser.add_argument("--num-forward-passes", type=int, default=1, choices=[1, 2, 3], help="total model passes per batch; values above 1 enable latent-feedback training")
+parser.add_argument("--feedback-jitter", type=float, default=0.02, help="half-width of uniform jitter applied to carried hidden states")
+parser.add_argument("--feedback-prefix-mixin", action=argparse.BooleanOptionalAction, default=True, help="sample an independent plain prefix for each packed document on feedback passes")
+parser.add_argument("--feedback-start-fraction", type=float, default=0.0, help="fraction of optimization steps to train with K=1 before enabling all configured forward passes")
 # Training horizon (only one used, in order of precedence)
 parser.add_argument("--num-iterations", type=int, default=-1, help="explicit number of optimization steps (-1 = disable)")
 parser.add_argument("--target-flops", type=float, default=-1.0, help="calculate num_iterations to reach target_flops (-1 = disable)")
@@ -78,6 +85,10 @@ parser.add_argument("--save-every", type=int, default=-1, help="save checkpoints
 # Output
 parser.add_argument("--model-tag", type=str, default=None, help="override model tag for checkpoint directory name")
 args = parser.parse_args()
+if args.feedback_jitter < 0:
+    parser.error("--feedback-jitter must be non-negative")
+if not math.isfinite(args.feedback_start_fraction) or not 0.0 <= args.feedback_start_fraction <= 1.0:
+    parser.error("--feedback-start-fraction must be in [0, 1]")
 user_config = vars(args).copy()  # for logging
 # -----------------------------------------------------------------------------
 # Compute init and wandb logging
@@ -121,6 +132,7 @@ else:
 tokenizer = get_tokenizer()
 token_bytes = get_token_bytes(device=device)
 vocab_size = tokenizer.get_vocab_size()
+bos_token_id = tokenizer.get_bos_token_id()
 print0(f"Vocab size: {vocab_size:,}")
 
 # -----------------------------------------------------------------------------
@@ -137,6 +149,8 @@ def build_model_meta(depth):
         sequence_len=args.max_seq_len, vocab_size=vocab_size,
         n_layer=depth, n_head=num_heads, n_kv_head=num_heads, n_embd=model_dim,
         window_pattern=args.window_pattern,
+        latent_feedback=args.num_forward_passes > 1,
+        weight_tying=args.weight_tying,
     )
     with torch.device("meta"):
         model_meta = GPT(config)
@@ -152,12 +166,41 @@ model.init_weights() # 3) All tensors get initialized
 
 # If we are resuming, overwrite the model parameters with those of the checkpoint
 base_dir = get_base_dir()
-output_dirname = args.model_tag if args.model_tag else f"d{args.depth}" # e.g. d12
+schedule_tag_suffix = (
+    f"-start{args.feedback_start_fraction:g}"
+    if args.num_forward_passes > 1 and args.feedback_start_fraction > 0.0
+    else ""
+)
+weight_tying_tag_suffix = "-wt" if args.weight_tying else ""
+default_model_tag = (
+    f"d{args.depth}{weight_tying_tag_suffix}"
+    if args.num_forward_passes == 1
+    else f"d{args.depth}-lf-k{args.num_forward_passes}{schedule_tag_suffix}{weight_tying_tag_suffix}"
+)
+output_dirname = args.model_tag if args.model_tag else default_model_tag
 checkpoint_dir = os.path.join(base_dir, "base_checkpoints", output_dirname)
 resuming = args.resume_from_step != -1
 if resuming:
     print0(f"Resuming optimization from step {args.resume_from_step}")
     model_data, optimizer_data, meta_data = load_checkpoint(checkpoint_dir, args.resume_from_step, device, load_optimizer=True, rank=ddp_rank)
+    checkpoint_forward_passes = meta_data.get("user_config", {}).get("num_forward_passes", 1)
+    if checkpoint_forward_passes != args.num_forward_passes:
+        raise ValueError(
+            "Cannot change --num-forward-passes when resuming: "
+            f"checkpoint uses {checkpoint_forward_passes}, requested {args.num_forward_passes}"
+        )
+    checkpoint_feedback_start_fraction = meta_data.get("user_config", {}).get("feedback_start_fraction", 0.0)
+    if checkpoint_feedback_start_fraction != args.feedback_start_fraction:
+        raise ValueError(
+            "Cannot change --feedback-start-fraction when resuming: "
+            f"checkpoint uses {checkpoint_feedback_start_fraction}, requested {args.feedback_start_fraction}"
+        )
+    checkpoint_weight_tying = meta_data.get("model_config", {}).get("weight_tying", False)
+    if checkpoint_weight_tying != args.weight_tying:
+        raise ValueError(
+            "Cannot change --weight-tying when resuming: "
+            f"checkpoint uses {checkpoint_weight_tying}, requested {args.weight_tying}"
+        )
     model.load_state_dict(model_data, strict=True, assign=True)
     del model_data # free up this memory after the copy
 
@@ -254,16 +297,30 @@ print0(f"Parameter counts:")
 for key, value in param_counts.items():
     print0(f"{key:24s}: {value:,}")
 num_params = param_counts['total']
-num_flops_per_token = model.estimate_flops()
-print0(f"Estimated FLOPs per token: {num_flops_per_token:e}")
+single_pass_flops_per_token = model.estimate_flops(num_forward_passes=1)
+max_pass_flops_per_token = model.estimate_flops(num_forward_passes=args.num_forward_passes)
+# Used only to solve a target-FLOPs horizon. Exact accounting below uses the
+# integer schedule boundary after num_iterations is known.
+schedule_avg_flops_per_token = (
+    args.feedback_start_fraction * single_pass_flops_per_token
+    + (1.0 - args.feedback_start_fraction) * max_pass_flops_per_token
+)
+print0(f"Estimated FLOPs per token (K=1): {single_pass_flops_per_token:e}")
+if args.num_forward_passes > 1:
+    print0(f"Estimated FLOPs per token (K={args.num_forward_passes}): {max_pass_flops_per_token:e}")
 
 # 1) Use scaling laws to determine the optimal training horizon in tokens
 # The compute-optimal models satisfy the Tokens:Params ratio of --target-param-data-ratio (derived experimentally via scaling laws analysis).
 # We've already initialized the model so we have Params. Optimal Tokens is now simply target-param-data-ratio * Params
 def get_scaling_params(m):
-    # As for which params to use exactly, transformer matrices + lm_head gives cleanest scaling laws (see dev/LOG.md Jan 27, 2026)
+    # Transformer-style matrices (trunk + feedback) and lm_head give the cleanest
+    # scaling laws for the existing model family (see dev/LOG.md Jan 27, 2026).
     params_counts = m.num_scaling_params()
-    scaling_params = params_counts['transformer_matrices'] + params_counts['lm_head']
+    scaling_params = (
+        params_counts['transformer_matrices']
+        + params_counts['feedback_matrices']
+        + params_counts['lm_head']
+    )
     return scaling_params
 num_scaling_params = get_scaling_params(model)
 target_tokens = int(args.target_param_data_ratio * num_scaling_params) # optimal tokens for the model we are about to train
@@ -313,6 +370,7 @@ optimizer = model.setup_optimizer(
     # Muon hyperparameters
     matrix_lr=args.matrix_lr * batch_lr_scale,
     weight_decay=weight_decay_scaled,
+    separate_feedback_params=args.feedback_start_fraction > 0.0,
 )
 
 if resuming:
@@ -343,7 +401,7 @@ if args.num_iterations > 0:
     print0(f"Using user-provided number of iterations: {num_iterations:,}")
 elif args.target_flops > 0:
     # Calculate the number of iterations from the target flops (used in scaling laws analysis, e.g. runs/scaling_laws.sh)
-    num_iterations = round(args.target_flops / (num_flops_per_token * total_batch_size))
+    num_iterations = round(args.target_flops / (schedule_avg_flops_per_token * total_batch_size))
     print0(f"Calculated number of iterations from target FLOPs: {num_iterations:,}")
 elif args.target_param_data_ratio > 0:
     # Calculate the number of iterations from the target param data ratio (the most common use case)
@@ -351,10 +409,39 @@ elif args.target_param_data_ratio > 0:
     print0(f"Calculated number of iterations from target data:param ratio: {num_iterations:,}")
 else:
     raise ValueError("No training horizon specified")
+feedback_start_step = get_feedback_start_step(num_iterations, args.feedback_start_fraction)
+if resuming:
+    checkpoint_num_iterations = meta_data.get("num_iterations")
+    if args.feedback_start_fraction > 0.0 and checkpoint_num_iterations is not None and checkpoint_num_iterations != num_iterations:
+        raise ValueError(
+            "Cannot change the training horizon when resuming a feedback schedule: "
+            f"checkpoint uses {checkpoint_num_iterations} iterations, requested {num_iterations}"
+        )
+    checkpoint_feedback_start_step = meta_data.get("loop_state", {}).get("feedback_start_step")
+    if checkpoint_feedback_start_step is not None and checkpoint_feedback_start_step != feedback_start_step:
+        raise ValueError(
+            "Feedback schedule boundary does not match checkpoint: "
+            f"checkpoint uses step {checkpoint_feedback_start_step}, requested {feedback_start_step}"
+        )
 total_tokens = total_batch_size * num_iterations # the actual number of tokens we will train for
+single_pass_iterations = feedback_start_step
+max_pass_iterations = num_iterations - feedback_start_step
+forward_pass_token_equivalents = total_batch_size * (
+    single_pass_iterations + max_pass_iterations * args.num_forward_passes
+)
+total_training_flops_estimate = total_batch_size * (
+    single_pass_iterations * single_pass_flops_per_token
+    + max_pass_iterations * max_pass_flops_per_token
+)
 print0(f"Total number of training tokens: {total_tokens:,}")
+print0(
+    f"Forward-pass schedule: K=1 for {single_pass_iterations:,} steps, "
+    f"then K={args.num_forward_passes} for {max_pass_iterations:,} steps "
+    f"(boundary step {feedback_start_step:,})"
+)
+print0(f"Forward-pass token equivalents: {forward_pass_token_equivalents:,}")
 print0(f"Tokens : Scaling params ratio: {total_batch_size * num_iterations / num_scaling_params:.2f}") # e.g. Chinchilla was ~20
-print0(f"Total training FLOPs estimate: {num_flops_per_token * total_tokens:e}")
+print0(f"Total training FLOPs estimate: {total_training_flops_estimate:e}")
 
 # Learning rate schedule (linear warmup, constant, linear warmdown)
 def get_lr_multiplier(it):
@@ -388,12 +475,16 @@ def get_weight_decay(it):
 # -----------------------------------------------------------------------------
 # Training loop
 
+EMA_BETA = 0.9
+
 # Loop state (variables updated by the training loop)
 if not resuming:
     step = 0
     val_bpb = None # will be set if eval_every > 0
     min_val_bpb = float("inf")
     smooth_train_loss = 0 # EMA of training loss
+    smooth_pass_losses = [0.0] * args.num_forward_passes
+    smooth_pass_loss_weights = [0.0] * args.num_forward_passes
     total_training_time = 0 # total wall-clock time of training
 else:
     step = meta_data["step"]
@@ -401,6 +492,27 @@ else:
     val_bpb = meta_data["val_bpb"]
     min_val_bpb = loop_state["min_val_bpb"]
     smooth_train_loss = loop_state["smooth_train_loss"]
+    smooth_pass_losses = loop_state.get("smooth_pass_losses")
+    checkpoint_has_pass_losses = smooth_pass_losses is not None
+    completed_ema_weight = 1.0 - EMA_BETA**step
+    if smooth_pass_losses is None and args.num_forward_passes == 1:
+        smooth_pass_losses = [smooth_train_loss]
+    elif smooth_pass_losses is None:
+        smooth_pass_losses = [0.0] * args.num_forward_passes
+    assert len(smooth_pass_losses) == args.num_forward_passes, "Checkpoint pass-loss state does not match K"
+    smooth_pass_loss_weights = loop_state.get("smooth_pass_loss_weights")
+    if smooth_pass_loss_weights is None:
+        # Fixed-K checkpoints predate explicit per-pass EMA weights. Their
+        # recorded pass losses were updated on every completed step. If a K>1
+        # checkpoint has no component history at all, start those logging-only
+        # EMAs fresh instead of debiasing zeros against the global step.
+        fallback_weight = (
+            completed_ema_weight
+            if checkpoint_has_pass_losses or args.num_forward_passes == 1
+            else 0.0
+        )
+        smooth_pass_loss_weights = [fallback_weight] * args.num_forward_passes
+    assert len(smooth_pass_loss_weights) == args.num_forward_passes, "Checkpoint pass-loss EMA state does not match K"
     total_training_time = loop_state["total_training_time"]
 
 # Figure out the needed gradient accumulation micro-steps to reach the desired total batch size per step
@@ -415,7 +527,12 @@ print0(f"Total batch size {total_batch_size:,} => gradient accumulation steps: {
 # Go!
 while True:
     last_step = step == num_iterations # loop runs num_iterations+1 times so that we can eval/save at the end
-    flops_so_far = num_flops_per_token * total_batch_size * step
+    single_pass_steps_done = min(step, feedback_start_step)
+    max_pass_steps_done = max(0, step - feedback_start_step)
+    flops_so_far = total_batch_size * (
+        single_pass_steps_done * single_pass_flops_per_token
+        + max_pass_steps_done * max_pass_flops_per_token
+    )
 
     # once in a while: evaluate the val bpb (all ranks participate)
     if args.eval_every > 0 and (last_step or step % args.eval_every == 0):
@@ -423,16 +540,35 @@ while True:
         val_loader = build_val_loader()
         eval_steps = args.eval_tokens // (args.device_batch_size * args.max_seq_len * ddp_world_size)
         with disable_fp8(model):
-            val_bpb = evaluate_bpb(model, val_loader, eval_steps, token_bytes)
-        print0(f"Step {step:05d} | Validation bpb: {val_bpb:.6f}")
+            # Always evaluate all configured passes, independent of the current
+            # training phase, so L1..LK remain comparable over the whole run.
+            val_bpb_per_pass = evaluate_bpb_per_pass(
+                model,
+                val_loader,
+                eval_steps,
+                token_bytes,
+                num_forward_passes=args.num_forward_passes,
+                bos_token_id=bos_token_id,
+            )
+        val_bpb = val_bpb_per_pass[0] # keep checkpoint selection based on standard BPB
+        val_bpb_str = " | ".join(
+            f"L{pass_idx}: {pass_bpb:.6f}"
+            for pass_idx, pass_bpb in enumerate(val_bpb_per_pass, start=1)
+        )
+        print0(f"Step {step:05d} | Validation bpb: {val_bpb:.6f} | {val_bpb_str}")
         if val_bpb < min_val_bpb:
             min_val_bpb = val_bpb
-        wandb_run.log({
+        val_log_data = {
             "step": step,
             "total_training_flops": flops_so_far,
             "total_training_time": total_training_time,
             "val/bpb": val_bpb,
+        }
+        val_log_data.update({
+            f"val/bpb_l{pass_idx}": pass_bpb
+            for pass_idx, pass_bpb in enumerate(val_bpb_per_pass, start=1)
         })
+        wandb_run.log(val_log_data)
         model.train()
 
     # once in a while: estimate the CORE metric (all ranks participate)
@@ -488,10 +624,14 @@ while True:
                 "device_batch_size": args.device_batch_size,
                 "max_seq_len": args.max_seq_len,
                 "total_batch_size": total_batch_size,
+                "num_iterations": num_iterations,
                 "dataloader_state_dict": dataloader_state_dict,
                 "loop_state": { # all loop state (other than step) so that we can resume training
                     "min_val_bpb": min_val_bpb,
                     "smooth_train_loss": smooth_train_loss,
+                    "smooth_pass_losses": smooth_pass_losses,
+                    "smooth_pass_loss_weights": smooth_pass_loss_weights,
+                    "feedback_start_step": feedback_start_step,
                     "total_training_time": total_training_time,
                 },
             },
@@ -507,9 +647,35 @@ while True:
     # evaluate the gradient
     synchronize()
     t0 = time.time()
+    active_forward_passes = get_active_forward_passes(
+        step,
+        num_iterations,
+        args.num_forward_passes,
+        args.feedback_start_fraction,
+    )
+    train_loss = torch.zeros((), device=x.device)
+    train_pass_losses = torch.zeros(active_forward_passes, device=x.device)
     for micro_step in range(grad_accum_steps):
-        loss = model(x, y)
-        train_loss = loss.detach() # for logging
+        feedback_masks = None
+        if active_forward_passes > 1:
+            feedback_masks = torch.stack([
+                build_feedback_mask(
+                    x,
+                    bos_token_id,
+                    prefix_mixin=args.feedback_prefix_mixin,
+                )
+                for _ in range(active_forward_passes - 1)
+            ])
+        loss, pass_losses = model(
+            x,
+            y,
+            num_forward_passes=active_forward_passes,
+            feedback_masks=feedback_masks,
+            feedback_jitter=args.feedback_jitter,
+            return_loss_components=True,
+        )
+        train_loss += loss.detach() / grad_accum_steps
+        train_pass_losses += pass_losses.detach() / grad_accum_steps
         loss = loss / grad_accum_steps # each .backward() is a grad sum => normalize loss here
         if scaler is not None:
             scaler.scale(loss).backward()
@@ -539,18 +705,29 @@ while True:
         optimizer.step()
     model.zero_grad(set_to_none=True)
     train_loss_f = train_loss.item() # .item() is a CPU-GPU sync point
+    train_pass_losses_f = train_pass_losses.tolist()
     synchronize()
     t1 = time.time()
     dt = t1 - t0
     # -------------------------------------------------------------------------
 
     # logging (CPU action only)
-    ema_beta = 0.9 # EMA decay factor for some smoothing just for nicer logging
+    ema_beta = EMA_BETA # EMA decay factor for some smoothing just for nicer logging
     smooth_train_loss = ema_beta * smooth_train_loss + (1 - ema_beta) * train_loss_f # EMA the training loss
+    for pass_idx, current in enumerate(train_pass_losses_f):
+        smooth_pass_losses[pass_idx] = ema_beta * smooth_pass_losses[pass_idx] + (1 - ema_beta) * current
+        smooth_pass_loss_weights[pass_idx] = ema_beta * smooth_pass_loss_weights[pass_idx] + (1 - ema_beta)
     debiased_smooth_loss = smooth_train_loss / (1 - ema_beta**(step + 1)) # debias the EMA
+    debiased_pass_losses = [
+        smooth_pass_losses[pass_idx] / smooth_pass_loss_weights[pass_idx]
+        for pass_idx in range(active_forward_passes)
+    ]
     pct_done = 100 * step / num_iterations
     tok_per_sec = int(total_batch_size / dt)
-    flops_per_sec = num_flops_per_token * total_batch_size / dt
+    active_flops_per_token = (
+        single_pass_flops_per_token if active_forward_passes == 1 else max_pass_flops_per_token
+    )
+    flops_per_sec = active_flops_per_token * total_batch_size / dt
     mfu = 100 * flops_per_sec / (gpu_peak_flops * ddp_world_size)
     if step > 10:
         total_training_time += dt # only count the time after the first 10 steps
@@ -564,19 +741,29 @@ while True:
     else:
         eta_str = ""
     epoch = f"{dataloader_state_dict['epoch']} pq: {dataloader_state_dict['pq_idx']} rg: {dataloader_state_dict['rg_idx']}"
-    print0(f"step {step:05d}/{num_iterations:05d} ({pct_done:.2f}%) | loss: {debiased_smooth_loss:.6f} | lrm: {lrm:.2f} | dt: {dt * 1000:.2f}ms | tok/sec: {tok_per_sec:,} | bf16_mfu: {mfu:.2f} | epoch: {epoch} | total time: {total_training_time/60:.2f}m{eta_str}")
-    if step % 100 == 0:
+    pass_loss_str = " | ".join(
+        f"L{pass_idx}: {pass_loss:.6f}"
+        for pass_idx, pass_loss in enumerate(debiased_pass_losses, start=1)
+    )
+    print0(f"step {step:05d}/{num_iterations:05d} ({pct_done:.2f}%) | K: {active_forward_passes} | loss: {debiased_smooth_loss:.6f} | {pass_loss_str} | lrm: {lrm:.2f} | dt: {dt * 1000:.2f}ms | tok/sec: {tok_per_sec:,} | bf16_mfu: {mfu:.2f} | epoch: {epoch} | total time: {total_training_time/60:.2f}m{eta_str}")
+    if step % 100 == 0 or step == feedback_start_step:
         log_data = {
             "step": step,
             "total_training_flops": flops_so_far,
             "total_training_time": total_training_time,
             "train/loss": debiased_smooth_loss,
+            "train/active_forward_passes": active_forward_passes,
+            "train/feedback_start_step": feedback_start_step,
             "train/lrm": lrm,
             "train/dt": dt,
             "train/tok_per_sec": tok_per_sec,
             "train/mfu": mfu,
             "train/epoch": epoch,
         }
+        log_data.update({
+            f"train/loss_l{pass_idx}": pass_loss
+            for pass_idx, pass_loss in enumerate(debiased_pass_losses, start=1)
+        })
         wandb_run.log(log_data)
 
     # state update

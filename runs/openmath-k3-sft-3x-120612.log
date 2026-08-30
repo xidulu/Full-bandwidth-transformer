@@ -1,0 +1,33 @@
+[BILLING] loaded!
+[BILLING] Re-emitting cost at job start!
+Autodetected device type: cuda
+2026-08-27 19:01:11,215 - nanochat.common - [32m[1mINFO[0m - Distributed world size: 4
+COMPUTE_DTYPE: torch.bfloat16 (auto-detected: CUDA SM 90 (bf16 supported))
+GPU: NVIDIA H100 NVL | Peak FLOPS (BF16): 8.35e+14
+wandb: Currently logged in as: xidulu (xidulu-umass-amherst) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: creating run
+wandb: Tracking run with wandb version 0.21.3
+wandb: Run data is saved locally in /weka/scratch/jhu/enalisn1/xiw/nanochat/wandb/run-20260827_190111-h8hnzi7t
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run d20-lf-k3-openmath-train1m-3x-v2
+wandb: ⭐️ View project at https://wandb.ai/xidulu-umass-amherst/nanochat-sft
+wandb: 🚀 View run at https://wandb.ai/xidulu-umass-amherst/nanochat-sft/runs/h8hnzi7t
+2026-08-27 19:01:12,615 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Loading model from /home/jhu/xwang457/work/nanochat_cache/base_checkpoints/d20-lf-k1-smoke with step 50000
+2026-08-27 19:01:13,166 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Building model with config: {'sequence_len': 2048, 'vocab_size': 32768, 'n_layer': 20, 'n_head': 10, 'n_kv_head': 10, 'n_embd': 1280, 'window_pattern': 'SSSL', 'latent_feedback': True, 'weight_tying': True}
+Using max_seq_len=2048
+NOTE: --device-batch-size=4 overrides pretrained value of 16
+Using total_batch_size=524288
+Inherited embedding_lr=0.3 from pretrained checkpoint
+Inherited unembedding_lr=0.008 from pretrained checkpoint
+Inherited matrix_lr=0.02 from pretrained checkpoint
+Tokens / micro-batch / rank: 4 x 2048 = 8,192
+Tokens / micro-batch: 32,768
+Total batch size 524,288 => gradient accumulation steps: 16
+Scaling the LR for the AdamW parameters ∝1/√(1280/768) = 0.774597
+Weight tying: shared embedding/head uses the unembedding AdamW hyperparameters
+Training OpenMathInstruct-2 split=train_1M: 995,904 train rows, 4,096 validation rows
+Step 00000 | Validation L1 bpb: 0.5353 | L2 bpb: 0.5278 | L3 bpb: 0.5271
+step 00001 (0.04%) | K: 3 | loss: 1.103195 | L1: 1.055521 | L2: 1.041097 | L3: 1.040003 | lrm: 0.01 | dt: 39450.09ms | tok/sec: 13,289 | mfu: 3.46 | epoch: 1 | total time: 0.00m
+srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
+[2026-08-27T19:02:05.479] error: *** JOB 120612 ON gh130 CANCELLED AT 2026-08-27T19:02:05 DUE to SIGNAL Terminated ***
+[2026-08-27T19:02:05.480] error: *** STEP 120612.0 ON gh130 CANCELLED AT 2026-08-27T19:02:05 DUE to SIGNAL Terminated ***

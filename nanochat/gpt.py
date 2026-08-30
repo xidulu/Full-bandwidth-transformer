@@ -3,7 +3,7 @@ GPT model (rewrite, a lot simpler)
 Notable features:
 - rotary embeddings (and no positional embeddings)
 - QK norm
-- untied weights for token embedding and lm_head
+- optional tied weights for token embedding and lm_head
 - relu^2 activation in MLP
 - norm after token embedding
 - no learnable params in rmsnorm
@@ -25,6 +25,12 @@ from nanochat.optim import MuonAdamW
 # Our custom Flash Attention module that automatically uses FA3 when compatible and SDPA fallback otherwise
 from nanochat.flash_attention import flash_attn
 
+EMBEDDING_INIT_STD = 0.8
+LM_HEAD_INIT_STD = 0.001
+# A tied matrix must retain the small output-head initialization. Restore the
+# legacy lookup scale before RMSNorm so its epsilon remains numerically inert.
+TIED_EMBEDDING_SCALE = EMBEDDING_INIT_STD / LM_HEAD_INIT_STD
+
 @dataclass
 class GPTConfig:
     sequence_len: int = 2048
@@ -37,6 +43,10 @@ class GPTConfig:
     # Characters: L=long (full context), S=short (quarter context)
     # Examples: "L"=all full context, "SL"=alternating, "SSL"=two short then one long
     window_pattern: str = "SSSL"
+    # Opt-in latent feedback parameters used by multi-pass training.
+    latent_feedback: bool = False
+    # Share the token embedding and output projection matrix.
+    weight_tying: bool = False
 
 
 def norm(x):
@@ -48,6 +58,65 @@ class Linear(nn.Linear):
     but matmuls run in the activation dtype (typically bf16 from embeddings)."""
     def forward(self, x):
         return F.linear(x, self.weight.to(dtype=x.dtype))
+
+
+class LatentFeedback(nn.Module):
+    """Fuse a previous top-layer state with the current token input."""
+
+    def __init__(self, n_embd):
+        super().__init__()
+        self.state_proj = Linear(n_embd, n_embd, bias=False)
+        self.token_gate = Linear(n_embd, n_embd, bias=False)
+
+    def forward(self, previous_hidden, token_input):
+        # The hidden state is the value pathway; token information only enters through the gate.
+        value = self.state_proj(previous_hidden)
+        gate = torch.sigmoid(self.token_gate(norm(token_input)))
+        return norm(value * gate)
+
+
+def build_feedback_mask(idx, bos_token_id, prefix_mixin=True, generator=None):
+    """
+    Return a bool mask indicating which token positions should use latent feedback.
+
+    Rows may contain multiple packed, BOS-delimited documents. Every document start stays
+    plain so shifted feedback state does not cross a document boundary. With prefix_mixin
+    enabled, each document also receives an independently sampled non-empty plain prefix.
+    The sampled prefix may cover the full document because the paper does not specify the
+    cutoff range.
+    """
+    assert idx.ndim == 2
+    B, T = idx.shape
+    assert T > 0
+    positions = torch.arange(T, device=idx.device).view(1, T).expand(B, T)
+
+    document_starts = idx.eq(bos_token_id)
+    document_starts[:, 0] = True # be safe even for callers whose rows do not start with BOS
+    if not prefix_mixin:
+        return ~document_starts
+
+    # Assign every token a packed-document id and the position of that document's BOS.
+    document_ids = document_starts.cumsum(dim=1) - 1
+    start_positions = torch.where(document_starts, positions, -1).cummax(dim=1).values
+
+    # Find the next document start (or T for the final document) to obtain document lengths.
+    start_candidates = torch.where(document_starts, positions, T)
+    future_candidates = torch.cat(
+        (start_candidates[:, 1:], torch.full((B, 1), T, device=idx.device, dtype=positions.dtype)),
+        dim=1,
+    )
+    end_positions = torch.flip(
+        torch.flip(future_candidates, dims=(1,)).cummin(dim=1).values,
+        dims=(1,),
+    )
+    document_lengths = end_positions - start_positions
+
+    # A table indexed by document id gives one independent random cutoff per document.
+    random_table = torch.rand((B, T), device=idx.device, generator=generator)
+    document_random = random_table.gather(1, document_ids)
+    plain_lengths = 1 + (document_random * document_lengths).floor().to(torch.long)
+    offsets = positions - start_positions
+    return offsets >= plain_lengths
 
 
 def has_ve(layer_idx, n_layer):
@@ -175,6 +244,8 @@ class GPT(nn.Module):
             "h": nn.ModuleList([Block(config, layer_idx) for layer_idx in range(config.n_layer)]),
         })
         self.lm_head = Linear(config.n_embd, padded_vocab_size, bias=False)
+        self.tie_weights()
+        self.latent_feedback = LatentFeedback(config.n_embd) if config.latent_feedback else None
         # Per-layer learnable scalars (inspired by modded-nanogpt)
         # resid_lambdas: scales the residual stream at each layer (init 1.0 = neutral)
         # x0_lambdas: blends initial embedding back in at each layer (init 0.0 = disabled)
@@ -200,13 +271,42 @@ class GPT(nn.Module):
         self.register_buffer("cos", cos, persistent=False) # persistent=False means it's not saved to the checkpoint
         self.register_buffer("sin", sin, persistent=False)
 
+    def tie_weights(self):
+        """Restore the embedding/output Parameter alias for tied models.
+
+        PyTorch's ``to_empty()`` and ``load_state_dict(assign=True)`` may replace
+        Parameters independently even when two modules initially shared one, so
+        the alias is re-established after materialization and checkpoint loads.
+        """
+        if self.config.weight_tying:
+            self.lm_head.weight = self.transformer.wte.weight
+
+    def load_state_dict(self, state_dict, strict=True, assign=False):
+        if self.config.weight_tying:
+            embedding = state_dict.get("transformer.wte.weight")
+            output = state_dict.get("lm_head.weight")
+            if (embedding is None) != (output is None):
+                raise RuntimeError(
+                    "A weight-tied model checkpoint must provide both "
+                    "transformer.wte.weight and lm_head.weight"
+                )
+            if embedding is not None and output is not None and not torch.equal(embedding, output):
+                raise RuntimeError(
+                    "Cannot load different transformer.wte.weight and lm_head.weight "
+                    "values into a weight-tied model"
+                )
+        result = super().load_state_dict(state_dict, strict=strict, assign=assign)
+        self.tie_weights()
+        return result
+
     @torch.no_grad()
     def init_weights(self):
         """
         Initialize the full model in this one function for maximum clarity.
 
-        wte (embedding):     normal, std=1.0
+        wte (embedding):     normal, std=0.8
         lm_head:             normal, std=0.001
+        tied wte/lm_head:    normal, std=0.001
         for each block:
             attn.c_q:        uniform, std=1/sqrt(n_embd)
             attn.c_k:        uniform, std=1/sqrt(n_embd)
@@ -214,11 +314,23 @@ class GPT(nn.Module):
             attn.c_proj:     zeros
             mlp.c_fc:        uniform, std=1/sqrt(n_embd)
             mlp.c_proj:      zeros
+        latent feedback:
+            state_proj:      uniform, std=1/sqrt(n_embd)
+            token_gate:      uniform, std=1/sqrt(n_embd)
         """
 
-        # Embedding and unembedding
-        torch.nn.init.normal_(self.transformer.wte.weight, mean=0.0, std=0.8)
-        torch.nn.init.normal_(self.lm_head.weight, mean=0.0, std=0.001)
+        # Materializing a meta model with to_empty() breaks cross-module aliases.
+        # Restore the tie before initialization so the shared matrix is written once.
+        self.tie_weights()
+
+        # Embedding and unembedding. For a tied matrix, preserve the output
+        # head's small initialization: token inputs are RMS-normalized, whereas
+        # the initial logit scale depends directly on this weight scale.
+        if self.config.weight_tying:
+            torch.nn.init.normal_(self.lm_head.weight, mean=0.0, std=LM_HEAD_INIT_STD)
+        else:
+            torch.nn.init.normal_(self.transformer.wte.weight, mean=0.0, std=EMBEDDING_INIT_STD)
+            torch.nn.init.normal_(self.lm_head.weight, mean=0.0, std=LM_HEAD_INIT_STD)
 
         # Transformer blocks: uniform init with bound = sqrt(3) * std (same standard deviation as normal)
         n_embd = self.config.n_embd
@@ -263,9 +375,17 @@ class GPT(nn.Module):
         # embeddings and it saves memory. Exception: fp16 requires fp32 embeddings
         # because GradScaler cannot unscale fp16 gradients.
         if COMPUTE_DTYPE != torch.float16:
-            self.transformer.wte.to(dtype=COMPUTE_DTYPE)
+            # A tied matrix is also the dense output projection, so retain its
+            # FP32 master weights just like the existing untied lm_head.
+            if not self.config.weight_tying:
+                self.transformer.wte.to(dtype=COMPUTE_DTYPE)
             for ve in self.value_embeds.values():
                 ve.to(dtype=COMPUTE_DTYPE)
+
+        # Keep this last so enabling feedback does not change any existing parameter's RNG stream.
+        if self.latent_feedback is not None:
+            torch.nn.init.uniform_(self.latent_feedback.state_proj.weight, -s, s)
+            torch.nn.init.uniform_(self.latent_feedback.token_gate.weight, -s, s)
 
     def _precompute_rotary_embeddings(self, seq_len, head_dim, base=100000, device=None):
         # TODO: bump base theta more? e.g. 100K is more common more recently
@@ -316,9 +436,12 @@ class GPT(nn.Module):
     def get_device(self):
         return self.transformer.wte.weight.device
 
-    def estimate_flops(self):
+    def estimate_flops(self, num_forward_passes=1):
         """
-        Return the estimated FLOPs per token for the model (forward + backward).
+        Return estimated training FLOPs per token (forward + backward).
+
+        Multi-pass training runs the full model num_forward_passes times and the
+        latent-feedback projections once between adjacent passes.
         Each matmul weight parameter contributes 2 FLOPs (multiply *, accumulate +) in forward, and 2X that in backward => 2+4=6.
         Cleanest explanation of this: https://medium.com/@dzmitrybahdanau/the-flops-calculus-of-language-model-training-3b19c1f025e4
         On top of that, 12 * h * q * effective_seq_len accounts for key @ query matmul flops inside attention.
@@ -335,17 +458,23 @@ class GPT(nn.Module):
             window = window_size[0]  # (left, right) tuple, we use left
             effective_seq = t if window < 0 else min(window, t)
             attn_flops += 12 * h * q * effective_seq
-        num_flops_per_token = 6 * self.num_matmul_params() + attn_flops
+        assert num_forward_passes >= 1
+        feedback_params = sum(p.numel() for p in self.latent_feedback.parameters()) if self.latent_feedback is not None else 0
+        trunk_params = self.num_matmul_params() - feedback_params
+        base_pass_flops = 6 * trunk_params + attn_flops
+        feedback_flops = 6 * feedback_params
+        num_flops_per_token = num_forward_passes * base_pass_flops + (num_forward_passes - 1) * feedback_flops
         return num_flops_per_token
 
     def num_matmul_params(self):
         """
         The number of parameters that participate in matmuls with the token stream,
         i.e. contribute 2 FLOPs/param to the forward pass. Counted structurally: every
-        matmul in this model goes through the Linear class, while non-matmul params
+        matmul in this model goes through an nn.Linear subclass, while non-matmul params
         (embeddings = lookups, per-layer scalars) are nn.Embedding or raw Parameters.
+        Counting the base class also handles Linear modules converted to Float8Linear.
         """
-        matmul_params = sum(m.weight.numel() for m in self.modules() if isinstance(m, Linear))
+        matmul_params = sum(m.weight.numel() for m in self.modules() if isinstance(m, nn.Linear))
         return matmul_params
 
     def estimate_decode_flops(self, context_len):
@@ -356,7 +485,8 @@ class GPT(nn.Module):
         h = self.config.n_head
         q = self.config.n_embd // self.config.n_head
         attn_flops = sum(4 * h * q * min(context_len, window) for window, _ in self.window_sizes)
-        decode_flops = 2 * self.num_matmul_params() + attn_flops
+        feedback_params = sum(p.numel() for p in self.latent_feedback.parameters()) if self.latent_feedback is not None else 0
+        decode_flops = 2 * (self.num_matmul_params() - feedback_params) + attn_flops
         return decode_flops
 
     def estimate_prefill_flops(self, num_tokens):
@@ -368,7 +498,8 @@ class GPT(nn.Module):
             w = min(window, num_tokens)
             attended_tokens = w * (w + 1) // 2 + (num_tokens - w) * w # ramp up to w, then flat
             attn_flops += 4 * h * q * attended_tokens
-        prefill_flops = 2 * self.num_matmul_params() * num_tokens + attn_flops
+        feedback_params = sum(p.numel() for p in self.latent_feedback.parameters()) if self.latent_feedback is not None else 0
+        prefill_flops = 2 * (self.num_matmul_params() - feedback_params) * num_tokens + attn_flops
         return prefill_flops
 
     def kv_bytes_per_token(self):
@@ -400,55 +531,106 @@ class GPT(nn.Module):
         can experiment with which combination gives the cleanest scaling laws.
         """
         # Count each group separately (mirrors the grouping in setup_optimizers)
-        wte = sum(p.numel() for p in self.transformer.wte.parameters())
+        # A tied embedding/head matrix is one physical Parameter. Attribute it
+        # to lm_head (rather than counting it twice) because that also preserves
+        # the scaling-law convention that includes the output projection.
+        wte = 0 if self.config.weight_tying else sum(p.numel() for p in self.transformer.wte.parameters())
         value_embeds = sum(p.numel() for p in self.value_embeds.parameters())
         lm_head = sum(p.numel() for p in self.lm_head.parameters())
         transformer_matrices = sum(p.numel() for p in self.transformer.h.parameters())
+        feedback_matrices = sum(p.numel() for p in self.latent_feedback.parameters()) if self.latent_feedback is not None else 0
         scalars = self.resid_lambdas.numel() + self.x0_lambdas.numel() + self.smear_gate.weight.numel() + self.smear_lambda.numel() + self.backout_lambda.numel()
-        total = wte + value_embeds + lm_head + transformer_matrices + scalars
+        total = wte + value_embeds + lm_head + transformer_matrices + feedback_matrices + scalars
         assert total == sum(p.numel() for p in self.parameters()), "Parameter count mismatch"
         return {
             'wte': wte,
             'value_embeds': value_embeds,
             'lm_head': lm_head,
             'transformer_matrices': transformer_matrices,
+            'feedback_matrices': feedback_matrices,
             'scalars': scalars,
             'total': total,
         }
 
-    def setup_optimizer(self, unembedding_lr=0.004, embedding_lr=0.2, matrix_lr=0.02, weight_decay=0.0, scalar_lr=0.5):
+    def setup_optimizer(
+        self,
+        unembedding_lr=0.004,
+        embedding_lr=0.2,
+        matrix_lr=0.02,
+        weight_decay=0.0,
+        scalar_lr=0.5,
+        separate_feedback_params=False,
+    ):
         model_dim = self.config.n_embd
 
         # Separate out all parameters into groups
         matrix_params = list(self.transformer.h.parameters())
+        feedback_matrix_params = (
+            list(self.latent_feedback.parameters())
+            if self.latent_feedback is not None
+            else []
+        )
+        if not separate_feedback_params:
+            # Preserve the historical fixed-K optimizer grouping (and therefore
+            # optimizer-checkpoint compatibility) unless a pass schedule needs
+            # the feedback module to be independently dormant.
+            matrix_params.extend(feedback_matrix_params)
+            feedback_matrix_params = []
         value_embeds_params = list(self.value_embeds.parameters())
-        embedding_params = list(self.transformer.wte.parameters())
+        # The shared matrix receives dense output-head gradients, so tied models
+        # optimize it once with the existing unembedding AdamW hyperparameters.
+        # The much larger embedding LR is intentionally unused for this matrix.
+        embedding_params = [] if self.config.weight_tying else list(self.transformer.wte.parameters())
         lm_head_params = list(self.lm_head.parameters())
         resid_params = [self.resid_lambdas]
         x0_params = [self.x0_lambdas]
         smear_params = [self.smear_gate.weight, self.smear_lambda, self.backout_lambda]
-        assert len(list(self.parameters())) == len(matrix_params) + len(embedding_params) + len(lm_head_params) + len(value_embeds_params) + len(resid_params) + len(x0_params) + len(smear_params)
+        grouped_params = (
+            matrix_params + feedback_matrix_params + embedding_params + lm_head_params
+            + value_embeds_params + resid_params + x0_params + smear_params
+        )
+        model_params = list(self.parameters())
+        assert len(grouped_params) == len({id(p) for p in grouped_params}), "Optimizer parameter appears in multiple groups"
+        assert {id(p) for p in grouped_params} == {id(p) for p in model_params}, "Optimizer parameter coverage mismatch"
 
         # Scale the LR for the AdamW parameters by ∝1/√dmodel (tuned for 768 dim model)
         dmodel_lr_scale = (model_dim / 768) ** -0.5
         print0(f"Scaling the LR for the AdamW parameters ∝1/√({model_dim}/768) = {dmodel_lr_scale:.6f}")
+        if self.config.weight_tying:
+            print0("Weight tying: shared embedding/head uses the unembedding AdamW hyperparameters")
 
         # Build param_groups with all required fields explicit
         param_groups = [
             # AdamW groups (embeddings, lm_head, scalars)
             dict(kind='adamw', params=lm_head_params, lr=unembedding_lr * dmodel_lr_scale, betas=(0.8, 0.96), eps=1e-10, weight_decay=0.01),
-            dict(kind='adamw', params=embedding_params, lr=embedding_lr * dmodel_lr_scale, betas=(0.8, 0.995), eps=1e-10, weight_decay=0.001),
+        ]
+        if embedding_params:
+            param_groups.append(
+                dict(kind='adamw', params=embedding_params, lr=embedding_lr * dmodel_lr_scale, betas=(0.8, 0.995), eps=1e-10, weight_decay=0.001)
+            )
+        param_groups.extend([
             dict(kind='adamw', params=value_embeds_params, lr=embedding_lr * dmodel_lr_scale * 0.5, betas=(0.8, 0.995), eps=1e-10, weight_decay=0.01),
             dict(kind='adamw', params=resid_params, lr=scalar_lr * 0.01, betas=(0.8, 0.95), eps=1e-10, weight_decay=0.05),
             dict(kind='adamw', params=x0_params, lr=scalar_lr, betas=(0.96, 0.95), eps=1e-10, weight_decay=0.0),  # higher beta1 for x0
             dict(kind='adamw', params=smear_params, lr=0.2, betas=(0.8, 0.95), eps=1e-10, weight_decay=0.0),
-        ]
-        # Muon groups (matrix params, grouped by shape for stacking)
+        ])
+        # Muon groups (matrix params, grouped by shape for stacking). Feedback
+        # matrices stay in dedicated groups so a scheduled one-pass phase can
+        # leave the whole group dormant (grad=None) without mixing dormant and
+        # active parameters in the same collective/update.
         for shape in sorted({p.shape for p in matrix_params}):
             group_params = [p for p in matrix_params if p.shape == shape]
             param_groups.append(dict(
                 kind='muon', params=group_params, lr=matrix_lr,
                 momentum=0.95, ns_steps=5, beta2=0.9, weight_decay=weight_decay,
+                is_feedback=False, allow_no_grad=False,
+            ))
+        for shape in sorted({p.shape for p in feedback_matrix_params}):
+            group_params = [p for p in feedback_matrix_params if p.shape == shape]
+            param_groups.append(dict(
+                kind='muon', params=group_params, lr=matrix_lr,
+                momentum=0.95, ns_steps=5, beta2=0.9, weight_decay=weight_decay,
+                is_feedback=True, allow_no_grad=True,
             ))
 
         optimizer = MuonAdamW(param_groups)
@@ -456,21 +638,20 @@ class GPT(nn.Module):
             group["initial_lr"] = group["lr"]
         return optimizer
 
-    def forward(self, idx, targets=None, kv_cache=None, loss_reduction='mean'):
-        B, T = idx.size()
+    def _embed_tokens(self, idx):
+        """Embed tokens without mixing context into the current-token representation."""
+        token_embeddings = self.transformer.wte(idx).to(COMPUTE_DTYPE)
+        if self.config.weight_tying:
+            # Input embeddings are immediately RMS-normalized, so this leaves
+            # their direction unchanged while matching the original std=0.8
+            # numerical scale. The output projection still sees std=0.001.
+            token_embeddings.mul_(TIED_EMBEDDING_SCALE)
+        return token_embeddings
 
-        # Grab the rotary embeddings for the current sequence length (they are of shape (1, seq_len, 1, head_dim/2))
-        assert T <= self.cos.size(1), f"Sequence length grew beyond the rotary embeddings cache: {T} > {self.cos.size(1)}"
-        assert idx.device == self.cos.device, f"Rotary embeddings and idx are on different devices: {idx.device} != {self.cos.device}"
-        assert self.cos.dtype == COMPUTE_DTYPE, f"Rotary embeddings must be in {COMPUTE_DTYPE}, got {self.cos.dtype}"
-        # if kv cache exists, we need to offset the rotary embeddings to the current position in the cache
-        T0 = 0 if kv_cache is None else kv_cache.get_pos()
-        cos_sin = self.cos[:, T0:T0+T], self.sin[:, T0:T0+T] # truncate cache to current sequence length
-
-        # Embed the tokens
-        x = self.transformer.wte(idx) # embed current token
-        x = x.to(COMPUTE_DTYPE) # ensure activations are in compute dtype (no-op usually, but active for fp16 code path)
-        x = norm(x)
+    def _prepare_token_inputs(self, token_embeddings, kv_cache):
+        """Construct the ordinary layer-0 inputs, including nanochat's smear."""
+        _, T, _ = token_embeddings.shape
+        x = norm(token_embeddings)
 
         # Smear: mix previous token's embedding into current position (cheap bigram info)
         if kv_cache is None:
@@ -490,6 +671,19 @@ class GPT(nn.Module):
                 # Decode: single token, use cached prev embedding
                 gate = self.smear_lambda.to(x.dtype) * torch.sigmoid(self.smear_gate(x[:, :, :24]))
                 x = x + gate * x_pre_smear
+        return x
+
+    def _run_trunk(self, idx, x, kv_cache):
+        """Run prepared layer-0 inputs through the Transformer and final normalization."""
+        T = idx.size(1)
+
+        # Grab the rotary embeddings for the current sequence length (they are of shape (1, seq_len, 1, head_dim/2))
+        assert T <= self.cos.size(1), f"Sequence length grew beyond the rotary embeddings cache: {T} > {self.cos.size(1)}"
+        assert idx.device == self.cos.device, f"Rotary embeddings and idx are on different devices: {idx.device} != {self.cos.device}"
+        assert self.cos.dtype == COMPUTE_DTYPE, f"Rotary embeddings must be in {COMPUTE_DTYPE}, got {self.cos.dtype}"
+        # if kv cache exists, we need to offset the rotary embeddings to the current position in the cache
+        T0 = 0 if kv_cache is None else kv_cache.get_pos()
+        cos_sin = self.cos[:, T0:T0+T], self.sin[:, T0:T0+T] # truncate cache to current sequence length
 
         # Forward the trunk of the Transformer
         x0 = x  # save initial normalized embedding for x0 residual
@@ -506,10 +700,12 @@ class GPT(nn.Module):
         if x_backout is not None:
             x = x - self.backout_lambda.to(x.dtype) * x_backout
         x = norm(x)
+        return x
 
+    def _project_and_loss(self, hidden, targets, loss_reduction):
         # Forward the lm_head (compute logits)
         softcap = 15 # smoothly cap the logits to the range [-softcap, softcap]
-        logits = self.lm_head(x) # (B, T, padded_vocab_size) <- very big tensor, large amount of memory
+        logits = self.lm_head(hidden) # (B, T, padded_vocab_size) <- very big tensor, large amount of memory
         logits = logits[..., :self.config.vocab_size] # slice to remove padding
         logits = logits.float() # switch to fp32 for logit softcap and loss computation
         logits = softcap * torch.tanh(logits / softcap) # squash the logits
@@ -522,6 +718,103 @@ class GPT(nn.Module):
         else:
             # inference: just return the logits directly
             return logits
+
+    def _forward_once(self, idx, inputs, targets, kv_cache, loss_reduction):
+        hidden = self._run_trunk(idx, inputs, kv_cache)
+        output = self._project_and_loss(hidden, targets, loss_reduction)
+        return output, hidden
+
+    def forward(
+        self,
+        idx,
+        targets=None,
+        kv_cache=None,
+        loss_reduction='mean',
+        num_forward_passes=1,
+        feedback_masks=None,
+        feedback_jitter=0.02,
+        return_loss_components=False,
+        feedback_hidden=None,
+        feedback_mask=None,
+        return_hidden=False,
+    ):
+        """
+        Run standard GPT training/inference, optionally with a multi-pass feedback objective.
+
+        num_forward_passes counts the ordinary first pass, so 1 is exactly the standard
+        objective. Multi-pass mode is training-only and requires feedback_masks with shape
+        (num_forward_passes - 1, B, T), where True selects a fused input position.
+        feedback_jitter is the half-width of training-only Uniform[-delta, delta] noise.
+        Set return_loss_components to also return stacked, unweighted losses [L1, ..., LK].
+
+        During cached inference, feedback_hidden supplies the previous top-layer state
+        aligned with each input token. feedback_mask optionally selects which positions
+        receive the fused input; when omitted, every position is fused. Set return_hidden
+        to return (logits, top_layer_hidden), which lets the decoding loop carry the final
+        state into the next token.
+        """
+        assert isinstance(num_forward_passes, int) and num_forward_passes >= 1
+        assert feedback_jitter >= 0.0
+        assert not return_loss_components or targets is not None, "Loss components require targets"
+        assert not (return_loss_components and return_hidden), "Choose loss components or hidden states, not both"
+        assert not return_hidden or num_forward_passes == 1, "Hidden-state returns require a single forward pass"
+        assert feedback_hidden is not None or feedback_mask is None, "feedback_mask requires feedback_hidden"
+
+        token_embeddings = self._embed_tokens(idx)
+        token_inputs = self._prepare_token_inputs(token_embeddings, kv_cache)
+        if feedback_hidden is not None:
+            assert num_forward_passes == 1, "Decode-time feedback requires a single forward pass"
+            assert targets is None, "Decode-time feedback is only supported for inference"
+            assert self.latent_feedback is not None, "Decode-time feedback requires GPTConfig(latent_feedback=True)"
+            assert feedback_hidden.shape == token_embeddings.shape, (
+                f"Expected feedback_hidden shape {token_embeddings.shape}, got {feedback_hidden.shape}"
+            )
+            fused_inputs = self.latent_feedback(feedback_hidden, token_embeddings)
+            if feedback_mask is None:
+                token_inputs = fused_inputs
+            else:
+                assert feedback_mask.shape == idx.shape, (
+                    f"Expected feedback_mask shape {idx.shape}, got {feedback_mask.shape}"
+                )
+                assert feedback_mask.dtype == torch.bool, "feedback_mask must be bool"
+                token_inputs = torch.where(feedback_mask.unsqueeze(-1), fused_inputs, token_inputs)
+
+        output, hidden = self._forward_once(idx, token_inputs, targets, kv_cache, loss_reduction)
+        if num_forward_passes == 1:
+            if return_hidden:
+                return output, hidden
+            return (output, output.unsqueeze(0)) if return_loss_components else output
+
+        assert self.latent_feedback is not None, "Multi-pass training requires GPTConfig(latent_feedback=True)"
+        assert targets is not None, "Multi-pass feedback is currently implemented only for the training objective"
+        assert kv_cache is None, "Multi-pass feedback does not use a KV cache"
+        B, T = idx.shape
+        assert T > 1, "Multi-pass feedback requires at least two token positions"
+        assert feedback_masks is not None, "Multi-pass feedback requires explicit prefix/reset masks"
+        expected_shape = (num_forward_passes - 1, B, T)
+        assert feedback_masks.shape == expected_shape, f"Expected feedback_masks shape {expected_shape}, got {feedback_masks.shape}"
+        assert feedback_masks.dtype == torch.bool
+
+        feedback_losses = []
+        for pass_idx in range(num_forward_passes - 1):
+            previous_hidden = hidden[:, :-1]
+            if self.training and feedback_jitter > 0.0:
+                noise = torch.empty_like(previous_hidden).uniform_(-feedback_jitter, feedback_jitter)
+                previous_hidden = previous_hidden + noise
+
+            fused_suffix = self.latent_feedback(previous_hidden, token_embeddings[:, 1:])
+            fused_inputs = torch.cat((token_inputs[:, :1], fused_suffix), dim=1)
+            feedback_mask = feedback_masks[pass_idx]
+            pass_inputs = torch.where(feedback_mask.unsqueeze(-1), fused_inputs, token_inputs)
+            pass_loss, hidden = self._forward_once(idx, pass_inputs, targets, None, loss_reduction)
+            feedback_losses.append(pass_loss)
+
+        # L = L_standard + lambda * mean(L_feedback), with lambda fixed to 1 for now.
+        feedback_loss = torch.stack(feedback_losses, dim=0).mean(dim=0)
+        total_loss = output + feedback_loss
+        if return_loss_components:
+            return total_loss, torch.stack((output, *feedback_losses), dim=0)
+        return total_loss
 
     @torch.inference_mode()
     def generate(self, tokens, max_tokens, temperature=1.0, top_k=None, seed=42):

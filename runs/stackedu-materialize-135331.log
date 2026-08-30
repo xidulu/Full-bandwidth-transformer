@@ -1,0 +1,49 @@
+Downloading metadata shard https://huggingface.co/api/datasets/HuggingFaceTB/stack-edu/parquet/Python/train/0.parquet ...
+Downloading metadata shard https://huggingface.co/api/datasets/HuggingFaceTB/stack-edu/parquet/Python/train/1.parquet ...
+Downloading metadata shard https://huggingface.co/api/datasets/HuggingFaceTB/stack-edu/parquet/Python/train/2.parquet ...
+Downloading metadata shard https://huggingface.co/api/datasets/HuggingFaceTB/stack-edu/parquet/Python/train/3.parquet ...
+Downloading metadata shard https://huggingface.co/api/datasets/HuggingFaceTB/stack-edu/parquet/Python/train/4.parquet ...
+Traceback (most recent call last):
+  File "/home/jhu/xwang457/.local/share/uv/python/cpython-3.10.21-linux-x86_64-gnu/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/home/jhu/xwang457/.local/share/uv/python/cpython-3.10.21-linux-x86_64-gnu/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/scripts/materialize_stackedu.py", line 323, in <module>
+    main()
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/scripts/materialize_stackedu.py", line 215, in main
+    metadata_paths = download_metadata_shards(args.language, base_dir)
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/scripts/materialize_stackedu.py", line 86, in download_metadata_shards
+    with urllib.request.urlopen(shard_url, timeout=300) as response:
+  File "/home/jhu/xwang457/.local/share/uv/python/cpython-3.10.21-linux-x86_64-gnu/lib/python3.10/urllib/request.py", line 216, in urlopen
+    return opener.open(url, data, timeout)
+  File "/home/jhu/xwang457/.local/share/uv/python/cpython-3.10.21-linux-x86_64-gnu/lib/python3.10/urllib/request.py", line 525, in open
+    response = meth(req, response)
+  File "/home/jhu/xwang457/.local/share/uv/python/cpython-3.10.21-linux-x86_64-gnu/lib/python3.10/urllib/request.py", line 634, in http_response
+    response = self.parent.error(
+  File "/home/jhu/xwang457/.local/share/uv/python/cpython-3.10.21-linux-x86_64-gnu/lib/python3.10/urllib/request.py", line 557, in error
+    result = self._call_chain(*args)
+  File "/home/jhu/xwang457/.local/share/uv/python/cpython-3.10.21-linux-x86_64-gnu/lib/python3.10/urllib/request.py", line 496, in _call_chain
+    result = func(*args)
+  File "/home/jhu/xwang457/.local/share/uv/python/cpython-3.10.21-linux-x86_64-gnu/lib/python3.10/urllib/request.py", line 749, in http_error_302
+    return self.parent.open(new, timeout=req.timeout)
+  File "/home/jhu/xwang457/.local/share/uv/python/cpython-3.10.21-linux-x86_64-gnu/lib/python3.10/urllib/request.py", line 525, in open
+    response = meth(req, response)
+  File "/home/jhu/xwang457/.local/share/uv/python/cpython-3.10.21-linux-x86_64-gnu/lib/python3.10/urllib/request.py", line 634, in http_response
+    response = self.parent.error(
+  File "/home/jhu/xwang457/.local/share/uv/python/cpython-3.10.21-linux-x86_64-gnu/lib/python3.10/urllib/request.py", line 557, in error
+    result = self._call_chain(*args)
+  File "/home/jhu/xwang457/.local/share/uv/python/cpython-3.10.21-linux-x86_64-gnu/lib/python3.10/urllib/request.py", line 496, in _call_chain
+    result = func(*args)
+  File "/home/jhu/xwang457/.local/share/uv/python/cpython-3.10.21-linux-x86_64-gnu/lib/python3.10/urllib/request.py", line 749, in http_error_302
+    return self.parent.open(new, timeout=req.timeout)
+  File "/home/jhu/xwang457/.local/share/uv/python/cpython-3.10.21-linux-x86_64-gnu/lib/python3.10/urllib/request.py", line 525, in open
+    response = meth(req, response)
+  File "/home/jhu/xwang457/.local/share/uv/python/cpython-3.10.21-linux-x86_64-gnu/lib/python3.10/urllib/request.py", line 634, in http_response
+    response = self.parent.error(
+  File "/home/jhu/xwang457/.local/share/uv/python/cpython-3.10.21-linux-x86_64-gnu/lib/python3.10/urllib/request.py", line 563, in error
+    return self._call_chain(*args)
+  File "/home/jhu/xwang457/.local/share/uv/python/cpython-3.10.21-linux-x86_64-gnu/lib/python3.10/urllib/request.py", line 496, in _call_chain
+    result = func(*args)
+  File "/home/jhu/xwang457/.local/share/uv/python/cpython-3.10.21-linux-x86_64-gnu/lib/python3.10/urllib/request.py", line 643, in http_error_default
+    raise HTTPError(req.full_url, code, msg, hdrs, fp)
+urllib.error.HTTPError: HTTP Error 429: Too Many Requests

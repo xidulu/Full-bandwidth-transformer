@@ -1,0 +1,29 @@
+{
+  "checkpoint": "/home/jhu/xwang457/work/nanochat_cache/chatsft_checkpoints/d20-lf-k3-stackedu-python-budget/model_004407.pt",
+  "decode": {
+    "mode": "standard",
+    "temperature": 0.0,
+    "greedy": true,
+    "max_new_tokens": 512
+  },
+  "prompting": {
+    "humaneval": "raw prompt continuation",
+    "mbpp": "MBPP full split, task text + public tests as comments"
+  },
+  "source_dirs": {
+    "humaneval": "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/d20_lf_k3_stackedu_004407_code_eval_standard_sharded",
+    "mbpp": "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/d20_lf_k3_stackedu_004407_mbpp_standard_sharded"
+  },
+  "metrics": {
+    "humaneval/standard": {
+      "passed": 25,
+      "total": 164,
+      "accuracy": 0.1524390243902439
+    },
+    "mbpp_full/standard": {
+      "passed": 56,
+      "total": 500,
+      "accuracy": 0.112
+    }
+  }
+}

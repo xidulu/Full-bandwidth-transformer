@@ -128,7 +128,7 @@ NANOCHAT_DTYPE=float32 python -m scripts.chat_cli -p "hello"   # force fp32
 NANOCHAT_DTYPE=bfloat16 torchrun --nproc_per_node=8 -m scripts.base_train  # force bf16
 ```
 
-How it works: model weights are stored in fp32 (for optimizer precision), but our custom `Linear` layer casts them to `COMPUTE_DTYPE` during the forward pass. Embeddings are stored directly in `COMPUTE_DTYPE` to save memory. This gives us the same mixed-precision benefit as autocast but with full explicit control over what runs in which precision.
+How it works: model weights are stored in fp32 (for optimizer precision), but our custom `Linear` layer casts them to `COMPUTE_DTYPE` during the forward pass. Untied, lookup-only embeddings are stored directly in `COMPUTE_DTYPE` to save memory. Models trained with `--weight-tying` keep the shared embedding/output matrix in fp32 because it is also a dense output projection. This gives us the same mixed-precision benefit as autocast but with full explicit control over what runs in which precision.
 
 Note: `float16` training automatically enables a `GradScaler` in `base_train.py` to prevent gradient underflow. SFT supports this too but RL currently does not. Inference in fp16 works fine everywhere.
 

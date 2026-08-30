@@ -1,0 +1,97 @@
+{
+  "checkpoint": "/weka/scratch/jhu/enalisn1/xiw/nanochat_cache/base_checkpoints/d16-lf-k1-smoke/model_010000.pt",
+  "step": 10000,
+  "modes": [
+    "standard",
+    "soft",
+    "fused"
+  ],
+  "continuation": {
+    "standard": {
+      "nats": 5556.377145677698,
+      "bytes": 9550,
+      "scored_tokens": 2048,
+      "seconds": 25.16064686491154,
+      "bpb": 0.8393882464270144,
+      "mean_token_nll": 2.7130747781629383,
+      "tokens_per_second": 81.39695338501386,
+      "all_finite": true,
+      "hidden_rms_min": 0.9980908036231995,
+      "hidden_rms_max": 1.002000331878662,
+      "hidden_abs_max": 31.625
+    },
+    "soft": {
+      "nats": 5574.306640528555,
+      "bytes": 9550,
+      "scored_tokens": 2048,
+      "seconds": 25.276847719447687,
+      "bpb": 0.8420968111712004,
+      "mean_token_nll": 2.7218294143205837,
+      "tokens_per_second": 81.02276133207444,
+      "all_finite": true,
+      "hidden_rms_min": 0.9980326890945435,
+      "hidden_rms_max": 1.0023244619369507,
+      "hidden_abs_max": 31.625,
+      "bpb_delta_vs_standard": 0.002708564744186015,
+      "bpb_relative_delta_vs_standard": 0.003226831869180158,
+      "documents_better_than_standard": 14,
+      "documents_evaluated": 32
+    },
+    "fused": {
+      "nats": 5554.411838366952,
+      "bytes": 9550,
+      "scored_tokens": 2048,
+      "seconds": 25.74751942034345,
+      "bpb": 0.839091352279262,
+      "mean_token_nll": 2.7121151554526133,
+      "tokens_per_second": 79.54164308278368,
+      "all_finite": true,
+      "hidden_rms_min": 0.9980353713035583,
+      "hidden_rms_max": 1.0021926164627075,
+      "hidden_abs_max": 31.625,
+      "bpb_delta_vs_standard": -0.0002968941477523579,
+      "bpb_relative_delta_vs_standard": -0.0003537030081325332,
+      "documents_better_than_standard": 18,
+      "documents_evaluated": 32
+    },
+    "standard_soft_first_token_max_abs_diff": 0.0
+  },
+  "gsm8k": {
+    "standard": {
+      "examples": 20,
+      "correct": 0,
+      "accuracy": 0.0,
+      "answers_parsed": 20,
+      "answer_parse_rate": 1.0,
+      "completion_tokens": 1463,
+      "seconds": 17.814439333742484,
+      "tokens_per_second": 82.12439205026897
+    },
+    "soft": {
+      "examples": 20,
+      "correct": 1,
+      "accuracy": 0.05,
+      "answers_parsed": 20,
+      "answer_parse_rate": 1.0,
+      "completion_tokens": 1584,
+      "seconds": 19.497971116914414,
+      "tokens_per_second": 81.23922178887044
+    },
+    "fused": {
+      "examples": 20,
+      "correct": 2,
+      "accuracy": 0.1,
+      "answers_parsed": 20,
+      "answer_parse_rate": 1.0,
+      "completion_tokens": 1196,
+      "seconds": 14.965924943098798,
+      "tokens_per_second": 79.91487359099102
+    },
+    "pairwise": {
+      "standard_soft_same_first_token": 1.0,
+      "standard_soft_identical": 0.15,
+      "standard_fused_identical": 0.2,
+      "soft_fused_identical": 0.3
+    }
+  }
+}

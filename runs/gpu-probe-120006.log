@@ -1,0 +1,6 @@
+[BILLING] loaded!
+[BILLING] Re-emitting cost at job start!
+srun: error: CPU binding outside of job step allocation, allocated CPUs are: 0x00000000000000030000000000000021.
+srun: error: Task launch for StepId=120006.0 failed on node gh202: Unable to satisfy cpu bind request
+srun: error: Application launch failed: Unable to satisfy cpu bind request
+srun: Job step aborted

@@ -1,0 +1,93 @@
+{
+  "command": [
+    "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/bin/python",
+    "fbt_experiments/evaluate_checkpoint.py",
+    "--checkpoint",
+    "/home/jhu/xwang457/work/nanochat_cache/base_checkpoints/d20-lf-k1-smoke",
+    "--output-dir",
+    "fbt_experiments/results/model_050000_core_prefill_100",
+    "--device",
+    "cuda",
+    "--skip-continuation",
+    "--skip-gsm8k",
+    "--core-max-per-task",
+    "100"
+  ],
+  "checkpoint": "/weka/scratch/jhu/enalisn1/xiw/nanochat_cache/base_checkpoints/d20-lf-k1-smoke/model_050000.pt",
+  "checkpoint_size_bytes": 2592668249,
+  "matching_meta": "/weka/scratch/jhu/enalisn1/xiw/nanochat_cache/base_checkpoints/d20-lf-k1-smoke/meta_050000.json",
+  "nanochat_base_dir": "/weka/scratch/jhu/enalisn1/xiw/nanochat_cache",
+  "step": 50000,
+  "device": "cuda",
+  "torch_version": "2.9.1+cu128",
+  "compute_dtype": "torch.bfloat16",
+  "compute_dtype_reason": "auto-detected: CUDA SM 90 (bf16 supported)",
+  "cuda_device": "NVIDIA H200 NVL",
+  "seed": 42,
+  "num_docs": 8,
+  "prefix_tokens": 64,
+  "continuation_tokens": 64,
+  "num_gsm8k": 20,
+  "gsm8k_start": 0,
+  "gsm8k_shots": 8,
+  "max_new_tokens": 192,
+  "core_max_per_task": 100,
+  "skip_continuation": true,
+  "skip_gsm8k": true,
+  "modes": [
+    "standard",
+    "soft",
+    "fused"
+  ],
+  "core_prefill_modes": [
+    "standard_prefill",
+    "fused_prefill"
+  ]
+}
+2026-08-27 13:26:01,102 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Building model with config: {'sequence_len': 2048, 'vocab_size': 32768, 'n_layer': 20, 'n_head': 10, 'n_kv_head': 10, 'n_embd': 1280, 'window_pattern': 'SSSL', 'latent_feedback': True, 'weight_tying': True}
+loaded model parameters=857,867,506
+core task=hellaswag_zeroshot shots=0 type=multiple_choice
+core task=hellaswag_zeroshot standard=61/100 fused=61/100 seconds=2.5
+core task=jeopardy shots=10 type=language_modeling
+core task=jeopardy standard=14/100 fused=23/100 seconds=2.3
+core task=bigbench_qa_wikidata shots=10 type=language_modeling
+core task=bigbench_qa_wikidata standard=46/100 fused=48/100 seconds=2.3
+core task=arc_easy shots=10 type=multiple_choice
+core task=arc_easy standard=69/100 fused=69/100 seconds=3.1
+core task=arc_challenge shots=10 type=multiple_choice
+core task=arc_challenge standard=47/100 fused=43/100 seconds=3.1
+core task=copa shots=0 type=multiple_choice
+core task=copa standard=66/100 fused=64/100 seconds=2.1
+core task=commonsense_qa shots=10 type=multiple_choice
+core task=commonsense_qa standard=38/100 fused=35/100 seconds=3.4
+core task=piqa shots=10 type=multiple_choice
+core task=piqa standard=72/100 fused=73/100 seconds=2.5
+core task=openbook_qa shots=0 type=multiple_choice
+core task=openbook_qa standard=41/100 fused=41/100 seconds=2.1
+core task=lambada_openai shots=0 type=language_modeling
+core task=lambada_openai standard=50/100 fused=55/100 seconds=2.2
+core task=hellaswag shots=10 type=multiple_choice
+core task=hellaswag standard=58/100 fused=60/100 seconds=5.2
+core task=winograd shots=0 type=schema
+core task=winograd standard=69/100 fused=71/100 seconds=2.1
+core task=winogrande shots=0 type=schema
+core task=winogrande standard=64/100 fused=58/100 seconds=2.1
+core task=bigbench_dyck_languages shots=10 type=language_modeling
+core task=bigbench_dyck_languages standard=14/100 fused=12/100 seconds=2.4
+core task=agi_eval_lsat_ar shots=3 type=multiple_choice
+core task=agi_eval_lsat_ar standard=27/100 fused=25/100 seconds=5.0
+core task=bigbench_cs_algorithms shots=10 type=language_modeling
+core task=bigbench_cs_algorithms standard=46/100 fused=45/100 seconds=2.2
+core task=bigbench_operators shots=10 type=language_modeling
+core task=bigbench_operators standard=14/100 fused=14/100 seconds=2.2
+core task=bigbench_repeat_copy_logic shots=10 type=language_modeling
+core task=bigbench_repeat_copy_logic standard=2/32 fused=2/32 seconds=0.7
+core task=squad shots=10 type=language_modeling
+core task=squad standard=49/100 fused=45/100 seconds=3.7
+core task=coqa shots=0 type=language_modeling
+core task=coqa standard=32/100 fused=34/100 seconds=2.3
+core task=boolq shots=10 type=multiple_choice
+core task=boolq standard=62/100 fused=64/100 seconds=4.7
+core task=bigbench_language_identification shots=10 type=multiple_choice
+core task=bigbench_language_identification standard=27/100 fused=27/100 seconds=8.7
+wrote evaluation assets to /weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_core_prefill_100

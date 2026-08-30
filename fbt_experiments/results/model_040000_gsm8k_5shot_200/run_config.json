@@ -1,0 +1,41 @@
+{
+  "command": [
+    "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/bin/python",
+    "fbt_experiments/evaluate_checkpoint.py",
+    "--checkpoint",
+    "/home/jhu/xwang457/work/nanochat_cache/base_checkpoints/d16-lf-k1-smoke/",
+    "--output-dir",
+    "fbt_experiments/results/model_040000_gsm8k_5shot_200",
+    "--skip-continuation",
+    "--num-gsm8k",
+    "200",
+    "--gsm8k-shots",
+    "5",
+    "--max-new-tokens",
+    "192"
+  ],
+  "checkpoint": "/weka/scratch/jhu/enalisn1/xiw/nanochat_cache/base_checkpoints/d16-lf-k1-smoke/model_040000.pt",
+  "checkpoint_size_bytes": 1551944136,
+  "matching_meta": "/weka/scratch/jhu/enalisn1/xiw/nanochat_cache/base_checkpoints/d16-lf-k1-smoke/meta_040000.json",
+  "nanochat_base_dir": "/weka/scratch/jhu/enalisn1/xiw/nanochat_cache",
+  "step": 40000,
+  "device": "cuda",
+  "torch_version": "2.9.1+cu128",
+  "compute_dtype": "torch.bfloat16",
+  "compute_dtype_reason": "auto-detected: CUDA SM 80 (bf16 supported)",
+  "cuda_device": "NVIDIA A100-SXM4-80GB",
+  "seed": 42,
+  "num_docs": 8,
+  "prefix_tokens": 64,
+  "continuation_tokens": 64,
+  "num_gsm8k": 200,
+  "gsm8k_shots": 5,
+  "max_new_tokens": 192,
+  "skip_continuation": true,
+  "skip_gsm8k": false,
+  "modes": [
+    "standard",
+    "soft",
+    "fused"
+  ]
+}

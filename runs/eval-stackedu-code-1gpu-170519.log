@@ -1,0 +1,9 @@
+[BILLING] loaded!
+[BILLING] Re-emitting cost at job start!
+Autodetected device type: cuda
+2026-08-28 23:10:32,459 - nanochat.common - [32m[1mINFO[0m - Distributed world size: 1
+2026-08-28 23:10:32,460 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Loading model from /home/jhu/xwang457/work/nanochat_cache/chatsft_checkpoints/d20-lf-k3-stackedu-python-budget with step 4407
+2026-08-28 23:10:33,192 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Building model with config: {'sequence_len': 2048, 'vocab_size': 32768, 'n_layer': 20, 'n_head': 10, 'n_kv_head': 10, 'n_embd': 1280, 'window_pattern': 'SSSL', 'latent_feedback': True, 'weight_tying': True}
+srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
+[2026-08-28T23:11:34.110] error: *** JOB 170519 ON gh128 CANCELLED AT 2026-08-28T23:11:34 DUE to SIGNAL Terminated ***
+[2026-08-28T23:11:34.110] error: *** STEP 170519.0 ON gh128 CANCELLED AT 2026-08-28T23:11:34 DUE to SIGNAL Terminated ***

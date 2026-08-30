@@ -1,0 +1,9 @@
+{
+  "metrics": {
+    "mbpp_full/standard": {
+      "passed": 56,
+      "total": 500,
+      "accuracy": 0.112
+    }
+  }
+}

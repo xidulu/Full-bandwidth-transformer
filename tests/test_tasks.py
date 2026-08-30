@@ -8,6 +8,7 @@ python -m pytest tests/test_tasks.py -v
 import numpy as np
 import pyarrow as pa
 from tasks.common import Task, TaskMixture, HubDataset, render_mc
+from tasks.openmathinstruct import OpenMathInstruct2
 
 
 class ToyTask(Task):
@@ -86,3 +87,20 @@ def test_render_mc_letter_binding():
     # the letter must directly follow '=' with no whitespace, so that the
     # prompt token for "A" matches the assistant's bare "A" response token
     assert "=A\n" in query and "=B\n" in query
+
+
+def test_openmathinstruct2_renders_problem_solution_pair():
+    table = pa.table({
+        "problem": ["What is 2+2?"],
+        "generated_solution": ["2+2=4. The answer is 4."],
+        "expected_answer": ["4"],
+        "problem_source": ["augmented_gsm8k"],
+    })
+    task = OpenMathInstruct2(split="train_1M", ds=HubDataset(table))
+    conversation = task[0]
+    assert conversation["messages"] == [
+        {"role": "user", "content": "What is 2+2?"},
+        {"role": "assistant", "content": "2+2=4. The answer is 4."},
+    ]
+    assert conversation["expected_answer"] == "4"
+    assert conversation["problem_source"] == "augmented_gsm8k"

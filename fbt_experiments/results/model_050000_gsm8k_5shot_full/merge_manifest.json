@@ -1,0 +1,276 @@
+{
+  "schema_version": 1,
+  "created_utc": "2026-08-21T13:06:07.282697+00:00",
+  "command": [
+    "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/bin/python",
+    "fbt_experiments/merge_gsm8k_shards.py",
+    "fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_00",
+    "fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_01",
+    "fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_02",
+    "fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_03",
+    "fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_04",
+    "fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_05",
+    "fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_06",
+    "fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_07",
+    "--output-dir",
+    "fbt_experiments/results/model_050000_gsm8k_5shot_full",
+    "--expected-count",
+    "1319"
+  ],
+  "checkpoint": "/weka/scratch/jhu/enalisn1/xiw/nanochat_cache/base_checkpoints/d16-lf-k1-smoke/model_050000.pt",
+  "step": 50000,
+  "protocol": {
+    "checkpoint": "/weka/scratch/jhu/enalisn1/xiw/nanochat_cache/base_checkpoints/d16-lf-k1-smoke/model_050000.pt",
+    "checkpoint_size_bytes": 2676554524,
+    "nanochat_base_dir": "/weka/scratch/jhu/enalisn1/xiw/nanochat_cache",
+    "step": 50000,
+    "seed": 42,
+    "gsm8k_shots": 5,
+    "max_new_tokens": 192,
+    "modes": [
+      "standard",
+      "soft",
+      "fused"
+    ]
+  },
+  "decoding": {
+    "num_samples": 1,
+    "temperature": 0.0,
+    "top_k": null,
+    "use_calculator": false,
+    "modes": [
+      "standard",
+      "soft",
+      "fused"
+    ]
+  },
+  "source_dataset": {
+    "path": "/weka/scratch/jhu/enalisn1/xiw/nanochat_cache/eval_bundle/eval_data/symbolic_problem_solving/gsm8k_prepended_8shot.jsonl",
+    "sha256": "c4b1b7378385b1c4e4862c0d0dde5eac5c986ff991db8eb53db9adf0f47199d6",
+    "size_bytes": 3650733,
+    "rows": 1319
+  },
+  "gsm8k_start": 0,
+  "num_gsm8k": 1319,
+  "first_example_index": 0,
+  "last_example_index": 1318,
+  "sources": [
+    {
+      "directory": "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_00",
+      "gsm8k_start": 0,
+      "num_gsm8k": 165,
+      "first_example_index": 0,
+      "last_example_index": 164,
+      "files": {
+        "run_config.json": {
+          "path": "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_00/run_config.json",
+          "sha256": "c188937440e38a62c5b1825dd9da108983df61fd3c426f05ee0896950718e1c2"
+        },
+        "checkpoint_meta.json": {
+          "path": "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_00/checkpoint_meta.json",
+          "sha256": "a0e3181117a6514ff2d7b21b473432d4327a0f7370088f16a92633f64dab7bab"
+        },
+        "metrics.json": {
+          "path": "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_00/metrics.json",
+          "sha256": "ef1a60a8961ba380d899a6c3550107d9825d92df0cf5fbf376ceec1798c9adb1"
+        },
+        "gsm8k_generations.jsonl": {
+          "path": "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_00/gsm8k_generations.jsonl",
+          "sha256": "b383bf5df154f7ead73a42bb11d16b7557be7bd20a17988eeae3bab87a6e42a7"
+        }
+      }
+    },
+    {
+      "directory": "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_01",
+      "gsm8k_start": 165,
+      "num_gsm8k": 165,
+      "first_example_index": 165,
+      "last_example_index": 329,
+      "files": {
+        "run_config.json": {
+          "path": "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_01/run_config.json",
+          "sha256": "245a1e5eb57dc3ac003e98e49203000f328133b7abc063cfa2a81ed1e320f5d2"
+        },
+        "checkpoint_meta.json": {
+          "path": "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_01/checkpoint_meta.json",
+          "sha256": "a0e3181117a6514ff2d7b21b473432d4327a0f7370088f16a92633f64dab7bab"
+        },
+        "metrics.json": {
+          "path": "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_01/metrics.json",
+          "sha256": "bdf352494bf62f0ec7bb9b3379fba8495ce094dbd5dbeb1e09ea48d3829b4599"
+        },
+        "gsm8k_generations.jsonl": {
+          "path": "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_01/gsm8k_generations.jsonl",
+          "sha256": "665588ae60bef9ca3a90a1d68001ac6bc12c3cfd9d2cd9d987bf9cde28ec7d25"
+        }
+      }
+    },
+    {
+      "directory": "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_02",
+      "gsm8k_start": 330,
+      "num_gsm8k": 165,
+      "first_example_index": 330,
+      "last_example_index": 494,
+      "files": {
+        "run_config.json": {
+          "path": "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_02/run_config.json",
+          "sha256": "11aa74c0dcc040b9d015ec4d14257312b377b5bd553460e2ed34fb1e4df35c0b"
+        },
+        "checkpoint_meta.json": {
+          "path": "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_02/checkpoint_meta.json",
+          "sha256": "a0e3181117a6514ff2d7b21b473432d4327a0f7370088f16a92633f64dab7bab"
+        },
+        "metrics.json": {
+          "path": "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_02/metrics.json",
+          "sha256": "6f41dc42d6c0b2d3f5ad4568cdf4a926eeb10e31ca4e186fa74249548b0beba3"
+        },
+        "gsm8k_generations.jsonl": {
+          "path": "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_02/gsm8k_generations.jsonl",
+          "sha256": "f69914bb83ea9af627d82904e5e27e0c0452bda3dbd3ef5f78a3e8d080334832"
+        }
+      }
+    },
+    {
+      "directory": "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_03",
+      "gsm8k_start": 495,
+      "num_gsm8k": 165,
+      "first_example_index": 495,
+      "last_example_index": 659,
+      "files": {
+        "run_config.json": {
+          "path": "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_03/run_config.json",
+          "sha256": "1f6cb60aafa8072409b9ae7636c9e85167988cbb06140bca037c2599ccaf8ad9"
+        },
+        "checkpoint_meta.json": {
+          "path": "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_03/checkpoint_meta.json",
+          "sha256": "a0e3181117a6514ff2d7b21b473432d4327a0f7370088f16a92633f64dab7bab"
+        },
+        "metrics.json": {
+          "path": "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_03/metrics.json",
+          "sha256": "e5af167719204d37e9f563648ae9bd31deb4e78b9ab963f1932f9980f8a02da6"
+        },
+        "gsm8k_generations.jsonl": {
+          "path": "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_03/gsm8k_generations.jsonl",
+          "sha256": "28ae0a5bb36d66ca3bb5ebc928c029786f2f7ea4afbab1530902ead29de1db84"
+        }
+      }
+    },
+    {
+      "directory": "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_04",
+      "gsm8k_start": 660,
+      "num_gsm8k": 165,
+      "first_example_index": 660,
+      "last_example_index": 824,
+      "files": {
+        "run_config.json": {
+          "path": "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_04/run_config.json",
+          "sha256": "d43f0f025c4b9717af3604f2cbd3cc38f3dc3d699f40a9a10b74b3016266b623"
+        },
+        "checkpoint_meta.json": {
+          "path": "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_04/checkpoint_meta.json",
+          "sha256": "a0e3181117a6514ff2d7b21b473432d4327a0f7370088f16a92633f64dab7bab"
+        },
+        "metrics.json": {
+          "path": "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_04/metrics.json",
+          "sha256": "42b8542ec198d9c15f7e46a7a549238967192470488bf14171c6d5c6e75f032c"
+        },
+        "gsm8k_generations.jsonl": {
+          "path": "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_04/gsm8k_generations.jsonl",
+          "sha256": "9ee7672040b440a46b9e920a46c043dbc920b75af662a1e91b0924d9d34bc5df"
+        }
+      }
+    },
+    {
+      "directory": "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_05",
+      "gsm8k_start": 825,
+      "num_gsm8k": 165,
+      "first_example_index": 825,
+      "last_example_index": 989,
+      "files": {
+        "run_config.json": {
+          "path": "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_05/run_config.json",
+          "sha256": "e2df71b5ed8bf7926a7012132e7630cde3d37151500ca6c90d3d8d4a32179e08"
+        },
+        "checkpoint_meta.json": {
+          "path": "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_05/checkpoint_meta.json",
+          "sha256": "a0e3181117a6514ff2d7b21b473432d4327a0f7370088f16a92633f64dab7bab"
+        },
+        "metrics.json": {
+          "path": "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_05/metrics.json",
+          "sha256": "ecf56f55a97405a6447050aa8d3ac30c91f43575b4a5589afa3af5b2d29b2897"
+        },
+        "gsm8k_generations.jsonl": {
+          "path": "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_05/gsm8k_generations.jsonl",
+          "sha256": "92cfea349f9fa180e418b033ccd303d24c998393971b52ecf77fda467d2fe170"
+        }
+      }
+    },
+    {
+      "directory": "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_06",
+      "gsm8k_start": 990,
+      "num_gsm8k": 165,
+      "first_example_index": 990,
+      "last_example_index": 1154,
+      "files": {
+        "run_config.json": {
+          "path": "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_06/run_config.json",
+          "sha256": "2cb33970f0dad29d140d83caacb52ae102fbd0eaedb04b8e0e8af9b98fa881a6"
+        },
+        "checkpoint_meta.json": {
+          "path": "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_06/checkpoint_meta.json",
+          "sha256": "a0e3181117a6514ff2d7b21b473432d4327a0f7370088f16a92633f64dab7bab"
+        },
+        "metrics.json": {
+          "path": "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_06/metrics.json",
+          "sha256": "d5010b0beec6679ec1d45c83ef111dbc19e7f2e3cc4ab1e59f67ba57dec07bda"
+        },
+        "gsm8k_generations.jsonl": {
+          "path": "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_06/gsm8k_generations.jsonl",
+          "sha256": "c43048cc7983ebec9348bf9633288bceae65033a04abdfe4334fe81aec18bf0a"
+        }
+      }
+    },
+    {
+      "directory": "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_07",
+      "gsm8k_start": 1155,
+      "num_gsm8k": 164,
+      "first_example_index": 1155,
+      "last_example_index": 1318,
+      "files": {
+        "run_config.json": {
+          "path": "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_07/run_config.json",
+          "sha256": "548410646738a6d6df6c161f52958b0af8e8a0f786ee28f59c00d655648126a4"
+        },
+        "checkpoint_meta.json": {
+          "path": "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_07/checkpoint_meta.json",
+          "sha256": "a0e3181117a6514ff2d7b21b473432d4327a0f7370088f16a92633f64dab7bab"
+        },
+        "metrics.json": {
+          "path": "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_07/metrics.json",
+          "sha256": "dfca657f9008e832b92ba98fcbf7604bab668fc749b1a5fc93f7bd7ab1bc1602"
+        },
+        "gsm8k_generations.jsonl": {
+          "path": "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_07/gsm8k_generations.jsonl",
+          "sha256": "4cf5fbc4a479393dfc6ce077f83f498ba80fbe4e3dac39f33be6b9317600f95e"
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "run_config.json": {
+      "sha256": "ca12da8f96a24fa13b065916120181c7a2a115b94a028532f05cd2aaf6c4dfb3"
+    },
+    "checkpoint_meta.json": {
+      "sha256": "e0d8ce65229b89daaad21fcb542f44b57c4d0c060f7f75325509b95a6114128f"
+    },
+    "gsm8k_generations.jsonl": {
+      "sha256": "ac829e558912cc63fcee45abe3c06edfef492822a34b3b79f5c0e9aa06cafe25"
+    },
+    "metrics.json": {
+      "sha256": "06d1ffa461b970c4d0d1f6e6c7ca487437ca017fe488cc35c6333abb4cfd7601"
+    },
+    "summary.md": {
+      "sha256": "33c4fed15076035a6004a9d4b1be781098c0a32a26920a64f1fcaa945aae0cc5"
+    }
+  }
+}

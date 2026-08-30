@@ -1,0 +1,52 @@
+{
+  "command": [
+    "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/bin/python",
+    "fbt_experiments/evaluate_checkpoint.py",
+    "--checkpoint",
+    "/home/jhu/xwang457/work/nanochat_cache/base_checkpoints/d20-lf-k1-smoke",
+    "--output-dir",
+    "fbt_experiments/results/model_050000_gsm8k_5shot_first",
+    "--device",
+    "cuda",
+    "--skip-continuation",
+    "--num-gsm8k",
+    "1",
+    "--gsm8k-start",
+    "0",
+    "--gsm8k-shots",
+    "5",
+    "--max-new-tokens",
+    "192"
+  ],
+  "checkpoint": "/weka/scratch/jhu/enalisn1/xiw/nanochat_cache/base_checkpoints/d20-lf-k1-smoke/model_050000.pt",
+  "checkpoint_size_bytes": 2592668249,
+  "matching_meta": "/weka/scratch/jhu/enalisn1/xiw/nanochat_cache/base_checkpoints/d20-lf-k1-smoke/meta_050000.json",
+  "nanochat_base_dir": "/weka/scratch/jhu/enalisn1/xiw/nanochat_cache",
+  "step": 50000,
+  "device": "cuda",
+  "torch_version": "2.9.1+cu128",
+  "compute_dtype": "torch.bfloat16",
+  "compute_dtype_reason": "auto-detected: CUDA SM 90 (bf16 supported)",
+  "cuda_device": "NVIDIA H200 NVL",
+  "seed": 42,
+  "num_docs": 8,
+  "prefix_tokens": 64,
+  "continuation_tokens": 64,
+  "num_gsm8k": 1,
+  "gsm8k_start": 0,
+  "gsm8k_shots": 5,
+  "max_new_tokens": 192,
+  "skip_continuation": true,
+  "skip_gsm8k": false,
+  "modes": [
+    "standard",
+    "soft",
+    "fused"
+  ]
+}
+2026-08-27 12:15:12,333 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Building model with config: {'sequence_len': 2048, 'vocab_size': 32768, 'n_layer': 20, 'n_head': 10, 'n_kv_head': 10, 'n_embd': 1280, 'window_pattern': 'SSSL', 'latent_feedback': True, 'weight_tying': True}
+loaded model parameters=857,867,506
+gsm8k example=1/1 global_index=0 mode=standard pred='12' ref='18' tokens=47 seconds=0.381
+gsm8k example=1/1 global_index=0 mode=soft pred='12' ref='18' tokens=41 seconds=0.240
+gsm8k example=1/1 global_index=0 mode=fused pred='12' ref='18' tokens=40 seconds=0.242
+wrote evaluation assets to /weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_first

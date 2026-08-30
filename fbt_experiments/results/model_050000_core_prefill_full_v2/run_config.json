@@ -1,0 +1,46 @@
+{
+  "command": [
+    "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/bin/python",
+    "fbt_experiments/evaluate_checkpoint.py",
+    "--checkpoint",
+    "/home/jhu/xwang457/work/nanochat_cache/base_checkpoints/d20-lf-k1-smoke",
+    "--output-dir",
+    "fbt_experiments/results/model_050000_core_prefill_full_v2",
+    "--device",
+    "cuda",
+    "--skip-continuation",
+    "--skip-gsm8k",
+    "--core-max-per-task",
+    "-1"
+  ],
+  "checkpoint": "/weka/scratch/jhu/enalisn1/xiw/nanochat_cache/base_checkpoints/d20-lf-k1-smoke/model_050000.pt",
+  "checkpoint_size_bytes": 2592668249,
+  "matching_meta": "/weka/scratch/jhu/enalisn1/xiw/nanochat_cache/base_checkpoints/d20-lf-k1-smoke/meta_050000.json",
+  "nanochat_base_dir": "/weka/scratch/jhu/enalisn1/xiw/nanochat_cache",
+  "step": 50000,
+  "device": "cuda",
+  "torch_version": "2.9.1+cu128",
+  "compute_dtype": "torch.bfloat16",
+  "compute_dtype_reason": "auto-detected: CUDA SM 90 (bf16 supported)",
+  "cuda_device": "NVIDIA H200 NVL",
+  "seed": 42,
+  "num_docs": 8,
+  "prefix_tokens": 64,
+  "continuation_tokens": 64,
+  "num_gsm8k": 20,
+  "gsm8k_start": 0,
+  "gsm8k_shots": 8,
+  "max_new_tokens": 192,
+  "core_max_per_task": -1,
+  "skip_continuation": true,
+  "skip_gsm8k": true,
+  "modes": [
+    "standard",
+    "soft",
+    "fused"
+  ],
+  "core_prefill_modes": [
+    "standard_prefill",
+    "fused_prefill"
+  ]
+}

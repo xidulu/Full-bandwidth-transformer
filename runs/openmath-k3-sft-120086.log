@@ -1,0 +1,136 @@
+[BILLING] loaded!
+[BILLING] Re-emitting cost at job start!
+W0827 16:35:59.585000 181223 torch/distributed/run.py:803] 
+W0827 16:35:59.585000 181223 torch/distributed/run.py:803] *****************************************
+W0827 16:35:59.585000 181223 torch/distributed/run.py:803] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+W0827 16:35:59.585000 181223 torch/distributed/run.py:803] *****************************************
+Autodetected device type: cuda
+2026-08-27 16:36:11,952 - nanochat.common - [32m[1mINFO[0m - Distributed world size: 4
+COMPUTE_DTYPE: torch.bfloat16 (auto-detected: CUDA SM 90 (bf16 supported))
+GPU: NVIDIA H100 80GB HBM3 | Peak FLOPS (BF16): 9.89e+14
+[rank2]: Traceback (most recent call last):
+[rank2]:   File "/home/jhu/xwang457/.local/share/uv/python/cpython-3.10.21-linux-x86_64-gnu/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+[rank2]:     return _run_code(code, main_globals, None,
+[rank2]:   File "/home/jhu/xwang457/.local/share/uv/python/cpython-3.10.21-linux-x86_64-gnu/lib/python3.10/runpy.py", line 86, in _run_code
+[rank2]:     exec(code, run_globals)
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/scripts/chat_sft.py", line 112, in <module>
+[rank2]:     model, tokenizer, meta = load_model("base", device, phase="train", model_tag=args.model_tag, step=args.model_step)
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/nanochat/checkpoint_manager.py", line 176, in load_model
+[rank2]:     return load_model_from_dir(checkpoints_dir, *args, **kwargs)
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/nanochat/checkpoint_manager.py", line 165, in load_model_from_dir
+[rank2]:     model, tokenizer, meta_data = build_model(checkpoint_dir, step, device, phase)
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/nanochat/checkpoint_manager.py", line 90, in build_model
+[rank2]:     model_data, optimizer_data, meta_data = load_checkpoint(checkpoint_dir, step, device, load_optimizer=False)
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/nanochat/checkpoint_manager.py", line 68, in load_checkpoint
+[rank2]:     model_data = torch.load(model_path, map_location=device)
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/serialization.py", line 1484, in load
+[rank2]:     with _open_file_like(f, "rb") as opened_file:
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/serialization.py", line 759, in _open_file_like
+[rank2]:     return _open_file(name_or_buffer, mode)
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/serialization.py", line 740, in __init__
+[rank2]:     super().__init__(open(name, mode))
+[rank2]: FileNotFoundError: [Errno 2] No such file or directory: '/home/jhu/xwang457/.cache/nanochat/base_checkpoints/d20-lf-k1-smoke/model_050000.pt'
+[rank1]: Traceback (most recent call last):
+[rank1]:   File "/home/jhu/xwang457/.local/share/uv/python/cpython-3.10.21-linux-x86_64-gnu/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+[rank1]:     return _run_code(code, main_globals, None,
+[rank1]:   File "/home/jhu/xwang457/.local/share/uv/python/cpython-3.10.21-linux-x86_64-gnu/lib/python3.10/runpy.py", line 86, in _run_code
+[rank1]:     exec(code, run_globals)
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/scripts/chat_sft.py", line 112, in <module>
+[rank1]:     model, tokenizer, meta = load_model("base", device, phase="train", model_tag=args.model_tag, step=args.model_step)
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/nanochat/checkpoint_manager.py", line 176, in load_model
+[rank1]:     return load_model_from_dir(checkpoints_dir, *args, **kwargs)
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/nanochat/checkpoint_manager.py", line 165, in load_model_from_dir
+[rank1]:     model, tokenizer, meta_data = build_model(checkpoint_dir, step, device, phase)
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/nanochat/checkpoint_manager.py", line 90, in build_model
+[rank1]:     model_data, optimizer_data, meta_data = load_checkpoint(checkpoint_dir, step, device, load_optimizer=False)
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/nanochat/checkpoint_manager.py", line 68, in load_checkpoint
+[rank1]:     model_data = torch.load(model_path, map_location=device)
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/serialization.py", line 1484, in load
+[rank1]:     with _open_file_like(f, "rb") as opened_file:
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/serialization.py", line 759, in _open_file_like
+[rank1]:     return _open_file(name_or_buffer, mode)
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/serialization.py", line 740, in __init__
+[rank1]:     super().__init__(open(name, mode))
+[rank1]: FileNotFoundError: [Errno 2] No such file or directory: '/home/jhu/xwang457/.cache/nanochat/base_checkpoints/d20-lf-k1-smoke/model_050000.pt'
+[rank3]: Traceback (most recent call last):
+[rank3]:   File "/home/jhu/xwang457/.local/share/uv/python/cpython-3.10.21-linux-x86_64-gnu/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+[rank3]:     return _run_code(code, main_globals, None,
+[rank3]:   File "/home/jhu/xwang457/.local/share/uv/python/cpython-3.10.21-linux-x86_64-gnu/lib/python3.10/runpy.py", line 86, in _run_code
+[rank3]:     exec(code, run_globals)
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/scripts/chat_sft.py", line 112, in <module>
+[rank3]:     model, tokenizer, meta = load_model("base", device, phase="train", model_tag=args.model_tag, step=args.model_step)
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/nanochat/checkpoint_manager.py", line 176, in load_model
+[rank3]:     return load_model_from_dir(checkpoints_dir, *args, **kwargs)
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/nanochat/checkpoint_manager.py", line 165, in load_model_from_dir
+[rank3]:     model, tokenizer, meta_data = build_model(checkpoint_dir, step, device, phase)
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/nanochat/checkpoint_manager.py", line 90, in build_model
+[rank3]:     model_data, optimizer_data, meta_data = load_checkpoint(checkpoint_dir, step, device, load_optimizer=False)
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/nanochat/checkpoint_manager.py", line 68, in load_checkpoint
+[rank3]:     model_data = torch.load(model_path, map_location=device)
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/serialization.py", line 1484, in load
+[rank3]:     with _open_file_like(f, "rb") as opened_file:
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/serialization.py", line 759, in _open_file_like
+[rank3]:     return _open_file(name_or_buffer, mode)
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/serialization.py", line 740, in __init__
+[rank3]:     super().__init__(open(name, mode))
+[rank3]: FileNotFoundError: [Errno 2] No such file or directory: '/home/jhu/xwang457/.cache/nanochat/base_checkpoints/d20-lf-k1-smoke/model_050000.pt'
+[rank0]: Traceback (most recent call last):
+[rank0]:   File "/home/jhu/xwang457/.local/share/uv/python/cpython-3.10.21-linux-x86_64-gnu/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+[rank0]:     return _run_code(code, main_globals, None,
+[rank0]:   File "/home/jhu/xwang457/.local/share/uv/python/cpython-3.10.21-linux-x86_64-gnu/lib/python3.10/runpy.py", line 86, in _run_code
+[rank0]:     exec(code, run_globals)
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/scripts/chat_sft.py", line 105, in <module>
+[rank0]:     wandb_run = DummyWandb() if use_dummy_wandb else wandb.init(project="nanochat-sft", name=args.run, config=user_config)
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/wandb/sdk/wandb_init.py", line 1581, in init
+[rank0]:     wandb._sentry.reraise(e)
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/wandb/analytics/sentry.py", line 162, in reraise
+[rank0]:     raise exc.with_traceback(sys.exc_info()[2])
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/wandb/sdk/wandb_init.py", line 1504, in init
+[rank0]:     wi.maybe_login(init_settings)
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/wandb/sdk/wandb_init.py", line 190, in maybe_login
+[rank0]:     wandb_login._login(
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/wandb/sdk/wandb_login.py", line 318, in _login
+[rank0]:     key, key_status = wlogin.prompt_api_key(referrer=referrer)
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/wandb/sdk/wandb_login.py", line 244, in prompt_api_key
+[rank0]:     raise UsageError("api_key not configured (no-tty). call " + directive)
+[rank0]: wandb.errors.errors.UsageError: api_key not configured (no-tty). call wandb.login(key=[your_api_key])
+[rank0]:[W827 16:36:12.843448736 ProcessGroupNCCL.cpp:1524] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+W0827 16:36:12.986000 181223 torch/distributed/elastic/multiprocessing/api.py:908] Sending process 181307 closing signal SIGTERM
+W0827 16:36:12.988000 181223 torch/distributed/elastic/multiprocessing/api.py:908] Sending process 181308 closing signal SIGTERM
+E0827 16:36:13.202000 181223 torch/distributed/elastic/multiprocessing/api.py:882] failed (exitcode: 1) local_rank: 0 (pid: 181306) of binary: /weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/bin/python3
+Traceback (most recent call last):
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/bin/torchrun", line 10, in <module>
+    sys.exit(main())
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 357, in wrapper
+    return f(*args, **kwargs)
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/distributed/run.py", line 936, in main
+    run(args)
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/distributed/run.py", line 927, in run
+    elastic_launch(
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 156, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 293, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+============================================================
+scripts.chat_sft FAILED
+------------------------------------------------------------
+Failures:
+[1]:
+  time      : 2026-08-27_16:36:12
+  host      : gh116.mgmt.ai.cluster
+  rank      : 3 (local_rank: 3)
+  exitcode  : 1 (pid: 181309)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2026-08-27_16:36:12
+  host      : gh116.mgmt.ai.cluster
+  rank      : 0 (local_rank: 0)
+  exitcode  : 1 (pid: 181306)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+============================================================
+srun: error: gh116: task 0: Exited with exit code 1

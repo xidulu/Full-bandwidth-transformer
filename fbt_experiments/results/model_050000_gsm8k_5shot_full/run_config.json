@@ -1,0 +1,121 @@
+{
+  "command": [
+    "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/bin/python",
+    "fbt_experiments/merge_gsm8k_shards.py",
+    "fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_00",
+    "fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_01",
+    "fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_02",
+    "fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_03",
+    "fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_04",
+    "fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_05",
+    "fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_06",
+    "fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_07",
+    "--output-dir",
+    "fbt_experiments/results/model_050000_gsm8k_5shot_full",
+    "--expected-count",
+    "1319"
+  ],
+  "merged_from_shards": true,
+  "source_shards": [
+    "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_00",
+    "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_01",
+    "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_02",
+    "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_03",
+    "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_04",
+    "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_05",
+    "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_06",
+    "/weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/model_050000_gsm8k_5shot_full_shards/shard_07"
+  ],
+  "checkpoint": "/weka/scratch/jhu/enalisn1/xiw/nanochat_cache/base_checkpoints/d16-lf-k1-smoke/model_050000.pt",
+  "checkpoint_size_bytes": 2676554524,
+  "matching_meta": "/weka/scratch/jhu/enalisn1/xiw/nanochat_cache/base_checkpoints/d16-lf-k1-smoke/meta_050000.json",
+  "nanochat_base_dir": "/weka/scratch/jhu/enalisn1/xiw/nanochat_cache",
+  "step": 50000,
+  "seed": 42,
+  "gsm8k_shots": 5,
+  "max_new_tokens": 192,
+  "modes": [
+    "standard",
+    "soft",
+    "fused"
+  ],
+  "gsm8k_start": 0,
+  "num_gsm8k": 1319,
+  "skip_continuation": true,
+  "skip_gsm8k": false,
+  "source_execution_environments": [
+    {
+      "device": "cuda",
+      "torch_version": "2.9.1+cu128",
+      "compute_dtype": "torch.bfloat16",
+      "compute_dtype_reason": "auto-detected: CUDA SM 80 (bf16 supported)",
+      "cuda_device": "NVIDIA A100-SXM4-80GB"
+    },
+    {
+      "device": "cuda",
+      "torch_version": "2.9.1+cu128",
+      "compute_dtype": "torch.bfloat16",
+      "compute_dtype_reason": "auto-detected: CUDA SM 80 (bf16 supported)",
+      "cuda_device": "NVIDIA A100-SXM4-80GB"
+    },
+    {
+      "device": "cuda",
+      "torch_version": "2.9.1+cu128",
+      "compute_dtype": "torch.bfloat16",
+      "compute_dtype_reason": "auto-detected: CUDA SM 80 (bf16 supported)",
+      "cuda_device": "NVIDIA A100-SXM4-80GB"
+    },
+    {
+      "device": "cuda",
+      "torch_version": "2.9.1+cu128",
+      "compute_dtype": "torch.bfloat16",
+      "compute_dtype_reason": "auto-detected: CUDA SM 80 (bf16 supported)",
+      "cuda_device": "NVIDIA A100-SXM4-80GB"
+    },
+    {
+      "device": "cuda",
+      "torch_version": "2.9.1+cu128",
+      "compute_dtype": "torch.bfloat16",
+      "compute_dtype_reason": "auto-detected: CUDA SM 80 (bf16 supported)",
+      "cuda_device": "NVIDIA A100-SXM4-80GB"
+    },
+    {
+      "device": "cuda",
+      "torch_version": "2.9.1+cu128",
+      "compute_dtype": "torch.bfloat16",
+      "compute_dtype_reason": "auto-detected: CUDA SM 80 (bf16 supported)",
+      "cuda_device": "NVIDIA A100-SXM4-80GB"
+    },
+    {
+      "device": "cuda",
+      "torch_version": "2.9.1+cu128",
+      "compute_dtype": "torch.bfloat16",
+      "compute_dtype_reason": "auto-detected: CUDA SM 80 (bf16 supported)",
+      "cuda_device": "NVIDIA A100-SXM4-80GB"
+    },
+    {
+      "device": "cuda",
+      "torch_version": "2.9.1+cu128",
+      "compute_dtype": "torch.bfloat16",
+      "compute_dtype_reason": "auto-detected: CUDA SM 80 (bf16 supported)",
+      "cuda_device": "NVIDIA A100-SXM4-80GB"
+    }
+  ],
+  "source_dataset": {
+    "path": "/weka/scratch/jhu/enalisn1/xiw/nanochat_cache/eval_bundle/eval_data/symbolic_problem_solving/gsm8k_prepended_8shot.jsonl",
+    "sha256": "c4b1b7378385b1c4e4862c0d0dde5eac5c986ff991db8eb53db9adf0f47199d6",
+    "size_bytes": 3650733,
+    "rows": 1319
+  },
+  "decoding": {
+    "num_samples": 1,
+    "temperature": 0.0,
+    "top_k": null,
+    "use_calculator": false,
+    "modes": [
+      "standard",
+      "soft",
+      "fused"
+    ]
+  }
+}

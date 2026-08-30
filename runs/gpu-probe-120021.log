@@ -1,0 +1,8 @@
+CVD=0
+GPU 0: NVIDIA H200 NVL (UUID: GPU-53f8489a-a8b0-6cef-8603-2017bba3670e)
+/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/cuda/__init__.py:182: UserWarning: CUDA initialization: CUDA unknown error - this may be due to an incorrectly set up environment, e.g. changing env variable CUDA_VISIBLE_DEVICES after program start. Setting the available devices to be zero. (Triggered internally at /pytorch/c10/cuda/CUDAFunctions.cpp:119.)
+  return torch._C._cuda_getDeviceCount() > 0
+CUDA_VISIBLE_DEVICES ''
+available False
+count 0
+name None

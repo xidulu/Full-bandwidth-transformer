@@ -1,0 +1,49 @@
+{
+  "command": [
+    "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/bin/python",
+    "fbt_experiments/evaluate_checkpoint.py",
+    "--checkpoint",
+    "/home/jhu/xwang457/work/nanochat_cache/chatsft_checkpoints/d20-lf-k3-openmath-train1m/model_000911.pt",
+    "--output-dir",
+    "fbt_experiments/results/d20_lf_k3_openmath_000911_gsm8k_5shot_full_shards/shard_05",
+    "--skip-continuation",
+    "--num-gsm8k",
+    "165",
+    "--gsm8k-start",
+    "825",
+    "--gsm8k-shots",
+    "5",
+    "--max-new-tokens",
+    "192"
+  ],
+  "checkpoint": "/weka/scratch/jhu/enalisn1/xiw/nanochat_cache/chatsft_checkpoints/d20-lf-k3-openmath-train1m/model_000911.pt",
+  "checkpoint_size_bytes": 2592668249,
+  "matching_meta": "/weka/scratch/jhu/enalisn1/xiw/nanochat_cache/chatsft_checkpoints/d20-lf-k3-openmath-train1m/meta_000911.json",
+  "nanochat_base_dir": "/weka/scratch/jhu/enalisn1/xiw/nanochat_cache",
+  "step": 911,
+  "device": "cuda",
+  "torch_version": "2.9.1+cu128",
+  "compute_dtype": "torch.bfloat16",
+  "compute_dtype_reason": "auto-detected: CUDA SM 90 (bf16 supported)",
+  "cuda_device": "NVIDIA H100 NVL",
+  "seed": 42,
+  "num_docs": 8,
+  "prefix_tokens": 64,
+  "continuation_tokens": 64,
+  "num_gsm8k": 165,
+  "gsm8k_start": 825,
+  "gsm8k_shots": 5,
+  "max_new_tokens": 192,
+  "core_max_per_task": 0,
+  "skip_continuation": true,
+  "skip_gsm8k": false,
+  "modes": [
+    "standard",
+    "soft",
+    "fused"
+  ],
+  "core_prefill_modes": [
+    "standard_prefill",
+    "fused_prefill"
+  ]
+}

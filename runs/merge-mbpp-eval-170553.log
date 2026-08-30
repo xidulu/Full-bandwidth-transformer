@@ -1,0 +1,8 @@
+{
+  "mbpp_full/standard": {
+    "passed": 56,
+    "total": 500,
+    "accuracy": 0.112
+  }
+}
+Wrote fbt_experiments/results/d20_lf_k3_stackedu_004407_mbpp_standard_sharded/metrics.json

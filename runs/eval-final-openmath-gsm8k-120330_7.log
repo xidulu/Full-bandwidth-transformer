@@ -1,0 +1,546 @@
+[BILLING] loaded!
+[BILLING] Re-emitting cost at job start!
+{
+  "command": [
+    "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/bin/python",
+    "fbt_experiments/evaluate_checkpoint.py",
+    "--checkpoint",
+    "/home/jhu/xwang457/work/nanochat_cache/chatsft_checkpoints/d20-lf-k3-openmath-train1m/model_000911.pt",
+    "--output-dir",
+    "fbt_experiments/results/d20_lf_k3_openmath_000911_gsm8k_5shot_full_shards/shard_07",
+    "--skip-continuation",
+    "--num-gsm8k",
+    "164",
+    "--gsm8k-start",
+    "1155",
+    "--gsm8k-shots",
+    "5",
+    "--max-new-tokens",
+    "192"
+  ],
+  "checkpoint": "/weka/scratch/jhu/enalisn1/xiw/nanochat_cache/chatsft_checkpoints/d20-lf-k3-openmath-train1m/model_000911.pt",
+  "checkpoint_size_bytes": 2592668249,
+  "matching_meta": "/weka/scratch/jhu/enalisn1/xiw/nanochat_cache/chatsft_checkpoints/d20-lf-k3-openmath-train1m/meta_000911.json",
+  "nanochat_base_dir": "/weka/scratch/jhu/enalisn1/xiw/nanochat_cache",
+  "step": 911,
+  "device": "cuda",
+  "torch_version": "2.9.1+cu128",
+  "compute_dtype": "torch.bfloat16",
+  "compute_dtype_reason": "auto-detected: CUDA SM 90 (bf16 supported)",
+  "cuda_device": "NVIDIA H100 NVL",
+  "seed": 42,
+  "num_docs": 8,
+  "prefix_tokens": 64,
+  "continuation_tokens": 64,
+  "num_gsm8k": 164,
+  "gsm8k_start": 1155,
+  "gsm8k_shots": 5,
+  "max_new_tokens": 192,
+  "core_max_per_task": 0,
+  "skip_continuation": true,
+  "skip_gsm8k": false,
+  "modes": [
+    "standard",
+    "soft",
+    "fused"
+  ],
+  "core_prefill_modes": [
+    "standard_prefill",
+    "fused_prefill"
+  ]
+}
+2026-08-27 17:39:25,516 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Building model with config: {'sequence_len': 2048, 'vocab_size': 32768, 'n_layer': 20, 'n_head': 10, 'n_kv_head': 10, 'n_embd': 1280, 'window_pattern': 'SSSL', 'latent_feedback': True, 'weight_tying': True}
+loaded model parameters=857,867,506
+gsm8k example=1/164 global_index=1155 mode=standard pred='13' ref='13' tokens=80 seconds=1.015
+gsm8k example=1/164 global_index=1155 mode=soft pred='13' ref='13' tokens=83 seconds=0.927
+gsm8k example=1/164 global_index=1155 mode=fused pred='18' ref='13' tokens=88 seconds=0.985
+gsm8k example=2/164 global_index=1156 mode=standard pred='0' ref='120' tokens=72 seconds=0.799
+gsm8k example=2/164 global_index=1156 mode=soft pred='20' ref='120' tokens=66 seconds=0.728
+gsm8k example=2/164 global_index=1156 mode=fused pred='20' ref='120' tokens=120 seconds=1.333
+gsm8k example=3/164 global_index=1157 mode=standard pred='6' ref='3' tokens=60 seconds=0.663
+gsm8k example=3/164 global_index=1157 mode=soft pred='6' ref='3' tokens=69 seconds=0.760
+gsm8k example=3/164 global_index=1157 mode=fused pred='9' ref='3' tokens=44 seconds=0.495
+gsm8k example=4/164 global_index=1158 mode=standard pred='3360' ref='7300' tokens=112 seconds=1.241
+gsm8k example=4/164 global_index=1158 mode=soft pred='10' ref='7300' tokens=160 seconds=1.776
+gsm8k example=4/164 global_index=1158 mode=fused pred='0.18' ref='7300' tokens=192 seconds=2.137
+gsm8k example=5/164 global_index=1159 mode=standard pred='1' ref='50' tokens=63 seconds=0.688
+gsm8k example=5/164 global_index=1159 mode=soft pred='25' ref='50' tokens=108 seconds=1.200
+gsm8k example=5/164 global_index=1159 mode=fused pred='25' ref='50' tokens=108 seconds=1.210
+gsm8k example=6/164 global_index=1160 mode=standard pred='1239' ref='1125' tokens=79 seconds=0.879
+gsm8k example=6/164 global_index=1160 mode=soft pred='2136' ref='1125' tokens=192 seconds=2.127
+gsm8k example=6/164 global_index=1160 mode=fused pred='5168' ref='1125' tokens=112 seconds=1.246
+gsm8k example=7/164 global_index=1161 mode=standard pred='80' ref='170' tokens=117 seconds=1.295
+gsm8k example=7/164 global_index=1161 mode=soft pred='60' ref='170' tokens=120 seconds=1.331
+gsm8k example=7/164 global_index=1161 mode=fused pred='180' ref='170' tokens=139 seconds=1.552
+gsm8k example=8/164 global_index=1162 mode=standard pred='3' ref='3' tokens=52 seconds=0.577
+gsm8k example=8/164 global_index=1162 mode=soft pred='3' ref='3' tokens=52 seconds=0.572
+gsm8k example=8/164 global_index=1162 mode=fused pred='3' ref='3' tokens=52 seconds=0.584
+gsm8k example=9/164 global_index=1163 mode=standard pred='4' ref='12' tokens=69 seconds=0.758
+gsm8k example=9/164 global_index=1163 mode=soft pred='8' ref='12' tokens=69 seconds=0.759
+gsm8k example=9/164 global_index=1163 mode=fused pred='6' ref='12' tokens=43 seconds=0.485
+gsm8k example=10/164 global_index=1164 mode=standard pred='27' ref='9' tokens=123 seconds=1.360
+gsm8k example=10/164 global_index=1164 mode=soft pred='59' ref='9' tokens=152 seconds=1.688
+gsm8k example=10/164 global_index=1164 mode=fused pred='59' ref='9' tokens=151 seconds=1.684
+gsm8k example=11/164 global_index=1165 mode=standard pred='240' ref='1248' tokens=51 seconds=0.558
+gsm8k example=11/164 global_index=1165 mode=soft pred='240' ref='1248' tokens=57 seconds=0.627
+gsm8k example=11/164 global_index=1165 mode=fused pred='5400' ref='1248' tokens=84 seconds=0.936
+gsm8k example=12/164 global_index=1166 mode=standard pred='168000' ref='2350' tokens=192 seconds=2.121
+gsm8k example=12/164 global_index=1166 mode=soft pred='3050' ref='2350' tokens=186 seconds=2.057
+gsm8k example=12/164 global_index=1166 mode=fused pred='4200' ref='2350' tokens=192 seconds=2.138
+gsm8k example=13/164 global_index=1167 mode=standard pred='120' ref='120' tokens=49 seconds=0.539
+gsm8k example=13/164 global_index=1167 mode=soft pred='120' ref='120' tokens=48 seconds=0.529
+gsm8k example=13/164 global_index=1167 mode=fused pred='80' ref='120' tokens=54 seconds=0.607
+gsm8k example=14/164 global_index=1168 mode=standard pred='35' ref='20' tokens=98 seconds=1.076
+gsm8k example=14/164 global_index=1168 mode=soft pred='32' ref='20' tokens=98 seconds=1.079
+gsm8k example=14/164 global_index=1168 mode=fused pred='32' ref='20' tokens=98 seconds=1.092
+gsm8k example=15/164 global_index=1169 mode=standard pred='0' ref='2' tokens=52 seconds=0.574
+gsm8k example=15/164 global_index=1169 mode=soft pred='0' ref='2' tokens=51 seconds=0.563
+gsm8k example=15/164 global_index=1169 mode=fused pred='4' ref='2' tokens=75 seconds=0.850
+gsm8k example=16/164 global_index=1170 mode=standard pred='10' ref='2' tokens=64 seconds=0.704
+gsm8k example=16/164 global_index=1170 mode=soft pred='10' ref='2' tokens=76 seconds=0.854
+gsm8k example=16/164 global_index=1170 mode=fused pred='3' ref='2' tokens=66 seconds=0.742
+gsm8k example=17/164 global_index=1171 mode=standard pred='760' ref='3160' tokens=49 seconds=0.545
+gsm8k example=17/164 global_index=1171 mode=soft pred='200' ref='3160' tokens=66 seconds=0.731
+gsm8k example=17/164 global_index=1171 mode=fused pred='2200' ref='3160' tokens=79 seconds=0.897
+gsm8k example=18/164 global_index=1172 mode=standard pred='48' ref='93' tokens=115 seconds=1.270
+gsm8k example=18/164 global_index=1172 mode=soft pred='48' ref='93' tokens=106 seconds=1.174
+gsm8k example=18/164 global_index=1172 mode=fused pred='93' ref='93' tokens=174 seconds=1.948
+gsm8k example=19/164 global_index=1173 mode=standard pred='120' ref='10' tokens=58 seconds=0.642
+gsm8k example=19/164 global_index=1173 mode=soft pred='120' ref='10' tokens=82 seconds=0.909
+gsm8k example=19/164 global_index=1173 mode=fused pred='83' ref='10' tokens=117 seconds=1.307
+gsm8k example=20/164 global_index=1174 mode=standard pred='60' ref='240' tokens=108 seconds=1.204
+gsm8k example=20/164 global_index=1174 mode=soft pred='5' ref='240' tokens=81 seconds=0.896
+gsm8k example=20/164 global_index=1174 mode=fused pred='5' ref='240' tokens=89 seconds=1.008
+gsm8k example=21/164 global_index=1175 mode=standard pred='84' ref='16' tokens=104 seconds=1.148
+gsm8k example=21/164 global_index=1175 mode=soft pred='36' ref='16' tokens=112 seconds=1.252
+gsm8k example=21/164 global_index=1175 mode=fused pred='30' ref='16' tokens=180 seconds=2.015
+gsm8k example=22/164 global_index=1176 mode=standard pred='2' ref='2' tokens=97 seconds=1.063
+gsm8k example=22/164 global_index=1176 mode=soft pred='3' ref='2' tokens=118 seconds=1.298
+gsm8k example=22/164 global_index=1176 mode=fused pred='2' ref='2' tokens=105 seconds=1.165
+gsm8k example=23/164 global_index=1177 mode=standard pred='7' ref='17' tokens=51 seconds=0.564
+gsm8k example=23/164 global_index=1177 mode=soft pred='31' ref='17' tokens=86 seconds=0.954
+gsm8k example=23/164 global_index=1177 mode=fused pred='7' ref='17' tokens=49 seconds=0.556
+gsm8k example=24/164 global_index=1178 mode=standard pred='17' ref='17' tokens=64 seconds=0.707
+gsm8k example=24/164 global_index=1178 mode=soft pred='17' ref='17' tokens=63 seconds=0.697
+gsm8k example=24/164 global_index=1178 mode=fused pred='17' ref='17' tokens=63 seconds=0.710
+gsm8k example=25/164 global_index=1179 mode=standard pred='11' ref='50' tokens=48 seconds=0.533
+gsm8k example=25/164 global_index=1179 mode=soft pred='11' ref='50' tokens=57 seconds=0.631
+gsm8k example=25/164 global_index=1179 mode=fused pred='11' ref='50' tokens=57 seconds=0.643
+gsm8k example=26/164 global_index=1180 mode=standard pred='5400' ref='5600' tokens=85 seconds=0.941
+gsm8k example=26/164 global_index=1180 mode=soft pred='5400' ref='5600' tokens=83 seconds=0.917
+gsm8k example=26/164 global_index=1180 mode=fused pred='0' ref='5600' tokens=93 seconds=1.052
+gsm8k example=27/164 global_index=1181 mode=standard pred='25' ref='20' tokens=105 seconds=1.150
+gsm8k example=27/164 global_index=1181 mode=soft pred='8' ref='20' tokens=138 seconds=1.538
+gsm8k example=27/164 global_index=1181 mode=fused pred='33.33' ref='20' tokens=86 seconds=0.965
+gsm8k example=28/164 global_index=1182 mode=standard pred='300' ref='1800' tokens=38 seconds=0.417
+gsm8k example=28/164 global_index=1182 mode=soft pred='300' ref='1800' tokens=38 seconds=0.421
+gsm8k example=28/164 global_index=1182 mode=fused pred='54' ref='1800' tokens=45 seconds=0.511
+gsm8k example=29/164 global_index=1183 mode=standard pred='1' ref='11' tokens=192 seconds=2.110
+gsm8k example=29/164 global_index=1183 mode=soft pred='1' ref='11' tokens=192 seconds=2.118
+gsm8k example=29/164 global_index=1183 mode=fused pred='1' ref='11' tokens=192 seconds=2.131
+gsm8k example=30/164 global_index=1184 mode=standard pred='15300' ref='306' tokens=45 seconds=0.498
+gsm8k example=30/164 global_index=1184 mode=soft pred='15300' ref='306' tokens=45 seconds=0.498
+gsm8k example=30/164 global_index=1184 mode=fused pred='15300' ref='306' tokens=56 seconds=0.642
+gsm8k example=31/164 global_index=1185 mode=standard pred='28' ref='6' tokens=43 seconds=0.478
+gsm8k example=31/164 global_index=1185 mode=soft pred='3' ref='6' tokens=50 seconds=0.553
+gsm8k example=31/164 global_index=1185 mode=fused pred='72' ref='6' tokens=42 seconds=0.476
+gsm8k example=32/164 global_index=1186 mode=standard pred='13' ref='19' tokens=48 seconds=0.525
+gsm8k example=32/164 global_index=1186 mode=soft pred='14' ref='19' tokens=56 seconds=0.619
+gsm8k example=32/164 global_index=1186 mode=fused pred='19' ref='19' tokens=93 seconds=1.040
+gsm8k example=33/164 global_index=1187 mode=standard pred='60' ref='5' tokens=66 seconds=0.723
+gsm8k example=33/164 global_index=1187 mode=soft pred='60' ref='5' tokens=120 seconds=1.328
+gsm8k example=33/164 global_index=1187 mode=fused pred='60' ref='5' tokens=120 seconds=1.340
+gsm8k example=34/164 global_index=1188 mode=standard pred='2' ref='24' tokens=53 seconds=0.581
+gsm8k example=34/164 global_index=1188 mode=soft pred='30' ref='24' tokens=62 seconds=0.686
+gsm8k example=34/164 global_index=1188 mode=fused pred='28' ref='24' tokens=192 seconds=2.146
+gsm8k example=35/164 global_index=1189 mode=standard pred='3' ref='6' tokens=65 seconds=0.717
+gsm8k example=35/164 global_index=1189 mode=soft pred='3' ref='6' tokens=65 seconds=0.720
+gsm8k example=35/164 global_index=1189 mode=fused pred='3' ref='6' tokens=66 seconds=0.742
+gsm8k example=36/164 global_index=1190 mode=standard pred='210' ref='19' tokens=113 seconds=1.247
+gsm8k example=36/164 global_index=1190 mode=soft pred='100' ref='19' tokens=94 seconds=1.041
+gsm8k example=36/164 global_index=1190 mode=fused pred='124' ref='19' tokens=93 seconds=1.042
+gsm8k example=37/164 global_index=1191 mode=standard pred='60' ref='100' tokens=44 seconds=0.483
+gsm8k example=37/164 global_index=1191 mode=soft pred='100' ref='100' tokens=87 seconds=0.963
+gsm8k example=37/164 global_index=1191 mode=fused pred='70' ref='100' tokens=82 seconds=0.919
+gsm8k example=38/164 global_index=1192 mode=standard pred='77.5' ref='280' tokens=86 seconds=0.945
+gsm8k example=38/164 global_index=1192 mode=soft pred='100.625' ref='280' tokens=153 seconds=1.703
+gsm8k example=38/164 global_index=1192 mode=fused pred='77.5' ref='280' tokens=97 seconds=1.085
+gsm8k example=39/164 global_index=1193 mode=standard pred='8.25' ref='9' tokens=103 seconds=1.148
+gsm8k example=39/164 global_index=1193 mode=soft pred='6' ref='9' tokens=122 seconds=1.352
+gsm8k example=39/164 global_index=1193 mode=fused pred='13.5' ref='9' tokens=107 seconds=1.198
+gsm8k example=40/164 global_index=1194 mode=standard pred='1200' ref='1200' tokens=62 seconds=0.688
+gsm8k example=40/164 global_index=1194 mode=soft pred='1200' ref='1200' tokens=62 seconds=0.686
+gsm8k example=40/164 global_index=1194 mode=fused pred='1200' ref='1200' tokens=73 seconds=0.831
+gsm8k example=41/164 global_index=1195 mode=standard pred='160' ref='320' tokens=75 seconds=0.822
+gsm8k example=41/164 global_index=1195 mode=soft pred='110' ref='320' tokens=192 seconds=2.120
+gsm8k example=41/164 global_index=1195 mode=fused pred='280' ref='320' tokens=72 seconds=0.802
+gsm8k example=42/164 global_index=1196 mode=standard pred='75' ref='75' tokens=76 seconds=0.838
+gsm8k example=42/164 global_index=1196 mode=soft pred='75' ref='75' tokens=78 seconds=0.864
+gsm8k example=42/164 global_index=1196 mode=fused pred='75' ref='75' tokens=77 seconds=0.864
+gsm8k example=43/164 global_index=1197 mode=standard pred='25' ref='2400' tokens=48 seconds=0.532
+gsm8k example=43/164 global_index=1197 mode=soft pred='25' ref='2400' tokens=63 seconds=0.697
+gsm8k example=43/164 global_index=1197 mode=fused pred='780' ref='2400' tokens=159 seconds=1.783
+gsm8k example=44/164 global_index=1198 mode=standard pred='60' ref='140' tokens=73 seconds=0.807
+gsm8k example=44/164 global_index=1198 mode=soft pred='60' ref='140' tokens=69 seconds=0.764
+gsm8k example=44/164 global_index=1198 mode=fused pred='140' ref='140' tokens=192 seconds=2.146
+gsm8k example=45/164 global_index=1199 mode=standard pred='1' ref='2' tokens=153 seconds=1.670
+gsm8k example=45/164 global_index=1199 mode=soft pred='10' ref='2' tokens=85 seconds=0.933
+gsm8k example=45/164 global_index=1199 mode=fused pred='9' ref='2' tokens=160 seconds=1.778
+gsm8k example=46/164 global_index=1200 mode=standard pred='40' ref='8' tokens=58 seconds=0.637
+gsm8k example=46/164 global_index=1200 mode=soft pred='48' ref='8' tokens=61 seconds=0.676
+gsm8k example=46/164 global_index=1200 mode=fused pred='48' ref='8' tokens=61 seconds=0.687
+gsm8k example=47/164 global_index=1201 mode=standard pred='44' ref='42' tokens=51 seconds=0.565
+gsm8k example=47/164 global_index=1201 mode=soft pred='5' ref='42' tokens=112 seconds=1.240
+gsm8k example=47/164 global_index=1201 mode=fused pred='42' ref='42' tokens=98 seconds=1.098
+gsm8k example=48/164 global_index=1202 mode=standard pred='0' ref='19' tokens=68 seconds=0.751
+gsm8k example=48/164 global_index=1202 mode=soft pred='4' ref='19' tokens=64 seconds=0.707
+gsm8k example=48/164 global_index=1202 mode=fused pred='3' ref='19' tokens=93 seconds=1.039
+gsm8k example=49/164 global_index=1203 mode=standard pred='840' ref='240' tokens=94 seconds=1.040
+gsm8k example=49/164 global_index=1203 mode=soft pred='2840' ref='240' tokens=78 seconds=0.865
+gsm8k example=49/164 global_index=1203 mode=fused pred='180' ref='240' tokens=88 seconds=0.987
+gsm8k example=50/164 global_index=1204 mode=standard pred='168' ref='168' tokens=128 seconds=1.411
+gsm8k example=50/164 global_index=1204 mode=soft pred='0' ref='168' tokens=152 seconds=1.694
+gsm8k example=50/164 global_index=1204 mode=fused pred='168' ref='168' tokens=145 seconds=1.628
+gsm8k example=51/164 global_index=1205 mode=standard pred='8' ref='4' tokens=70 seconds=0.775
+gsm8k example=51/164 global_index=1205 mode=soft pred='6' ref='4' tokens=60 seconds=0.665
+gsm8k example=51/164 global_index=1205 mode=fused pred='3' ref='4' tokens=100 seconds=1.116
+gsm8k example=52/164 global_index=1206 mode=standard pred='40000' ref='40000' tokens=135 seconds=1.500
+gsm8k example=52/164 global_index=1206 mode=soft pred='40000' ref='40000' tokens=139 seconds=1.548
+gsm8k example=52/164 global_index=1206 mode=fused pred='40000' ref='40000' tokens=133 seconds=1.492
+gsm8k example=53/164 global_index=1207 mode=standard pred='183' ref='64' tokens=79 seconds=0.879
+gsm8k example=53/164 global_index=1207 mode=soft pred='63' ref='64' tokens=104 seconds=1.162
+gsm8k example=53/164 global_index=1207 mode=fused pred='63' ref='64' tokens=111 seconds=1.252
+gsm8k example=54/164 global_index=1208 mode=standard pred='7.5' ref='27' tokens=57 seconds=0.625
+gsm8k example=54/164 global_index=1208 mode=soft pred='8' ref='27' tokens=60 seconds=0.665
+gsm8k example=54/164 global_index=1208 mode=fused pred='13.5' ref='27' tokens=57 seconds=0.644
+gsm8k example=55/164 global_index=1209 mode=standard pred='21' ref='29' tokens=169 seconds=1.856
+gsm8k example=55/164 global_index=1209 mode=soft pred='21' ref='29' tokens=169 seconds=1.869
+gsm8k example=55/164 global_index=1209 mode=fused pred='19' ref='29' tokens=93 seconds=1.045
+gsm8k example=56/164 global_index=1210 mode=standard pred='288' ref='288' tokens=54 seconds=0.592
+gsm8k example=56/164 global_index=1210 mode=soft pred='288' ref='288' tokens=54 seconds=0.597
+gsm8k example=56/164 global_index=1210 mode=fused pred='288' ref='288' tokens=54 seconds=0.608
+gsm8k example=57/164 global_index=1211 mode=standard pred='56' ref='448' tokens=48 seconds=0.527
+gsm8k example=57/164 global_index=1211 mode=soft pred='56' ref='448' tokens=48 seconds=0.531
+gsm8k example=57/164 global_index=1211 mode=fused pred='56' ref='448' tokens=55 seconds=0.620
+gsm8k example=58/164 global_index=1212 mode=standard pred='30' ref='150' tokens=84 seconds=0.924
+gsm8k example=58/164 global_index=1212 mode=soft pred='360' ref='150' tokens=59 seconds=0.653
+gsm8k example=58/164 global_index=1212 mode=fused pred='135' ref='150' tokens=77 seconds=0.875
+gsm8k example=59/164 global_index=1213 mode=standard pred='306' ref='31' tokens=99 seconds=1.105
+gsm8k example=59/164 global_index=1213 mode=soft pred='306' ref='31' tokens=99 seconds=1.106
+gsm8k example=59/164 global_index=1213 mode=fused pred='306' ref='31' tokens=89 seconds=1.008
+gsm8k example=60/164 global_index=1214 mode=standard pred='7' ref='5' tokens=26 seconds=0.285
+gsm8k example=60/164 global_index=1214 mode=soft pred='5' ref='5' tokens=44 seconds=0.486
+gsm8k example=60/164 global_index=1214 mode=fused pred='3' ref='5' tokens=72 seconds=0.807
+gsm8k example=61/164 global_index=1215 mode=standard pred='2666.67' ref='36' tokens=192 seconds=2.124
+gsm8k example=61/164 global_index=1215 mode=soft pred='900' ref='36' tokens=110 seconds=1.228
+gsm8k example=61/164 global_index=1215 mode=fused pred='270' ref='36' tokens=58 seconds=0.655
+gsm8k example=62/164 global_index=1216 mode=standard pred='55' ref='20' tokens=37 seconds=0.407
+gsm8k example=62/164 global_index=1216 mode=soft pred='20' ref='20' tokens=161 seconds=1.778
+gsm8k example=62/164 global_index=1216 mode=fused pred='190' ref='20' tokens=99 seconds=1.118
+gsm8k example=63/164 global_index=1217 mode=standard pred='36' ref='75' tokens=115 seconds=1.279
+gsm8k example=63/164 global_index=1217 mode=soft pred='25' ref='75' tokens=110 seconds=1.229
+gsm8k example=63/164 global_index=1217 mode=fused pred='25' ref='75' tokens=109 seconds=1.229
+gsm8k example=64/164 global_index=1218 mode=standard pred='440' ref='225' tokens=112 seconds=1.248
+gsm8k example=64/164 global_index=1218 mode=soft pred='442' ref='225' tokens=148 seconds=1.647
+gsm8k example=64/164 global_index=1218 mode=fused pred='9' ref='225' tokens=153 seconds=1.714
+gsm8k example=65/164 global_index=1219 mode=standard pred='100' ref='100' tokens=69 seconds=0.756
+gsm8k example=65/164 global_index=1219 mode=soft pred='9' ref='100' tokens=45 seconds=0.499
+gsm8k example=65/164 global_index=1219 mode=fused pred='100' ref='100' tokens=72 seconds=0.809
+gsm8k example=66/164 global_index=1220 mode=standard pred='40' ref='32' tokens=41 seconds=0.455
+gsm8k example=66/164 global_index=1220 mode=soft pred='160' ref='32' tokens=41 seconds=0.455
+gsm8k example=66/164 global_index=1220 mode=fused pred='160' ref='32' tokens=41 seconds=0.465
+gsm8k example=67/164 global_index=1221 mode=standard pred='5' ref='10' tokens=42 seconds=0.466
+gsm8k example=67/164 global_index=1221 mode=soft pred='2560' ref='10' tokens=77 seconds=0.850
+gsm8k example=67/164 global_index=1221 mode=fused pred='10' ref='10' tokens=75 seconds=0.842
+gsm8k example=68/164 global_index=1222 mode=standard pred='87.5' ref='350' tokens=54 seconds=0.592
+gsm8k example=68/164 global_index=1222 mode=soft pred='350' ref='350' tokens=74 seconds=0.830
+gsm8k example=68/164 global_index=1222 mode=fused pred='87.5' ref='350' tokens=54 seconds=0.610
+gsm8k example=69/164 global_index=1223 mode=standard pred='7.2' ref='8' tokens=64 seconds=0.703
+gsm8k example=69/164 global_index=1223 mode=soft pred='7.2' ref='8' tokens=64 seconds=0.709
+gsm8k example=69/164 global_index=1223 mode=fused pred='7.2' ref='8' tokens=64 seconds=0.720
+gsm8k example=70/164 global_index=1224 mode=standard pred='5' ref='5' tokens=54 seconds=0.597
+gsm8k example=70/164 global_index=1224 mode=soft pred='5' ref='5' tokens=62 seconds=0.686
+gsm8k example=70/164 global_index=1224 mode=fused pred='5' ref='5' tokens=51 seconds=0.576
+gsm8k example=71/164 global_index=1225 mode=standard pred='8' ref='3' tokens=79 seconds=0.870
+gsm8k example=71/164 global_index=1225 mode=soft pred='4' ref='3' tokens=90 seconds=0.996
+gsm8k example=71/164 global_index=1225 mode=fused pred='4' ref='3' tokens=91 seconds=1.018
+gsm8k example=72/164 global_index=1226 mode=standard pred='41' ref='90' tokens=62 seconds=0.683
+gsm8k example=72/164 global_index=1226 mode=soft pred='90' ref='90' tokens=86 seconds=0.952
+gsm8k example=72/164 global_index=1226 mode=fused pred='35' ref='90' tokens=85 seconds=0.963
+gsm8k example=73/164 global_index=1227 mode=standard pred='24' ref='66' tokens=50 seconds=0.550
+gsm8k example=73/164 global_index=1227 mode=soft pred='24' ref='66' tokens=58 seconds=0.642
+gsm8k example=73/164 global_index=1227 mode=fused pred='30' ref='66' tokens=54 seconds=0.609
+gsm8k example=74/164 global_index=1228 mode=standard pred='27' ref='31' tokens=60 seconds=0.658
+gsm8k example=74/164 global_index=1228 mode=soft pred='8' ref='31' tokens=192 seconds=2.137
+gsm8k example=74/164 global_index=1228 mode=fused pred='8' ref='31' tokens=53 seconds=0.598
+gsm8k example=75/164 global_index=1229 mode=standard pred='72' ref='36' tokens=64 seconds=0.702
+gsm8k example=75/164 global_index=1229 mode=soft pred='16' ref='36' tokens=114 seconds=1.262
+gsm8k example=75/164 global_index=1229 mode=fused pred='36' ref='36' tokens=99 seconds=1.108
+gsm8k example=76/164 global_index=1230 mode=standard pred='480' ref='440' tokens=54 seconds=0.598
+gsm8k example=76/164 global_index=1230 mode=soft pred='480' ref='440' tokens=85 seconds=0.941
+gsm8k example=76/164 global_index=1230 mode=fused pred='176' ref='440' tokens=53 seconds=0.598
+gsm8k example=77/164 global_index=1231 mode=standard pred='630' ref='70' tokens=192 seconds=2.116
+gsm8k example=77/164 global_index=1231 mode=soft pred='630' ref='70' tokens=192 seconds=2.134
+gsm8k example=77/164 global_index=1231 mode=fused pred='630' ref='70' tokens=192 seconds=2.145
+gsm8k example=78/164 global_index=1232 mode=standard pred='5' ref='15' tokens=51 seconds=0.565
+gsm8k example=78/164 global_index=1232 mode=soft pred='5' ref='15' tokens=56 seconds=0.620
+gsm8k example=78/164 global_index=1232 mode=fused pred='5' ref='15' tokens=66 seconds=0.742
+gsm8k example=79/164 global_index=1233 mode=standard pred='24' ref='81' tokens=139 seconds=1.523
+gsm8k example=79/164 global_index=1233 mode=soft pred='27' ref='81' tokens=122 seconds=1.345
+gsm8k example=79/164 global_index=1233 mode=fused pred='81' ref='81' tokens=149 seconds=1.667
+gsm8k example=80/164 global_index=1234 mode=standard pred='3' ref='12' tokens=81 seconds=0.886
+gsm8k example=80/164 global_index=1234 mode=soft pred='6' ref='12' tokens=67 seconds=0.741
+gsm8k example=80/164 global_index=1234 mode=fused pred='6' ref='12' tokens=76 seconds=0.852
+gsm8k example=81/164 global_index=1235 mode=standard pred='7.5' ref='60' tokens=161 seconds=1.784
+gsm8k example=81/164 global_index=1235 mode=soft pred='60' ref='60' tokens=146 seconds=1.624
+gsm8k example=81/164 global_index=1235 mode=fused pred='1.25' ref='60' tokens=152 seconds=1.703
+gsm8k example=82/164 global_index=1236 mode=standard pred='18' ref='84' tokens=68 seconds=0.747
+gsm8k example=82/164 global_index=1236 mode=soft pred='18' ref='84' tokens=70 seconds=0.774
+gsm8k example=82/164 global_index=1236 mode=fused pred='0' ref='84' tokens=62 seconds=0.697
+gsm8k example=83/164 global_index=1237 mode=standard pred='67' ref='78' tokens=33 seconds=0.362
+gsm8k example=83/164 global_index=1237 mode=soft pred='67' ref='78' tokens=33 seconds=0.366
+gsm8k example=83/164 global_index=1237 mode=fused pred='67' ref='78' tokens=38 seconds=0.433
+gsm8k example=84/164 global_index=1238 mode=standard pred='312' ref='520' tokens=111 seconds=1.220
+gsm8k example=84/164 global_index=1238 mode=soft pred='312' ref='520' tokens=113 seconds=1.248
+gsm8k example=84/164 global_index=1238 mode=fused pred='312' ref='520' tokens=121 seconds=1.360
+gsm8k example=85/164 global_index=1239 mode=standard pred='0.084' ref='50' tokens=97 seconds=1.064
+gsm8k example=85/164 global_index=1239 mode=soft pred='0.4' ref='50' tokens=87 seconds=0.961
+gsm8k example=85/164 global_index=1239 mode=fused pred='0.064' ref='50' tokens=118 seconds=1.315
+gsm8k example=86/164 global_index=1240 mode=standard pred='9' ref='2' tokens=109 seconds=1.197
+gsm8k example=86/164 global_index=1240 mode=soft pred='3' ref='2' tokens=135 seconds=1.491
+gsm8k example=86/164 global_index=1240 mode=fused pred='50' ref='2' tokens=98 seconds=1.096
+gsm8k example=87/164 global_index=1241 mode=standard pred='57' ref='8' tokens=57 seconds=0.626
+gsm8k example=87/164 global_index=1241 mode=soft pred='58.6' ref='8' tokens=65 seconds=0.719
+gsm8k example=87/164 global_index=1241 mode=fused pred='58.6' ref='8' tokens=65 seconds=0.731
+gsm8k example=88/164 global_index=1242 mode=standard pred='50.6' ref='20' tokens=192 seconds=2.120
+gsm8k example=88/164 global_index=1242 mode=soft pred='60' ref='20' tokens=192 seconds=2.133
+gsm8k example=88/164 global_index=1242 mode=fused pred='40' ref='20' tokens=170 seconds=1.902
+gsm8k example=89/164 global_index=1243 mode=standard pred='1' ref='50' tokens=166 seconds=1.827
+gsm8k example=89/164 global_index=1243 mode=soft pred='1.67' ref='50' tokens=97 seconds=1.076
+gsm8k example=89/164 global_index=1243 mode=fused pred='5' ref='50' tokens=99 seconds=1.107
+gsm8k example=90/164 global_index=1244 mode=standard pred='49' ref='35' tokens=49 seconds=0.543
+gsm8k example=90/164 global_index=1244 mode=soft pred='49' ref='35' tokens=49 seconds=0.543
+gsm8k example=90/164 global_index=1244 mode=fused pred='49' ref='35' tokens=49 seconds=0.554
+gsm8k example=91/164 global_index=1245 mode=standard pred='112' ref='96' tokens=41 seconds=0.451
+gsm8k example=91/164 global_index=1245 mode=soft pred='86' ref='96' tokens=135 seconds=1.505
+gsm8k example=91/164 global_index=1245 mode=fused pred='20' ref='96' tokens=192 seconds=2.149
+gsm8k example=92/164 global_index=1246 mode=standard pred='3360' ref='3360' tokens=64 seconds=0.702
+gsm8k example=92/164 global_index=1246 mode=soft pred='3360' ref='3360' tokens=64 seconds=0.709
+gsm8k example=92/164 global_index=1246 mode=fused pred='3360' ref='3360' tokens=78 seconds=0.887
+gsm8k example=93/164 global_index=1247 mode=standard pred='5' ref='7' tokens=59 seconds=0.653
+gsm8k example=93/164 global_index=1247 mode=soft pred='5' ref='7' tokens=91 seconds=1.007
+gsm8k example=93/164 global_index=1247 mode=fused pred='2' ref='7' tokens=68 seconds=0.764
+gsm8k example=94/164 global_index=1248 mode=standard pred='15' ref='750' tokens=56 seconds=0.620
+gsm8k example=94/164 global_index=1248 mode=soft pred='15' ref='750' tokens=83 seconds=0.918
+gsm8k example=94/164 global_index=1248 mode=fused pred='15' ref='750' tokens=67 seconds=0.753
+gsm8k example=95/164 global_index=1249 mode=standard pred='128' ref='56' tokens=64 seconds=0.703
+gsm8k example=95/164 global_index=1249 mode=soft pred='64' ref='56' tokens=124 seconds=1.385
+gsm8k example=95/164 global_index=1249 mode=fused pred='36' ref='56' tokens=138 seconds=1.552
+gsm8k example=96/164 global_index=1250 mode=standard pred='22' ref='22' tokens=66 seconds=0.734
+gsm8k example=96/164 global_index=1250 mode=soft pred='22' ref='22' tokens=52 seconds=0.576
+gsm8k example=96/164 global_index=1250 mode=fused pred='22' ref='22' tokens=54 seconds=0.610
+gsm8k example=97/164 global_index=1251 mode=standard pred='20' ref='30' tokens=80 seconds=0.878
+gsm8k example=97/164 global_index=1251 mode=soft pred='1' ref='30' tokens=192 seconds=2.134
+gsm8k example=97/164 global_index=1251 mode=fused pred='17.5' ref='30' tokens=93 seconds=1.042
+gsm8k example=98/164 global_index=1252 mode=standard pred='20' ref='70' tokens=70 seconds=0.779
+gsm8k example=98/164 global_index=1252 mode=soft pred='20' ref='70' tokens=71 seconds=0.799
+gsm8k example=98/164 global_index=1252 mode=fused pred='40' ref='70' tokens=80 seconds=0.911
+gsm8k example=99/164 global_index=1253 mode=standard pred='15' ref='120' tokens=192 seconds=2.120
+gsm8k example=99/164 global_index=1253 mode=soft pred='15' ref='120' tokens=192 seconds=2.141
+gsm8k example=99/164 global_index=1253 mode=fused pred='60' ref='120' tokens=192 seconds=2.153
+gsm8k example=100/164 global_index=1254 mode=standard pred='6' ref='30' tokens=75 seconds=0.829
+gsm8k example=100/164 global_index=1254 mode=soft pred='6' ref='30' tokens=64 seconds=0.709
+gsm8k example=100/164 global_index=1254 mode=fused pred='72' ref='30' tokens=50 seconds=0.566
+gsm8k example=101/164 global_index=1255 mode=standard pred='8' ref='12' tokens=75 seconds=0.826
+gsm8k example=101/164 global_index=1255 mode=soft pred='8' ref='12' tokens=87 seconds=0.976
+gsm8k example=101/164 global_index=1255 mode=fused pred='8' ref='12' tokens=85 seconds=0.965
+gsm8k example=102/164 global_index=1256 mode=standard pred='10' ref='15' tokens=53 seconds=0.588
+gsm8k example=102/164 global_index=1256 mode=soft pred='20' ref='15' tokens=108 seconds=1.195
+gsm8k example=102/164 global_index=1256 mode=fused pred='5' ref='15' tokens=76 seconds=0.864
+gsm8k example=103/164 global_index=1257 mode=standard pred='14' ref='14' tokens=51 seconds=0.566
+gsm8k example=103/164 global_index=1257 mode=soft pred='14' ref='14' tokens=50 seconds=0.553
+gsm8k example=103/164 global_index=1257 mode=fused pred='14' ref='14' tokens=47 seconds=0.532
+gsm8k example=104/164 global_index=1258 mode=standard pred='30' ref='60' tokens=51 seconds=0.559
+gsm8k example=104/164 global_index=1258 mode=soft pred='30' ref='60' tokens=51 seconds=0.565
+gsm8k example=104/164 global_index=1258 mode=fused pred='40' ref='60' tokens=54 seconds=0.610
+gsm8k example=105/164 global_index=1259 mode=standard pred='240' ref='7200' tokens=66 seconds=0.724
+gsm8k example=105/164 global_index=1259 mode=soft pred='7200' ref='7200' tokens=116 seconds=1.297
+gsm8k example=105/164 global_index=1259 mode=fused pred='240' ref='7200' tokens=61 seconds=0.687
+gsm8k example=106/164 global_index=1260 mode=standard pred='34' ref='5' tokens=76 seconds=0.837
+gsm8k example=106/164 global_index=1260 mode=soft pred='5' ref='5' tokens=109 seconds=1.206
+gsm8k example=106/164 global_index=1260 mode=fused pred='1' ref='5' tokens=121 seconds=1.363
+gsm8k example=107/164 global_index=1261 mode=standard pred='12' ref='235' tokens=192 seconds=2.123
+gsm8k example=107/164 global_index=1261 mode=soft pred='2' ref='235' tokens=192 seconds=2.137
+gsm8k example=107/164 global_index=1261 mode=fused pred='45' ref='235' tokens=143 seconds=1.608
+gsm8k example=108/164 global_index=1262 mode=standard pred='10' ref='12' tokens=67 seconds=0.736
+gsm8k example=108/164 global_index=1262 mode=soft pred='10' ref='12' tokens=84 seconds=0.930
+gsm8k example=108/164 global_index=1262 mode=fused pred='0.0021' ref='12' tokens=192 seconds=2.149
+gsm8k example=109/164 global_index=1263 mode=standard pred='180' ref='500' tokens=135 seconds=1.492
+gsm8k example=109/164 global_index=1263 mode=soft pred='420' ref='500' tokens=122 seconds=1.364
+gsm8k example=109/164 global_index=1263 mode=fused pred='420' ref='500' tokens=129 seconds=1.452
+gsm8k example=110/164 global_index=1264 mode=standard pred='24' ref='210' tokens=52 seconds=0.574
+gsm8k example=110/164 global_index=1264 mode=soft pred='27' ref='210' tokens=97 seconds=1.064
+gsm8k example=110/164 global_index=1264 mode=fused pred='0' ref='210' tokens=192 seconds=2.130
+gsm8k example=111/164 global_index=1265 mode=standard pred='36' ref='36' tokens=192 seconds=2.127
+gsm8k example=111/164 global_index=1265 mode=soft pred='24' ref='36' tokens=80 seconds=0.885
+gsm8k example=111/164 global_index=1265 mode=fused pred='24' ref='36' tokens=83 seconds=0.941
+gsm8k example=112/164 global_index=1266 mode=standard pred='21' ref='147' tokens=86 seconds=0.944
+gsm8k example=112/164 global_index=1266 mode=soft pred='147' ref='147' tokens=85 seconds=0.938
+gsm8k example=112/164 global_index=1266 mode=fused pred='147' ref='147' tokens=129 seconds=1.448
+gsm8k example=113/164 global_index=1267 mode=standard pred='70' ref='40' tokens=73 seconds=0.805
+gsm8k example=113/164 global_index=1267 mode=soft pred='20' ref='40' tokens=70 seconds=0.775
+gsm8k example=113/164 global_index=1267 mode=fused pred='80' ref='40' tokens=79 seconds=0.887
+gsm8k example=114/164 global_index=1268 mode=standard pred='20' ref='20' tokens=85 seconds=0.931
+gsm8k example=114/164 global_index=1268 mode=soft pred='20' ref='20' tokens=78 seconds=0.864
+gsm8k example=114/164 global_index=1268 mode=fused pred='20' ref='20' tokens=64 seconds=0.721
+gsm8k example=115/164 global_index=1269 mode=standard pred='222' ref='54' tokens=75 seconds=0.823
+gsm8k example=115/164 global_index=1269 mode=soft pred='108' ref='54' tokens=134 seconds=1.483
+gsm8k example=115/164 global_index=1269 mode=fused pred='144' ref='54' tokens=120 seconds=1.352
+gsm8k example=116/164 global_index=1270 mode=standard pred='180000' ref='3528' tokens=192 seconds=2.120
+gsm8k example=116/164 global_index=1270 mode=soft pred='8748' ref='3528' tokens=136 seconds=1.517
+gsm8k example=116/164 global_index=1270 mode=fused pred='8968.6' ref='3528' tokens=172 seconds=1.928
+gsm8k example=117/164 global_index=1271 mode=standard pred='108' ref='43' tokens=58 seconds=0.636
+gsm8k example=117/164 global_index=1271 mode=soft pred='189' ref='43' tokens=105 seconds=1.162
+gsm8k example=117/164 global_index=1271 mode=fused pred='27' ref='43' tokens=51 seconds=0.577
+gsm8k example=118/164 global_index=1272 mode=standard pred='88' ref='296' tokens=97 seconds=1.077
+gsm8k example=118/164 global_index=1272 mode=soft pred='56' ref='296' tokens=79 seconds=0.874
+gsm8k example=118/164 global_index=1272 mode=fused pred='56' ref='296' tokens=87 seconds=0.985
+gsm8k example=119/164 global_index=1273 mode=standard pred='35' ref='27' tokens=41 seconds=0.450
+gsm8k example=119/164 global_index=1273 mode=soft pred='8' ref='27' tokens=71 seconds=0.786
+gsm8k example=119/164 global_index=1273 mode=fused pred='29' ref='27' tokens=41 seconds=0.466
+gsm8k example=120/164 global_index=1274 mode=standard pred='6' ref='38' tokens=52 seconds=0.571
+gsm8k example=120/164 global_index=1274 mode=soft pred='26' ref='38' tokens=70 seconds=0.775
+gsm8k example=120/164 global_index=1274 mode=fused pred='6' ref='38' tokens=55 seconds=0.620
+gsm8k example=121/164 global_index=1275 mode=standard pred='96' ref='16' tokens=73 seconds=0.805
+gsm8k example=121/164 global_index=1275 mode=soft pred='950' ref='16' tokens=62 seconds=0.685
+gsm8k example=121/164 global_index=1275 mode=fused pred='12' ref='16' tokens=60 seconds=0.675
+gsm8k example=122/164 global_index=1276 mode=standard pred='1' ref='70' tokens=81 seconds=0.890
+gsm8k example=122/164 global_index=1276 mode=soft pred='300' ref='70' tokens=192 seconds=2.132
+gsm8k example=122/164 global_index=1276 mode=fused pred='35' ref='70' tokens=46 seconds=0.521
+gsm8k example=123/164 global_index=1277 mode=standard pred='32' ref='48' tokens=67 seconds=0.746
+gsm8k example=123/164 global_index=1277 mode=soft pred='32' ref='48' tokens=59 seconds=0.653
+gsm8k example=123/164 global_index=1277 mode=fused pred='32' ref='48' tokens=59 seconds=0.665
+gsm8k example=124/164 global_index=1278 mode=standard pred='734' ref='665' tokens=61 seconds=0.671
+gsm8k example=124/164 global_index=1278 mode=soft pred='641' ref='665' tokens=77 seconds=0.852
+gsm8k example=124/164 global_index=1278 mode=fused pred='641' ref='665' tokens=75 seconds=0.842
+gsm8k example=125/164 global_index=1279 mode=standard pred='9' ref='180' tokens=46 seconds=0.506
+gsm8k example=125/164 global_index=1279 mode=soft pred='54' ref='180' tokens=89 seconds=0.984
+gsm8k example=125/164 global_index=1279 mode=fused pred='51' ref='180' tokens=150 seconds=1.681
+gsm8k example=126/164 global_index=1280 mode=standard pred='7' ref='7' tokens=71 seconds=0.778
+gsm8k example=126/164 global_index=1280 mode=soft pred='2' ref='7' tokens=45 seconds=0.498
+gsm8k example=126/164 global_index=1280 mode=fused pred='12' ref='7' tokens=34 seconds=0.388
+gsm8k example=127/164 global_index=1281 mode=standard pred='1750' ref='20' tokens=114 seconds=1.251
+gsm8k example=127/164 global_index=1281 mode=soft pred='20' ref='20' tokens=118 seconds=1.306
+gsm8k example=127/164 global_index=1281 mode=fused pred='2100' ref='20' tokens=96 seconds=1.086
+gsm8k example=128/164 global_index=1282 mode=standard pred='16' ref='12' tokens=40 seconds=0.439
+gsm8k example=128/164 global_index=1282 mode=soft pred='16' ref='12' tokens=192 seconds=2.133
+gsm8k example=128/164 global_index=1282 mode=fused pred='6' ref='12' tokens=68 seconds=0.763
+gsm8k example=129/164 global_index=1283 mode=standard pred='60' ref='60' tokens=68 seconds=0.750
+gsm8k example=129/164 global_index=1283 mode=soft pred='20' ref='60' tokens=80 seconds=0.886
+gsm8k example=129/164 global_index=1283 mode=fused pred='20' ref='60' tokens=80 seconds=0.909
+gsm8k example=130/164 global_index=1284 mode=standard pred='9' ref='25' tokens=61 seconds=0.671
+gsm8k example=130/164 global_index=1284 mode=soft pred='15' ref='25' tokens=92 seconds=1.018
+gsm8k example=130/164 global_index=1284 mode=fused pred='15' ref='25' tokens=92 seconds=1.030
+gsm8k example=131/164 global_index=1285 mode=standard pred='3490' ref='1218' tokens=52 seconds=0.576
+gsm8k example=131/164 global_index=1285 mode=soft pred='3460' ref='1218' tokens=70 seconds=0.785
+gsm8k example=131/164 global_index=1285 mode=fused pred='3560' ref='1218' tokens=78 seconds=0.876
+gsm8k example=132/164 global_index=1286 mode=standard pred='115' ref='105' tokens=67 seconds=0.736
+gsm8k example=132/164 global_index=1286 mode=soft pred='115' ref='105' tokens=74 seconds=0.820
+gsm8k example=132/164 global_index=1286 mode=fused pred='115' ref='105' tokens=73 seconds=0.820
+gsm8k example=133/164 global_index=1287 mode=standard pred='52' ref='84' tokens=61 seconds=0.669
+gsm8k example=133/164 global_index=1287 mode=soft pred='25' ref='84' tokens=46 seconds=0.508
+gsm8k example=133/164 global_index=1287 mode=fused pred='56' ref='84' tokens=72 seconds=0.808
+gsm8k example=134/164 global_index=1288 mode=standard pred='1' ref='34' tokens=102 seconds=1.125
+gsm8k example=134/164 global_index=1288 mode=soft pred='1' ref='34' tokens=74 seconds=0.817
+gsm8k example=134/164 global_index=1288 mode=fused pred='4' ref='34' tokens=192 seconds=2.146
+gsm8k example=135/164 global_index=1289 mode=standard pred='101' ref='101' tokens=98 seconds=1.095
+gsm8k example=135/164 global_index=1289 mode=soft pred='101' ref='101' tokens=113 seconds=1.264
+gsm8k example=135/164 global_index=1289 mode=fused pred='101' ref='101' tokens=121 seconds=1.363
+gsm8k example=136/164 global_index=1290 mode=standard pred='90' ref='90' tokens=95 seconds=1.047
+gsm8k example=136/164 global_index=1290 mode=soft pred='54' ref='90' tokens=97 seconds=1.073
+gsm8k example=136/164 global_index=1290 mode=fused pred='54' ref='90' tokens=94 seconds=1.050
+gsm8k example=137/164 global_index=1291 mode=standard pred='27' ref='27' tokens=58 seconds=0.636
+gsm8k example=137/164 global_index=1291 mode=soft pred='27' ref='27' tokens=59 seconds=0.654
+gsm8k example=137/164 global_index=1291 mode=fused pred='27' ref='27' tokens=58 seconds=0.655
+gsm8k example=138/164 global_index=1292 mode=standard pred='70' ref='67' tokens=56 seconds=0.615
+gsm8k example=138/164 global_index=1292 mode=soft pred='70' ref='67' tokens=56 seconds=0.620
+gsm8k example=138/164 global_index=1292 mode=fused pred='70' ref='67' tokens=56 seconds=0.632
+gsm8k example=139/164 global_index=1293 mode=standard pred='140000' ref='140000' tokens=60 seconds=0.658
+gsm8k example=139/164 global_index=1293 mode=soft pred='140000' ref='140000' tokens=67 seconds=0.741
+gsm8k example=139/164 global_index=1293 mode=fused pred='140000' ref='140000' tokens=67 seconds=0.755
+gsm8k example=140/164 global_index=1294 mode=standard pred='32' ref='36' tokens=114 seconds=1.254
+gsm8k example=140/164 global_index=1294 mode=soft pred='40' ref='36' tokens=106 seconds=1.172
+gsm8k example=140/164 global_index=1294 mode=fused pred='24' ref='36' tokens=110 seconds=1.229
+gsm8k example=141/164 global_index=1295 mode=standard pred='-30' ref='2' tokens=96 seconds=1.054
+gsm8k example=141/164 global_index=1295 mode=soft pred='-14.5' ref='2' tokens=109 seconds=1.208
+gsm8k example=141/164 global_index=1295 mode=fused pred='14.25' ref='2' tokens=90 seconds=1.008
+gsm8k example=142/164 global_index=1296 mode=standard pred='225' ref='335' tokens=56 seconds=0.616
+gsm8k example=142/164 global_index=1296 mode=soft pred='270' ref='335' tokens=99 seconds=1.095
+gsm8k example=142/164 global_index=1296 mode=fused pred='310' ref='335' tokens=87 seconds=0.974
+gsm8k example=143/164 global_index=1297 mode=standard pred='0' ref='60' tokens=65 seconds=0.715
+gsm8k example=143/164 global_index=1297 mode=soft pred='6' ref='60' tokens=103 seconds=1.140
+gsm8k example=143/164 global_index=1297 mode=fused pred='42.5' ref='60' tokens=105 seconds=1.184
+gsm8k example=144/164 global_index=1298 mode=standard pred='30' ref='31' tokens=112 seconds=1.228
+gsm8k example=144/164 global_index=1298 mode=soft pred='30.5' ref='31' tokens=145 seconds=1.619
+gsm8k example=144/164 global_index=1298 mode=fused pred='30' ref='31' tokens=132 seconds=1.487
+gsm8k example=145/164 global_index=1299 mode=standard pred='17.5' ref='13' tokens=48 seconds=0.528
+gsm8k example=145/164 global_index=1299 mode=soft pred='19.5' ref='13' tokens=48 seconds=0.532
+gsm8k example=145/164 global_index=1299 mode=fused pred='19.5' ref='13' tokens=57 seconds=0.642
+gsm8k example=146/164 global_index=1300 mode=standard pred='168' ref='120' tokens=74 seconds=0.811
+gsm8k example=146/164 global_index=1300 mode=soft pred='2' ref='120' tokens=100 seconds=1.108
+gsm8k example=146/164 global_index=1300 mode=fused pred='2' ref='120' tokens=192 seconds=2.148
+gsm8k example=147/164 global_index=1301 mode=standard pred='10' ref='23' tokens=140 seconds=1.541
+gsm8k example=147/164 global_index=1301 mode=soft pred='0' ref='23' tokens=192 seconds=2.133
+gsm8k example=147/164 global_index=1301 mode=fused pred='2' ref='23' tokens=192 seconds=2.142
+gsm8k example=148/164 global_index=1302 mode=standard pred='144' ref='72' tokens=94 seconds=1.042
+gsm8k example=148/164 global_index=1302 mode=soft pred='60' ref='72' tokens=50 seconds=0.554
+gsm8k example=148/164 global_index=1302 mode=fused pred='144' ref='72' tokens=91 seconds=1.028
+gsm8k example=149/164 global_index=1303 mode=standard pred='588' ref='4' tokens=55 seconds=0.605
+gsm8k example=149/164 global_index=1303 mode=soft pred='6' ref='4' tokens=108 seconds=1.195
+gsm8k example=149/164 global_index=1303 mode=fused pred='84' ref='4' tokens=192 seconds=2.145
+gsm8k example=150/164 global_index=1304 mode=standard pred='1000' ref='1000' tokens=69 seconds=0.768
+gsm8k example=150/164 global_index=1304 mode=soft pred='1000' ref='1000' tokens=69 seconds=0.774
+gsm8k example=150/164 global_index=1304 mode=fused pred='0' ref='1000' tokens=92 seconds=1.026
+gsm8k example=151/164 global_index=1305 mode=standard pred='1995' ref='2325' tokens=81 seconds=0.899
+gsm8k example=151/164 global_index=1305 mode=soft pred='-120' ref='2325' tokens=192 seconds=2.137
+gsm8k example=151/164 global_index=1305 mode=fused pred='2205' ref='2325' tokens=82 seconds=0.931
+gsm8k example=152/164 global_index=1306 mode=standard pred='31' ref='2' tokens=36 seconds=0.396
+gsm8k example=152/164 global_index=1306 mode=soft pred='11' ref='2' tokens=50 seconds=0.546
+gsm8k example=152/164 global_index=1306 mode=fused pred='23' ref='2' tokens=149 seconds=1.649
+gsm8k example=153/164 global_index=1307 mode=standard pred='8' ref='8' tokens=63 seconds=0.690
+gsm8k example=153/164 global_index=1307 mode=soft pred='0' ref='8' tokens=46 seconds=0.509
+gsm8k example=153/164 global_index=1307 mode=fused pred='8' ref='8' tokens=89 seconds=1.008
+gsm8k example=154/164 global_index=1308 mode=standard pred='30' ref='30' tokens=54 seconds=0.592
+gsm8k example=154/164 global_index=1308 mode=soft pred='30' ref='30' tokens=54 seconds=0.598
+gsm8k example=154/164 global_index=1308 mode=fused pred='30' ref='30' tokens=55 seconds=0.621
+gsm8k example=155/164 global_index=1309 mode=standard pred='1450' ref='2280' tokens=80 seconds=0.879
+gsm8k example=155/164 global_index=1309 mode=soft pred='1450' ref='2280' tokens=93 seconds=1.040
+gsm8k example=155/164 global_index=1309 mode=fused pred='1450' ref='2280' tokens=89 seconds=1.009
+gsm8k example=156/164 global_index=1310 mode=standard pred='4' ref='64' tokens=79 seconds=0.873
+gsm8k example=156/164 global_index=1310 mode=soft pred='8' ref='64' tokens=74 seconds=0.819
+gsm8k example=156/164 global_index=1310 mode=fused pred='2' ref='64' tokens=95 seconds=1.062
+gsm8k example=157/164 global_index=1311 mode=standard pred='67' ref='594' tokens=70 seconds=0.768
+gsm8k example=157/164 global_index=1311 mode=soft pred='594' ref='594' tokens=73 seconds=0.807
+gsm8k example=157/164 global_index=1311 mode=fused pred='594' ref='594' tokens=72 seconds=0.809
+gsm8k example=158/164 global_index=1312 mode=standard pred='60' ref='180' tokens=102 seconds=1.119
+gsm8k example=158/164 global_index=1312 mode=soft pred='120' ref='180' tokens=105 seconds=1.165
+gsm8k example=158/164 global_index=1312 mode=fused pred='13' ref='180' tokens=56 seconds=0.634
+gsm8k example=159/164 global_index=1313 mode=standard pred='60' ref='2' tokens=59 seconds=0.647
+gsm8k example=159/164 global_index=1313 mode=soft pred='60' ref='2' tokens=60 seconds=0.665
+gsm8k example=159/164 global_index=1313 mode=fused pred='60' ref='2' tokens=60 seconds=0.677
+gsm8k example=160/164 global_index=1314 mode=standard pred='3' ref='8' tokens=54 seconds=0.593
+gsm8k example=160/164 global_index=1314 mode=soft pred='3' ref='8' tokens=54 seconds=0.598
+gsm8k example=160/164 global_index=1314 mode=fused pred='35' ref='8' tokens=48 seconds=0.542
+gsm8k example=161/164 global_index=1315 mode=standard pred='1' ref='5' tokens=85 seconds=0.935
+gsm8k example=161/164 global_index=1315 mode=soft pred='2' ref='5' tokens=192 seconds=2.133
+gsm8k example=161/164 global_index=1315 mode=fused pred='1' ref='5' tokens=140 seconds=1.570
+gsm8k example=162/164 global_index=1316 mode=standard pred='80' ref='230' tokens=65 seconds=0.715
+gsm8k example=162/164 global_index=1316 mode=soft pred='40' ref='230' tokens=192 seconds=2.132
+gsm8k example=162/164 global_index=1316 mode=fused pred='230' ref='230' tokens=84 seconds=0.942
+gsm8k example=163/164 global_index=1317 mode=standard pred='-10' ref='5' tokens=192 seconds=2.114
+gsm8k example=163/164 global_index=1317 mode=soft pred='20' ref='5' tokens=76 seconds=0.843
+gsm8k example=163/164 global_index=1317 mode=fused pred='50' ref='5' tokens=192 seconds=2.149
+gsm8k example=164/164 global_index=1318 mode=standard pred='28' ref='14' tokens=68 seconds=0.748
+gsm8k example=164/164 global_index=1318 mode=soft pred='28' ref='14' tokens=68 seconds=0.754
+gsm8k example=164/164 global_index=1318 mode=fused pred='28' ref='14' tokens=69 seconds=0.777
+wrote evaluation assets to /weka/scratch/jhu/enalisn1/xiw/nanochat/fbt_experiments/results/d20_lf_k3_openmath_000911_gsm8k_5shot_full_shards/shard_07

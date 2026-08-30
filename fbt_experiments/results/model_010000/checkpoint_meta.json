@@ -1,0 +1,75 @@
+{
+  "step": 10000,
+  "val_bpb": 0.7383741140365601,
+  "model_config": {
+    "sequence_len": 2048,
+    "vocab_size": 32768,
+    "n_layer": 16,
+    "n_head": 8,
+    "n_kv_head": 8,
+    "n_embd": 1024,
+    "window_pattern": "SSSL",
+    "latent_feedback": true
+  },
+  "user_config": {
+    "run": "d16-lf-k1-smoke",
+    "device_type": "",
+    "fp8": false,
+    "fp8_recipe": "tensorwise",
+    "depth": 16,
+    "aspect_ratio": 64,
+    "head_dim": 128,
+    "max_seq_len": 2048,
+    "window_pattern": "SSSL",
+    "num_forward_passes": 3,
+    "feedback_jitter": 0.02,
+    "feedback_prefix_mixin": false,
+    "feedback_start_fraction": 0.75,
+    "num_iterations": 10000,
+    "target_flops": -1.0,
+    "target_param_data_ratio": 12,
+    "device_batch_size": 8,
+    "total_batch_size": 524288,
+    "embedding_lr": 0.3,
+    "unembedding_lr": 0.008,
+    "weight_decay": 0.28,
+    "matrix_lr": 0.02,
+    "scalar_lr": 0.5,
+    "warmup_steps": 40,
+    "warmdown_ratio": 0.65,
+    "final_lr_frac": 0.05,
+    "resume_from_step": -1,
+    "eval_every": 100,
+    "eval_tokens": 1048576,
+    "core_metric_every": -1,
+    "core_metric_max_per_task": 500,
+    "sample_every": -1,
+    "save_every": -1,
+    "model_tag": "d16-lf-k1-smoke"
+  },
+  "device_batch_size": 8,
+  "max_seq_len": 2048,
+  "total_batch_size": 524288,
+  "num_iterations": 10000,
+  "dataloader_state_dict": {
+    "pq_idx": 117,
+    "rg_idx": 22,
+    "epoch": 1
+  },
+  "loop_state": {
+    "min_val_bpb": 0.7383741140365601,
+    "smooth_train_loss": 5.021507043903442,
+    "smooth_pass_losses": [
+      2.5145830808774052,
+      2.5069494837900086,
+      2.506898857658889
+    ],
+    "smooth_pass_loss_weights": [
+      0.9999999999999994,
+      0.9999999999999994,
+      0.9999999999999994
+    ],
+    "feedback_start_step": 7500,
+    "total_training_time": 70082.7931830883
+  }
+}

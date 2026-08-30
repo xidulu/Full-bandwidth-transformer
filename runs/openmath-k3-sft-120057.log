@@ -1,0 +1,4 @@
+[BILLING] loaded!
+[BILLING] Re-emitting cost at job start!
+srun: error: gh116: task 0: Exited with exit code 2
+[2026-08-27T16:30:20.097] error: execve(): torchrun: No such file or directory

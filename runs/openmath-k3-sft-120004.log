@@ -1,0 +1,39 @@
+/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/cuda/__init__.py:182: UserWarning: CUDA initialization: CUDA unknown error - this may be due to an incorrectly set up environment, e.g. changing env variable CUDA_VISIBLE_DEVICES after program start. Setting the available devices to be zero. (Triggered internally at /pytorch/c10/cuda/CUDAFunctions.cpp:119.)
+  return torch._C._cuda_getDeviceCount() > 0
+/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/cuda/__init__.py:182: UserWarning: CUDA initialization: CUDA unknown error - this may be due to an incorrectly set up environment, e.g. changing env variable CUDA_VISIBLE_DEVICES after program start. Setting the available devices to be zero. (Triggered internally at /pytorch/c10/cuda/CUDAFunctions.cpp:119.)
+  return torch._C._cuda_getDeviceCount() > 0
+/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/cuda/__init__.py:182: UserWarning: CUDA initialization: CUDA unknown error - this may be due to an incorrectly set up environment, e.g. changing env variable CUDA_VISIBLE_DEVICES after program start. Setting the available devices to be zero. (Triggered internally at /pytorch/c10/cuda/CUDAFunctions.cpp:119.)
+  return torch._C._cuda_getDeviceCount() > 0
+/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/cuda/__init__.py:182: UserWarning: CUDA initialization: CUDA unknown error - this may be due to an incorrectly set up environment, e.g. changing env variable CUDA_VISIBLE_DEVICES after program start. Setting the available devices to be zero. (Triggered internally at /pytorch/c10/cuda/CUDAFunctions.cpp:119.)
+  return torch._C._cuda_getDeviceCount() > 0
+/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/cuda/__init__.py:182: UserWarning: CUDA initialization: CUDA unknown error - this may be due to an incorrectly set up environment, e.g. changing env variable CUDA_VISIBLE_DEVICES after program start. Setting the available devices to be zero. (Triggered internally at /pytorch/c10/cuda/CUDAFunctions.cpp:119.)
+  return torch._C._cuda_getDeviceCount() > 0
+Autodetected device type: cpu
+2026-08-27 16:17:44,547 - nanochat.common - [32m[1mINFO[0m - Distributed world size: 4
+COMPUTE_DTYPE: torch.float32 (auto-detected: no CUDA (CPU/MPS))
+wandb: Currently logged in as: xidulu (xidulu-umass-amherst) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: creating run
+wandb: Tracking run with wandb version 0.21.3
+wandb: Run data is saved locally in /weka/scratch/jhu/enalisn1/xiw/nanochat/wandb/run-20260827_161744-1zzjr4xf
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run d20-lf-k3-openmath-train1m
+wandb: ⭐️ View project at https://wandb.ai/xidulu-umass-amherst/nanochat-sft
+wandb: 🚀 View run at https://wandb.ai/xidulu-umass-amherst/nanochat-sft/runs/1zzjr4xf
+WARNING: Flash Attention 3 not available, using PyTorch SDPA fallback. Training will be less efficient.
+2026-08-27 16:17:45,800 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Loading model from /home/jhu/xwang457/work/nanochat_cache/base_checkpoints/d20-lf-k1-smoke with step 50000
+2026-08-27 16:17:46,158 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Building model with config: {'sequence_len': 2048, 'vocab_size': 32768, 'n_layer': 20, 'n_head': 10, 'n_kv_head': 10, 'n_embd': 1280, 'window_pattern': 'SSSL', 'latent_feedback': True, 'weight_tying': True}
+Using max_seq_len=2048
+NOTE: --device-batch-size=8 overrides pretrained value of 16
+Using total_batch_size=524288
+Inherited embedding_lr=0.3 from pretrained checkpoint
+Inherited unembedding_lr=0.008 from pretrained checkpoint
+Inherited matrix_lr=0.02 from pretrained checkpoint
+Tokens / micro-batch / rank: 8 x 2048 = 16,384
+Tokens / micro-batch: 65,536
+Total batch size 524,288 => gradient accumulation steps: 8
+Scaling the LR for the AdamW parameters ∝1/√(1280/768) = 0.774597
+Weight tying: shared embedding/head uses the unembedding AdamW hyperparameters
+2026-08-27 16:17:49,038 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Loading optimizer state from /home/jhu/xwang457/work/nanochat_cache/base_checkpoints/d20-lf-k1-smoke/optim_050000_rank0.pt
+Loaded optimizer state from pretrained checkpoint (momentum buffers only, LRs reset)
+Downloading https://huggingface.co/api/datasets/nvidia/OpenMathInstruct-2/parquet/default/train_1M/0.parquet ...
+[2026-08-27T16:17:54.859] error: *** JOB 120004 ON gh202 CANCELLED AT 2026-08-27T16:17:54 DUE to SIGNAL Terminated ***

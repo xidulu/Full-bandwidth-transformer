@@ -254,6 +254,8 @@ class MuonAdamW(torch.optim.Optimizer):
         param_groups: List of dicts, each containing:
             - 'params': List of parameters
             - 'kind': 'adamw' or 'muon'
+            - 'allow_no_grad': optional bool; skip the whole group when every
+              gradient is None (for intentionally dormant scheduled modules)
             - For AdamW groups: 'lr', 'betas', 'eps', 'weight_decay'
             - For Muon groups: 'lr', 'momentum', 'ns_steps', 'beta2', 'weight_decay'
     """
@@ -435,9 +437,35 @@ class MuonAdamW(torch.optim.Optimizer):
             rank = 0
             world_size = 1
 
+        # A whole parameter group may be dormant, e.g. latent-feedback matrices
+        # during a scheduled one-pass warmup. Skipping it entirely is important:
+        # it prevents communication, optimizer-state initialization, momentum
+        # advancement, and decoupled weight decay before the module is active.
+        # Muon stacks every gradient in a group, so a mixture of present and
+        # missing gradients is an invalid grouping rather than something that
+        # can be silently skipped.
+        active_groups: list[dict] = []
+        for group_idx, group in enumerate(self.param_groups):
+            has_grad = [p.grad is not None for p in group['params']]
+            if not any(has_grad):
+                if group.get('allow_no_grad', False):
+                    continue
+                raise RuntimeError(
+                    f"Optimizer group {group_idx} ({group['kind']}) has no gradients; "
+                    "set allow_no_grad=True only for an intentionally dormant group"
+                )
+            if not all(has_grad):
+                missing = sum(not present for present in has_grad)
+                raise RuntimeError(
+                    f"Optimizer group {group_idx} ({group['kind']}) has {missing}/"
+                    f"{len(has_grad)} parameters with grad=None; parameters with "
+                    "different activation schedules must use separate groups"
+                )
+            active_groups.append(group)
+
         # Phase 1: launch all async reduce ops
         reduce_infos: list[dict] = []
-        for group in self.param_groups:
+        for group in active_groups:
             if group['kind'] == 'adamw':
                 reduce_infos.append(self._reduce_adamw(group, world_size))
             elif group['kind'] == 'muon':
@@ -447,7 +475,7 @@ class MuonAdamW(torch.optim.Optimizer):
 
         # Phase 2: wait for reduces, compute updates, launch gathers
         gather_list: list[dict] = []
-        for group, info in zip(self.param_groups, reduce_infos):
+        for group, info in zip(active_groups, reduce_infos):
             if group['kind'] == 'adamw':
                 self._compute_adamw(group, info, gather_list, rank, world_size)
             elif group['kind'] == 'muon':

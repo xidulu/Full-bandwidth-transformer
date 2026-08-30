@@ -1,0 +1,138 @@
+Reusing metadata shard /home/jhu/xwang457/work/nanochat_cache/task_data/HuggingFaceTB--stack-edu/Python/train/00000.parquet
+Reusing metadata shard /home/jhu/xwang457/work/nanochat_cache/task_data/HuggingFaceTB--stack-edu/Python/train/00001.parquet
+Reusing metadata shard /home/jhu/xwang457/work/nanochat_cache/task_data/HuggingFaceTB--stack-edu/Python/train/00002.parquet
+Reusing metadata shard /home/jhu/xwang457/work/nanochat_cache/task_data/HuggingFaceTB--stack-edu/Python/train/00003.parquet
+Downloading metadata shard https://huggingface.co/api/datasets/HuggingFaceTB/stack-edu/parquet/Python/train/4.parquet ...
+docs=16,384 train_bytes=24,136,296/8,000,000,000 failed=0 rate=0.85 MiB/s
+docs=49,152 train_bytes=87,583,052/8,000,000,000 failed=0 rate=0.98 MiB/s
+docs=98,304 train_bytes=183,589,175/8,000,000,000 failed=0 rate=1.02 MiB/s
+docs=245,760 train_bytes=473,996,951/8,000,000,000 failed=0 rate=1.06 MiB/s
+docs=262,144 train_bytes=506,185,331/8,000,000,000 failed=0 rate=1.06 MiB/s
+docs=327,680 train_bytes=634,581,113/8,000,000,000 failed=0 rate=1.06 MiB/s
+docs=360,448 train_bytes=698,919,497/8,000,000,000 failed=0 rate=1.06 MiB/s
+docs=376,832 train_bytes=731,713,605/8,000,000,000 failed=0 rate=1.06 MiB/s
+docs=393,216 train_bytes=764,369,439/8,000,000,000 failed=0 rate=1.06 MiB/s
+docs=409,600 train_bytes=796,678,154/8,000,000,000 failed=0 rate=1.07 MiB/s
+docs=491,520 train_bytes=958,820,153/8,000,000,000 failed=0 rate=1.07 MiB/s
+docs=507,904 train_bytes=990,883,394/8,000,000,000 failed=0 rate=1.07 MiB/s
+docs=524,288 train_bytes=1,022,753,059/8,000,000,000 failed=0 rate=1.07 MiB/s
+docs=540,672 train_bytes=1,054,746,681/8,000,000,000 failed=0 rate=1.07 MiB/s
+docs=557,056 train_bytes=1,086,210,237/8,000,000,000 failed=0 rate=1.07 MiB/s
+docs=573,440 train_bytes=1,118,387,334/8,000,000,000 failed=0 rate=1.07 MiB/s
+docs=589,824 train_bytes=1,150,907,600/8,000,000,000 failed=0 rate=1.07 MiB/s
+docs=622,592 train_bytes=1,215,594,723/8,000,000,000 failed=0 rate=1.07 MiB/s
+docs=737,280 train_bytes=1,442,357,266/8,000,000,000 failed=0 rate=1.07 MiB/s
+docs=786,432 train_bytes=1,539,258,235/8,000,000,000 failed=0 rate=1.07 MiB/s
+docs=868,352 train_bytes=1,701,101,011/8,000,000,000 failed=0 rate=1.07 MiB/s
+docs=901,120 train_bytes=1,765,180,018/8,000,000,000 failed=0 rate=1.07 MiB/s
+docs=917,504 train_bytes=1,797,318,105/8,000,000,000 failed=0 rate=1.07 MiB/s
+docs=983,040 train_bytes=1,924,511,387/8,000,000,000 failed=0 rate=1.07 MiB/s
+docs=999,424 train_bytes=1,956,244,085/8,000,000,000 failed=0 rate=1.07 MiB/s
+docs=1,015,808 train_bytes=1,988,074,825/8,000,000,000 failed=0 rate=1.07 MiB/s
+docs=1,032,192 train_bytes=2,020,175,824/8,000,000,000 failed=1 rate=1.07 MiB/s
+docs=1,048,576 train_bytes=2,051,536,654/8,000,000,000 failed=1 rate=1.07 MiB/s
+docs=1,163,264 train_bytes=2,275,647,311/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=1,179,648 train_bytes=2,307,068,840/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=1,212,416 train_bytes=2,372,494,997/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=1,228,800 train_bytes=2,405,032,936/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=1,294,336 train_bytes=2,534,191,487/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=1,310,720 train_bytes=2,566,306,823/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=1,392,640 train_bytes=2,726,079,737/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=1,425,408 train_bytes=2,790,217,475/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=1,441,792 train_bytes=2,822,397,562/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=1,458,176 train_bytes=2,855,057,170/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=1,507,328 train_bytes=2,951,205,736/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=1,589,248 train_bytes=3,112,527,503/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=1,622,016 train_bytes=3,175,683,339/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=1,638,400 train_bytes=3,207,627,791/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=1,654,784 train_bytes=3,239,755,946/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=1,703,936 train_bytes=3,335,840,206/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=1,785,856 train_bytes=3,497,303,565/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=1,802,240 train_bytes=3,529,288,742/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=1,851,392 train_bytes=3,626,508,221/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=1,867,776 train_bytes=3,658,501,713/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=1,884,160 train_bytes=3,691,005,564/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=1,900,544 train_bytes=3,723,085,977/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=1,949,696 train_bytes=3,818,959,976/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=1,982,464 train_bytes=3,883,652,712/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=2,080,768 train_bytes=4,076,984,030/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=2,129,920 train_bytes=4,173,954,273/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=2,179,072 train_bytes=4,271,075,753/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=2,277,376 train_bytes=4,462,309,277/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=2,293,760 train_bytes=4,494,308,971/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=2,326,528 train_bytes=4,558,539,388/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=2,359,296 train_bytes=4,621,878,090/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=2,441,216 train_bytes=4,780,678,371/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=2,473,984 train_bytes=4,843,966,864/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=2,490,368 train_bytes=4,875,302,141/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=2,506,752 train_bytes=4,907,830,480/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=2,555,904 train_bytes=5,004,215,061/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=2,621,440 train_bytes=5,130,481,139/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=2,637,824 train_bytes=5,162,505,845/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=2,670,592 train_bytes=5,227,014,091/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=2,686,976 train_bytes=5,259,059,064/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=2,768,896 train_bytes=5,418,238,513/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=2,850,816 train_bytes=5,577,774,874/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=2,899,968 train_bytes=5,673,719,393/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=2,932,736 train_bytes=5,739,024,029/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=2,949,120 train_bytes=5,771,771,372/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=2,998,272 train_bytes=5,867,168,407/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=3,047,424 train_bytes=5,964,352,699/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=3,112,960 train_bytes=6,092,037,754/8,000,000,000 failed=2 rate=1.06 MiB/s
+docs=3,129,344 train_bytes=6,123,884,570/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=3,145,728 train_bytes=6,155,834,524/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=3,162,112 train_bytes=6,187,483,042/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=3,211,264 train_bytes=6,284,028,765/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=3,244,032 train_bytes=6,349,425,474/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=3,276,800 train_bytes=6,413,635,887/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=3,293,184 train_bytes=6,446,494,826/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=3,391,488 train_bytes=6,640,227,817/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=3,407,872 train_bytes=6,672,233,844/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=3,424,256 train_bytes=6,704,085,121/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=3,440,640 train_bytes=6,735,464,773/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=3,457,024 train_bytes=6,767,552,508/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=3,473,408 train_bytes=6,800,079,815/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=3,489,792 train_bytes=6,832,304,107/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=3,506,176 train_bytes=6,864,345,581/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=3,555,328 train_bytes=6,961,195,990/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=3,571,712 train_bytes=6,993,412,622/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=3,604,480 train_bytes=7,057,431,024/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=3,637,248 train_bytes=7,120,704,082/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=3,670,016 train_bytes=7,184,932,105/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=3,751,936 train_bytes=7,345,194,647/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=3,768,320 train_bytes=7,377,977,754/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=3,801,088 train_bytes=7,442,445,969/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=3,932,160 train_bytes=7,699,173,827/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=4,014,080 train_bytes=7,860,056,860/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=4,030,464 train_bytes=7,892,269,850/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=4,046,848 train_bytes=7,924,034,354/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=4,063,232 train_bytes=7,956,742,175/8,000,000,000 failed=2 rate=1.07 MiB/s
+docs=4,079,616 train_bytes=7,988,423,080/8,000,000,000 failed=2 rate=1.07 MiB/s
+{
+  "language": "Python",
+  "output": "/home/jhu/xwang457/work/nanochat_cache/task_data/HuggingFaceTB--stack-edu/materialized/Python/stackedu_python_budget.parquet",
+  "success_docs": 4085616,
+  "failed_docs": 2,
+  "decoded_bytes": 8007494069,
+  "train_bytes_after_val_docs": 8000001484,
+  "val_docs": 4096,
+  "target_bytes": 8000000000,
+  "elapsed_sec": 7136.96768283844,
+  "args": {
+    "language": "Python",
+    "output": "/home/jhu/xwang457/work/nanochat_cache/task_data/HuggingFaceTB--stack-edu/materialized/Python/stackedu_python_budget.parquet",
+    "target_bytes": 8000000000,
+    "val_docs": 4096,
+    "max_docs": -1,
+    "min_length_bytes": 64,
+    "max_length_bytes": 65536,
+    "min_score": 3.0,
+    "allowed_license_types": "",
+    "num_workers": 64,
+    "batch_size": 4096,
+    "timeout": 30.0,
+    "retries": 2,
+    "metadata_limit": -1,
+    "overwrite": false
+  }
+}

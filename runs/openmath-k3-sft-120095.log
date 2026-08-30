@@ -1,0 +1,723 @@
+[BILLING] loaded!
+[BILLING] Re-emitting cost at job start!
+Autodetected device type: cuda
+2026-08-27 16:37:11,220 - nanochat.common - [32m[1mINFO[0m - Distributed world size: 4
+COMPUTE_DTYPE: torch.bfloat16 (auto-detected: CUDA SM 90 (bf16 supported))
+GPU: NVIDIA H100 80GB HBM3 | Peak FLOPS (BF16): 9.89e+14
+wandb: Currently logged in as: xidulu (xidulu-umass-amherst) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: creating run
+wandb: Tracking run with wandb version 0.21.3
+wandb: Run data is saved locally in /weka/scratch/jhu/enalisn1/xiw/nanochat/wandb/run-20260827_163711-mt52nu7o
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run d20-lf-k3-openmath-train1m
+wandb: ⭐️ View project at https://wandb.ai/xidulu-umass-amherst/nanochat-sft
+wandb: 🚀 View run at https://wandb.ai/xidulu-umass-amherst/nanochat-sft/runs/mt52nu7o
+2026-08-27 16:37:12,436 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Loading model from /home/jhu/xwang457/work/nanochat_cache/base_checkpoints/d20-lf-k1-smoke with step 50000
+2026-08-27 16:37:12,958 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Building model with config: {'sequence_len': 2048, 'vocab_size': 32768, 'n_layer': 20, 'n_head': 10, 'n_kv_head': 10, 'n_embd': 1280, 'window_pattern': 'SSSL', 'latent_feedback': True, 'weight_tying': True}
+Using max_seq_len=2048
+NOTE: --device-batch-size=4 overrides pretrained value of 16
+Using total_batch_size=524288
+Inherited embedding_lr=0.3 from pretrained checkpoint
+Inherited unembedding_lr=0.008 from pretrained checkpoint
+Inherited matrix_lr=0.02 from pretrained checkpoint
+Tokens / micro-batch / rank: 4 x 2048 = 8,192
+Tokens / micro-batch: 32,768
+Total batch size 524,288 => gradient accumulation steps: 16
+Scaling the LR for the AdamW parameters ∝1/√(1280/768) = 0.774597
+Weight tying: shared embedding/head uses the unembedding AdamW hyperparameters
+2026-08-27 16:37:13,873 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Loading optimizer state from /home/jhu/xwang457/work/nanochat_cache/base_checkpoints/d20-lf-k1-smoke/optim_050000_rank0.pt
+Loaded optimizer state from pretrained checkpoint (momentum buffers only, LRs reset)
+Training OpenMathInstruct-2 split=train_1M: 995,904 train rows, 4,096 validation rows
+Step 00000 | Validation L1 bpb: 0.5353 | L2 bpb: 0.5278 | L3 bpb: 0.5271
+[rank1]:E0827 16:38:00.228000 181532 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0] failed while attempting to run meta for aten.lerp_.Tensor
+[rank1]:E0827 16:38:00.228000 181532 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0] Traceback (most recent call last):
+[rank1]:E0827 16:38:00.228000 181532 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py", line 2755, in _dispatch_impl
+[rank1]:E0827 16:38:00.228000 181532 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]     r = func(*args, **kwargs)
+[rank1]:E0827 16:38:00.228000 181532 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_ops.py", line 841, in __call__
+[rank1]:E0827 16:38:00.228000 181532 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]     return self._op(*args, **kwargs)
+[rank1]:E0827 16:38:00.228000 181532 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_meta_registrations.py", line 7824, in _fn
+[rank1]:E0827 16:38:00.228000 181532 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]     out = fn(self, *args, **kwargs)
+[rank1]:E0827 16:38:00.228000 181532 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_ops.py", line 1255, in __call__
+[rank1]:E0827 16:38:00.228000 181532 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]     return self._op(*args, **kwargs)
+[rank1]:E0827 16:38:00.228000 181532 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_prims_common/wrappers.py", line 309, in _fn
+[rank1]:E0827 16:38:00.228000 181532 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]     result = fn(*args, **kwargs)
+[rank1]:E0827 16:38:00.228000 181532 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_meta_registrations.py", line 7850, in lerp
+[rank1]:E0827 16:38:00.228000 181532 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]     return elementwise_meta(
+[rank1]:E0827 16:38:00.228000 181532 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_meta_registrations.py", line 79, in elementwise_meta
+[rank1]:E0827 16:38:00.228000 181532 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]     args = _maybe_broadcast(*args)
+[rank1]:E0827 16:38:00.228000 181532 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_refs/__init__.py", line 448, in _maybe_broadcast
+[rank1]:E0827 16:38:00.228000 181532 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]     common_shape = _broadcast_shapes(
+[rank1]:E0827 16:38:00.228000 181532 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_refs/__init__.py", line 436, in _broadcast_shapes
+[rank1]:E0827 16:38:00.228000 181532 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]     torch._check(
+[rank1]:E0827 16:38:00.228000 181532 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/__init__.py", line 1695, in _check
+[rank1]:E0827 16:38:00.228000 181532 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]     _check_with(RuntimeError, cond, message)
+[rank1]:E0827 16:38:00.228000 181532 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/__init__.py", line 1677, in _check_with
+[rank1]:E0827 16:38:00.228000 181532 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]     raise error_type(message_evaluated)
+[rank1]:E0827 16:38:00.228000 181532 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0] RuntimeError: Attempting to broadcast a dimension of length 8192 at -2! Mismatching argument at index 1 had torch.Size([8192, 1280]); but expected shape should be broadcastable to [4096, 1280]
+[rank1]: Traceback (most recent call last):
+[rank1]:   File "/home/jhu/xwang457/.local/share/uv/python/cpython-3.10.21-linux-x86_64-gnu/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+[rank1]:     return _run_code(code, main_globals, None,
+[rank1]:   File "/home/jhu/xwang457/.local/share/uv/python/cpython-3.10.21-linux-x86_64-gnu/lib/python3.10/runpy.py", line 86, in _run_code
+[rank1]:     exec(code, run_globals)
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/scripts/chat_sft.py", line 555, in <module>
+[rank1]:     optimizer.step()
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/optim/optimizer.py", line 517, in wrapper
+[rank1]:     out = func(*args, **kwargs)
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/utils/_contextlib.py", line 120, in decorate_context
+[rank1]:     return func(*args, **kwargs)
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/nanochat/optim.py", line 480, in step
+[rank1]:     self._compute_adamw(group, info, gather_list, rank, world_size)
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/nanochat/optim.py", line 353, in _compute_adamw
+[rank1]:     adamw_step_fused(
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/eval_frame.py", line 832, in compile_wrapper
+[rank1]:     return fn(*args, **kwargs)
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 1875, in __call__
+[rank1]:     result = self._torchdynamo_orig_backend(
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 688, in __call__
+[rank1]:     result = _compile(
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 1434, in _compile
+[rank1]:     guarded_code, tracer_output = compile_inner(code, one_graph, hooks)
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_utils_internal.py", line 92, in wrapper_function
+[rank1]:     return function(*args, **kwargs)
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 1117, in compile_inner
+[rank1]:     return _compile_inner(code, one_graph, hooks)
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 1151, in _compile_inner
+[rank1]:     dynamo_output = compile_frame(
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 1032, in compile_frame
+[rank1]:     bytecode, tracer_output = transform_code_object(code, transform)
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/bytecode_transformation.py", line 1592, in transform_code_object
+[rank1]:     tracer_output = transformations(instructions, code_options)
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 1004, in transform
+[rank1]:     tracer_output = trace_frame(
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 312, in _fn
+[rank1]:     return fn(*args, **kwargs)
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 815, in trace_frame
+[rank1]:     run_tracer()
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 797, in run_tracer
+[rank1]:     tracer.run()
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/symbolic_convert.py", line 1500, in run
+[rank1]:     while self.step():
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/symbolic_convert.py", line 1348, in step
+[rank1]:     self.dispatch_table[inst.opcode](self, inst)
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/symbolic_convert.py", line 904, in wrapper
+[rank1]:     return inner_fn(self, inst)
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/symbolic_convert.py", line 2333, in CALL_FUNCTION
+[rank1]:     self.call_function(fn, args, {})
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/symbolic_convert.py", line 1266, in call_function
+[rank1]:     self.push(fn.call_function(self, args, kwargs))  # type: ignore[arg-type]
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/variables/misc.py", line 1115, in call_function
+[rank1]:     return self.obj.call_method(tx, self.name, args, kwargs)
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/variables/tensor.py", line 713, in call_method
+[rank1]:     return wrap_fx_proxy(
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/variables/builder.py", line 2645, in wrap_fx_proxy
+[rank1]:     return wrap_fx_proxy_cls(target_cls=TensorVariable, **kwargs)
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/variables/builder.py", line 2711, in wrap_fx_proxy_cls
+[rank1]:     return _wrap_fx_proxy(
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/variables/builder.py", line 2809, in _wrap_fx_proxy
+[rank1]:     example_value = get_fake_value(proxy.node, tx, allow_non_graph_fake=True)
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/utils.py", line 3478, in get_fake_value
+[rank1]:     raise TorchRuntimeError(str(e)).with_traceback(e.__traceback__) from None
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/utils.py", line 3376, in get_fake_value
+[rank1]:     ret_val = wrap_fake_exception(
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/utils.py", line 2864, in wrap_fake_exception
+[rank1]:     return fn()
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/utils.py", line 3377, in <lambda>
+[rank1]:     lambda: run_node(tx.output, node, args, kwargs, nnmodule)
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/utils.py", line 3587, in run_node
+[rank1]:     raise RuntimeError(make_error_message(e)).with_traceback(
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/utils.py", line 3557, in run_node
+[rank1]:     return getattr(args[0], node.target)(*args[1:], **kwargs)  # type: ignore[arg-type]
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/utils/_stats.py", line 28, in wrapper
+[rank1]:     return fn(*args, **kwargs)
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py", line 1376, in __torch_dispatch__
+[rank1]:     return self.dispatch(func, types, args, kwargs)
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py", line 2096, in dispatch
+[rank1]:     return self._cached_dispatch_impl(func, types, args, kwargs)
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py", line 1511, in _cached_dispatch_impl
+[rank1]:     output = self._dispatch_impl(func, types, args, kwargs)
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py", line 2755, in _dispatch_impl
+[rank1]:     r = func(*args, **kwargs)
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_ops.py", line 841, in __call__
+[rank1]:     return self._op(*args, **kwargs)
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_meta_registrations.py", line 7824, in _fn
+[rank1]:     out = fn(self, *args, **kwargs)
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_ops.py", line 1255, in __call__
+[rank1]:     return self._op(*args, **kwargs)
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_prims_common/wrappers.py", line 309, in _fn
+[rank1]:     result = fn(*args, **kwargs)
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_meta_registrations.py", line 7850, in lerp
+[rank1]:     return elementwise_meta(
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_meta_registrations.py", line 79, in elementwise_meta
+[rank1]:     args = _maybe_broadcast(*args)
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_refs/__init__.py", line 448, in _maybe_broadcast
+[rank1]:     common_shape = _broadcast_shapes(
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_refs/__init__.py", line 436, in _broadcast_shapes
+[rank1]:     torch._check(
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/__init__.py", line 1695, in _check
+[rank1]:     _check_with(RuntimeError, cond, message)
+[rank1]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/__init__.py", line 1677, in _check_with
+[rank1]:     raise error_type(message_evaluated)
+[rank1]: torch._dynamo.exc.TorchRuntimeError: Dynamo failed to run FX node with fake tensors: call_method lerp_(*(FakeTensor(..., device='cuda:1', size=(4096, 1280)), FakeTensor(..., device='cuda:1', size=(8192, 1280)), FakeTensor(..., size=())), **{}): got RuntimeError('Attempting to broadcast a dimension of length 8192 at -2! Mismatching argument at index 1 had torch.Size([8192, 1280]); but expected shape should be broadcastable to [4096, 1280]')
+
+[rank1]: from user code:
+[rank1]:    File "/weka/scratch/jhu/enalisn1/xiw/nanochat/nanochat/optim.py", line 51, in adamw_step_fused
+[rank1]:     exp_avg32.lerp_(grad32, 1 - beta1_t)
+
+[rank1]: Set TORCHDYNAMO_VERBOSE=1 for the internal stack trace (please do this especially if you're reporting a bug to PyTorch). For even more developer context, set TORCH_LOGS="+dynamo"
+
+[rank3]:E0827 16:38:00.741000 181534 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0] failed while attempting to run meta for aten.lerp_.Tensor
+[rank3]:E0827 16:38:00.741000 181534 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0] Traceback (most recent call last):
+[rank3]:E0827 16:38:00.741000 181534 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py", line 2755, in _dispatch_impl
+[rank3]:E0827 16:38:00.741000 181534 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]     r = func(*args, **kwargs)
+[rank3]:E0827 16:38:00.741000 181534 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_ops.py", line 841, in __call__
+[rank3]:E0827 16:38:00.741000 181534 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]     return self._op(*args, **kwargs)
+[rank3]:E0827 16:38:00.741000 181534 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_meta_registrations.py", line 7824, in _fn
+[rank3]:E0827 16:38:00.741000 181534 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]     out = fn(self, *args, **kwargs)
+[rank3]:E0827 16:38:00.741000 181534 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_ops.py", line 1255, in __call__
+[rank3]:E0827 16:38:00.741000 181534 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]     return self._op(*args, **kwargs)
+[rank3]:E0827 16:38:00.741000 181534 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_prims_common/wrappers.py", line 309, in _fn
+[rank3]:E0827 16:38:00.741000 181534 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]     result = fn(*args, **kwargs)
+[rank3]:E0827 16:38:00.741000 181534 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_meta_registrations.py", line 7850, in lerp
+[rank3]:E0827 16:38:00.741000 181534 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]     return elementwise_meta(
+[rank3]:E0827 16:38:00.741000 181534 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_meta_registrations.py", line 79, in elementwise_meta
+[rank3]:E0827 16:38:00.741000 181534 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]     args = _maybe_broadcast(*args)
+[rank3]:E0827 16:38:00.741000 181534 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_refs/__init__.py", line 448, in _maybe_broadcast
+[rank3]:E0827 16:38:00.741000 181534 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]     common_shape = _broadcast_shapes(
+[rank3]:E0827 16:38:00.741000 181534 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_refs/__init__.py", line 436, in _broadcast_shapes
+[rank3]:E0827 16:38:00.741000 181534 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]     torch._check(
+[rank3]:E0827 16:38:00.741000 181534 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/__init__.py", line 1695, in _check
+[rank3]:E0827 16:38:00.741000 181534 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]     _check_with(RuntimeError, cond, message)
+[rank3]:E0827 16:38:00.741000 181534 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/__init__.py", line 1677, in _check_with
+[rank3]:E0827 16:38:00.741000 181534 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]     raise error_type(message_evaluated)
+[rank3]:E0827 16:38:00.741000 181534 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0] RuntimeError: Attempting to broadcast a dimension of length 8192 at -2! Mismatching argument at index 1 had torch.Size([8192, 1280]); but expected shape should be broadcastable to [4096, 1280]
+[rank3]: Traceback (most recent call last):
+[rank3]:   File "/home/jhu/xwang457/.local/share/uv/python/cpython-3.10.21-linux-x86_64-gnu/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+[rank3]:     return _run_code(code, main_globals, None,
+[rank3]:   File "/home/jhu/xwang457/.local/share/uv/python/cpython-3.10.21-linux-x86_64-gnu/lib/python3.10/runpy.py", line 86, in _run_code
+[rank3]:     exec(code, run_globals)
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/scripts/chat_sft.py", line 555, in <module>
+[rank3]:     optimizer.step()
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/optim/optimizer.py", line 517, in wrapper
+[rank3]:     out = func(*args, **kwargs)
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/utils/_contextlib.py", line 120, in decorate_context
+[rank3]:     return func(*args, **kwargs)
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/nanochat/optim.py", line 480, in step
+[rank3]:     self._compute_adamw(group, info, gather_list, rank, world_size)
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/nanochat/optim.py", line 353, in _compute_adamw
+[rank3]:     adamw_step_fused(
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/eval_frame.py", line 832, in compile_wrapper
+[rank3]:     return fn(*args, **kwargs)
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 1875, in __call__
+[rank3]:     result = self._torchdynamo_orig_backend(
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 688, in __call__
+[rank3]:     result = _compile(
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 1434, in _compile
+[rank3]:     guarded_code, tracer_output = compile_inner(code, one_graph, hooks)
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_utils_internal.py", line 92, in wrapper_function
+[rank3]:     return function(*args, **kwargs)
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 1117, in compile_inner
+[rank3]:     return _compile_inner(code, one_graph, hooks)
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 1151, in _compile_inner
+[rank3]:     dynamo_output = compile_frame(
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 1032, in compile_frame
+[rank3]:     bytecode, tracer_output = transform_code_object(code, transform)
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/bytecode_transformation.py", line 1592, in transform_code_object
+[rank3]:     tracer_output = transformations(instructions, code_options)
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 1004, in transform
+[rank3]:     tracer_output = trace_frame(
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 312, in _fn
+[rank3]:     return fn(*args, **kwargs)
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 815, in trace_frame
+[rank3]:     run_tracer()
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 797, in run_tracer
+[rank3]:     tracer.run()
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/symbolic_convert.py", line 1500, in run
+[rank3]:     while self.step():
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/symbolic_convert.py", line 1348, in step
+[rank3]:     self.dispatch_table[inst.opcode](self, inst)
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/symbolic_convert.py", line 904, in wrapper
+[rank3]:     return inner_fn(self, inst)
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/symbolic_convert.py", line 2333, in CALL_FUNCTION
+[rank3]:     self.call_function(fn, args, {})
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/symbolic_convert.py", line 1266, in call_function
+[rank3]:     self.push(fn.call_function(self, args, kwargs))  # type: ignore[arg-type]
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/variables/misc.py", line 1115, in call_function
+[rank3]:     return self.obj.call_method(tx, self.name, args, kwargs)
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/variables/tensor.py", line 713, in call_method
+[rank3]:     return wrap_fx_proxy(
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/variables/builder.py", line 2645, in wrap_fx_proxy
+[rank3]:     return wrap_fx_proxy_cls(target_cls=TensorVariable, **kwargs)
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/variables/builder.py", line 2711, in wrap_fx_proxy_cls
+[rank3]:     return _wrap_fx_proxy(
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/variables/builder.py", line 2809, in _wrap_fx_proxy
+[rank3]:     example_value = get_fake_value(proxy.node, tx, allow_non_graph_fake=True)
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/utils.py", line 3478, in get_fake_value
+[rank3]:     raise TorchRuntimeError(str(e)).with_traceback(e.__traceback__) from None
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/utils.py", line 3376, in get_fake_value
+[rank3]:     ret_val = wrap_fake_exception(
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/utils.py", line 2864, in wrap_fake_exception
+[rank3]:     return fn()
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/utils.py", line 3377, in <lambda>
+[rank3]:     lambda: run_node(tx.output, node, args, kwargs, nnmodule)
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/utils.py", line 3587, in run_node
+[rank3]:     raise RuntimeError(make_error_message(e)).with_traceback(
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/utils.py", line 3557, in run_node
+[rank3]:     return getattr(args[0], node.target)(*args[1:], **kwargs)  # type: ignore[arg-type]
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/utils/_stats.py", line 28, in wrapper
+[rank3]:     return fn(*args, **kwargs)
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py", line 1376, in __torch_dispatch__
+[rank3]:     return self.dispatch(func, types, args, kwargs)
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py", line 2096, in dispatch
+[rank3]:     return self._cached_dispatch_impl(func, types, args, kwargs)
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py", line 1511, in _cached_dispatch_impl
+[rank3]:     output = self._dispatch_impl(func, types, args, kwargs)
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py", line 2755, in _dispatch_impl
+[rank3]:     r = func(*args, **kwargs)
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_ops.py", line 841, in __call__
+[rank3]:     return self._op(*args, **kwargs)
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_meta_registrations.py", line 7824, in _fn
+[rank3]:     out = fn(self, *args, **kwargs)
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_ops.py", line 1255, in __call__
+[rank3]:     return self._op(*args, **kwargs)
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_prims_common/wrappers.py", line 309, in _fn
+[rank3]:     result = fn(*args, **kwargs)
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_meta_registrations.py", line 7850, in lerp
+[rank3]:     return elementwise_meta(
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_meta_registrations.py", line 79, in elementwise_meta
+[rank3]:     args = _maybe_broadcast(*args)
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_refs/__init__.py", line 448, in _maybe_broadcast
+[rank3]:     common_shape = _broadcast_shapes(
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_refs/__init__.py", line 436, in _broadcast_shapes
+[rank3]:     torch._check(
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/__init__.py", line 1695, in _check
+[rank3]:     _check_with(RuntimeError, cond, message)
+[rank3]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/__init__.py", line 1677, in _check_with
+[rank3]:     raise error_type(message_evaluated)
+[rank3]: torch._dynamo.exc.TorchRuntimeError: Dynamo failed to run FX node with fake tensors: call_method lerp_(*(FakeTensor(..., device='cuda:3', size=(4096, 1280)), FakeTensor(..., device='cuda:3', size=(8192, 1280)), FakeTensor(..., size=())), **{}): got RuntimeError('Attempting to broadcast a dimension of length 8192 at -2! Mismatching argument at index 1 had torch.Size([8192, 1280]); but expected shape should be broadcastable to [4096, 1280]')
+
+[rank3]: from user code:
+[rank3]:    File "/weka/scratch/jhu/enalisn1/xiw/nanochat/nanochat/optim.py", line 51, in adamw_step_fused
+[rank3]:     exp_avg32.lerp_(grad32, 1 - beta1_t)
+
+[rank3]: Set TORCHDYNAMO_VERBOSE=1 for the internal stack trace (please do this especially if you're reporting a bug to PyTorch). For even more developer context, set TORCH_LOGS="+dynamo"
+
+[rank2]:E0827 16:38:01.294000 181533 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0] failed while attempting to run meta for aten.lerp_.Tensor
+[rank2]:E0827 16:38:01.294000 181533 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0] Traceback (most recent call last):
+[rank2]:E0827 16:38:01.294000 181533 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py", line 2755, in _dispatch_impl
+[rank2]:E0827 16:38:01.294000 181533 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]     r = func(*args, **kwargs)
+[rank2]:E0827 16:38:01.294000 181533 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_ops.py", line 841, in __call__
+[rank2]:E0827 16:38:01.294000 181533 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]     return self._op(*args, **kwargs)
+[rank2]:E0827 16:38:01.294000 181533 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_meta_registrations.py", line 7824, in _fn
+[rank2]:E0827 16:38:01.294000 181533 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]     out = fn(self, *args, **kwargs)
+[rank2]:E0827 16:38:01.294000 181533 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_ops.py", line 1255, in __call__
+[rank2]:E0827 16:38:01.294000 181533 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]     return self._op(*args, **kwargs)
+[rank2]:E0827 16:38:01.294000 181533 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_prims_common/wrappers.py", line 309, in _fn
+[rank2]:E0827 16:38:01.294000 181533 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]     result = fn(*args, **kwargs)
+[rank2]:E0827 16:38:01.294000 181533 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_meta_registrations.py", line 7850, in lerp
+[rank2]:E0827 16:38:01.294000 181533 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]     return elementwise_meta(
+[rank2]:E0827 16:38:01.294000 181533 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_meta_registrations.py", line 79, in elementwise_meta
+[rank2]:E0827 16:38:01.294000 181533 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]     args = _maybe_broadcast(*args)
+[rank2]:E0827 16:38:01.294000 181533 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_refs/__init__.py", line 448, in _maybe_broadcast
+[rank2]:E0827 16:38:01.294000 181533 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]     common_shape = _broadcast_shapes(
+[rank2]:E0827 16:38:01.294000 181533 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_refs/__init__.py", line 436, in _broadcast_shapes
+[rank2]:E0827 16:38:01.294000 181533 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]     torch._check(
+[rank2]:E0827 16:38:01.294000 181533 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/__init__.py", line 1695, in _check
+[rank2]:E0827 16:38:01.294000 181533 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]     _check_with(RuntimeError, cond, message)
+[rank2]:E0827 16:38:01.294000 181533 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/__init__.py", line 1677, in _check_with
+[rank2]:E0827 16:38:01.294000 181533 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]     raise error_type(message_evaluated)
+[rank2]:E0827 16:38:01.294000 181533 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0] RuntimeError: Attempting to broadcast a dimension of length 8192 at -2! Mismatching argument at index 1 had torch.Size([8192, 1280]); but expected shape should be broadcastable to [4096, 1280]
+[rank2]: Traceback (most recent call last):
+[rank2]:   File "/home/jhu/xwang457/.local/share/uv/python/cpython-3.10.21-linux-x86_64-gnu/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+[rank2]:     return _run_code(code, main_globals, None,
+[rank2]:   File "/home/jhu/xwang457/.local/share/uv/python/cpython-3.10.21-linux-x86_64-gnu/lib/python3.10/runpy.py", line 86, in _run_code
+[rank2]:     exec(code, run_globals)
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/scripts/chat_sft.py", line 555, in <module>
+[rank2]:     optimizer.step()
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/optim/optimizer.py", line 517, in wrapper
+[rank2]:     out = func(*args, **kwargs)
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/utils/_contextlib.py", line 120, in decorate_context
+[rank2]:     return func(*args, **kwargs)
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/nanochat/optim.py", line 480, in step
+[rank2]:     self._compute_adamw(group, info, gather_list, rank, world_size)
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/nanochat/optim.py", line 353, in _compute_adamw
+[rank2]:     adamw_step_fused(
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/eval_frame.py", line 832, in compile_wrapper
+[rank2]:     return fn(*args, **kwargs)
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 1875, in __call__
+[rank2]:     result = self._torchdynamo_orig_backend(
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 688, in __call__
+[rank2]:     result = _compile(
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 1434, in _compile
+[rank2]:     guarded_code, tracer_output = compile_inner(code, one_graph, hooks)
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_utils_internal.py", line 92, in wrapper_function
+[rank2]:     return function(*args, **kwargs)
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 1117, in compile_inner
+[rank2]:     return _compile_inner(code, one_graph, hooks)
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 1151, in _compile_inner
+[rank2]:     dynamo_output = compile_frame(
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 1032, in compile_frame
+[rank2]:     bytecode, tracer_output = transform_code_object(code, transform)
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/bytecode_transformation.py", line 1592, in transform_code_object
+[rank2]:     tracer_output = transformations(instructions, code_options)
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 1004, in transform
+[rank2]:     tracer_output = trace_frame(
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 312, in _fn
+[rank2]:     return fn(*args, **kwargs)
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 815, in trace_frame
+[rank2]:     run_tracer()
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 797, in run_tracer
+[rank2]:     tracer.run()
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/symbolic_convert.py", line 1500, in run
+[rank2]:     while self.step():
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/symbolic_convert.py", line 1348, in step
+[rank2]:     self.dispatch_table[inst.opcode](self, inst)
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/symbolic_convert.py", line 904, in wrapper
+[rank2]:     return inner_fn(self, inst)
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/symbolic_convert.py", line 2333, in CALL_FUNCTION
+[rank2]:     self.call_function(fn, args, {})
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/symbolic_convert.py", line 1266, in call_function
+[rank2]:     self.push(fn.call_function(self, args, kwargs))  # type: ignore[arg-type]
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/variables/misc.py", line 1115, in call_function
+[rank2]:     return self.obj.call_method(tx, self.name, args, kwargs)
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/variables/tensor.py", line 713, in call_method
+[rank2]:     return wrap_fx_proxy(
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/variables/builder.py", line 2645, in wrap_fx_proxy
+[rank2]:     return wrap_fx_proxy_cls(target_cls=TensorVariable, **kwargs)
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/variables/builder.py", line 2711, in wrap_fx_proxy_cls
+[rank2]:     return _wrap_fx_proxy(
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/variables/builder.py", line 2809, in _wrap_fx_proxy
+[rank2]:     example_value = get_fake_value(proxy.node, tx, allow_non_graph_fake=True)
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/utils.py", line 3478, in get_fake_value
+[rank2]:     raise TorchRuntimeError(str(e)).with_traceback(e.__traceback__) from None
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/utils.py", line 3376, in get_fake_value
+[rank2]:     ret_val = wrap_fake_exception(
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/utils.py", line 2864, in wrap_fake_exception
+[rank2]:     return fn()
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/utils.py", line 3377, in <lambda>
+[rank2]:     lambda: run_node(tx.output, node, args, kwargs, nnmodule)
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/utils.py", line 3587, in run_node
+[rank2]:     raise RuntimeError(make_error_message(e)).with_traceback(
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/utils.py", line 3557, in run_node
+[rank2]:     return getattr(args[0], node.target)(*args[1:], **kwargs)  # type: ignore[arg-type]
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/utils/_stats.py", line 28, in wrapper
+[rank2]:     return fn(*args, **kwargs)
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py", line 1376, in __torch_dispatch__
+[rank2]:     return self.dispatch(func, types, args, kwargs)
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py", line 2096, in dispatch
+[rank2]:     return self._cached_dispatch_impl(func, types, args, kwargs)
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py", line 1511, in _cached_dispatch_impl
+[rank2]:     output = self._dispatch_impl(func, types, args, kwargs)
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py", line 2755, in _dispatch_impl
+[rank2]:     r = func(*args, **kwargs)
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_ops.py", line 841, in __call__
+[rank2]:     return self._op(*args, **kwargs)
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_meta_registrations.py", line 7824, in _fn
+[rank2]:     out = fn(self, *args, **kwargs)
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_ops.py", line 1255, in __call__
+[rank2]:     return self._op(*args, **kwargs)
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_prims_common/wrappers.py", line 309, in _fn
+[rank2]:     result = fn(*args, **kwargs)
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_meta_registrations.py", line 7850, in lerp
+[rank2]:     return elementwise_meta(
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_meta_registrations.py", line 79, in elementwise_meta
+[rank2]:     args = _maybe_broadcast(*args)
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_refs/__init__.py", line 448, in _maybe_broadcast
+[rank2]:     common_shape = _broadcast_shapes(
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_refs/__init__.py", line 436, in _broadcast_shapes
+[rank2]:     torch._check(
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/__init__.py", line 1695, in _check
+[rank2]:     _check_with(RuntimeError, cond, message)
+[rank2]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/__init__.py", line 1677, in _check_with
+[rank2]:     raise error_type(message_evaluated)
+[rank2]: torch._dynamo.exc.TorchRuntimeError: Dynamo failed to run FX node with fake tensors: call_method lerp_(*(FakeTensor(..., device='cuda:2', size=(4096, 1280)), FakeTensor(..., device='cuda:2', size=(8192, 1280)), FakeTensor(..., size=())), **{}): got RuntimeError('Attempting to broadcast a dimension of length 8192 at -2! Mismatching argument at index 1 had torch.Size([8192, 1280]); but expected shape should be broadcastable to [4096, 1280]')
+
+[rank2]: from user code:
+[rank2]:    File "/weka/scratch/jhu/enalisn1/xiw/nanochat/nanochat/optim.py", line 51, in adamw_step_fused
+[rank2]:     exp_avg32.lerp_(grad32, 1 - beta1_t)
+
+[rank2]: Set TORCHDYNAMO_VERBOSE=1 for the internal stack trace (please do this especially if you're reporting a bug to PyTorch). For even more developer context, set TORCH_LOGS="+dynamo"
+
+[rank0]:E0827 16:38:01.620000 181531 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0] failed while attempting to run meta for aten.lerp_.Tensor
+[rank0]:E0827 16:38:01.620000 181531 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0] Traceback (most recent call last):
+[rank0]:E0827 16:38:01.620000 181531 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py", line 2755, in _dispatch_impl
+[rank0]:E0827 16:38:01.620000 181531 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]     r = func(*args, **kwargs)
+[rank0]:E0827 16:38:01.620000 181531 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_ops.py", line 841, in __call__
+[rank0]:E0827 16:38:01.620000 181531 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]     return self._op(*args, **kwargs)
+[rank0]:E0827 16:38:01.620000 181531 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_meta_registrations.py", line 7824, in _fn
+[rank0]:E0827 16:38:01.620000 181531 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]     out = fn(self, *args, **kwargs)
+[rank0]:E0827 16:38:01.620000 181531 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_ops.py", line 1255, in __call__
+[rank0]:E0827 16:38:01.620000 181531 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]     return self._op(*args, **kwargs)
+[rank0]:E0827 16:38:01.620000 181531 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_prims_common/wrappers.py", line 309, in _fn
+[rank0]:E0827 16:38:01.620000 181531 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]     result = fn(*args, **kwargs)
+[rank0]:E0827 16:38:01.620000 181531 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_meta_registrations.py", line 7850, in lerp
+[rank0]:E0827 16:38:01.620000 181531 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]     return elementwise_meta(
+[rank0]:E0827 16:38:01.620000 181531 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_meta_registrations.py", line 79, in elementwise_meta
+[rank0]:E0827 16:38:01.620000 181531 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]     args = _maybe_broadcast(*args)
+[rank0]:E0827 16:38:01.620000 181531 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_refs/__init__.py", line 448, in _maybe_broadcast
+[rank0]:E0827 16:38:01.620000 181531 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]     common_shape = _broadcast_shapes(
+[rank0]:E0827 16:38:01.620000 181531 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_refs/__init__.py", line 436, in _broadcast_shapes
+[rank0]:E0827 16:38:01.620000 181531 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]     torch._check(
+[rank0]:E0827 16:38:01.620000 181531 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/__init__.py", line 1695, in _check
+[rank0]:E0827 16:38:01.620000 181531 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]     _check_with(RuntimeError, cond, message)
+[rank0]:E0827 16:38:01.620000 181531 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/__init__.py", line 1677, in _check_with
+[rank0]:E0827 16:38:01.620000 181531 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0]     raise error_type(message_evaluated)
+[rank0]:E0827 16:38:01.620000 181531 .venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py:2759] [1/0] RuntimeError: Attempting to broadcast a dimension of length 8192 at -2! Mismatching argument at index 1 had torch.Size([8192, 1280]); but expected shape should be broadcastable to [4096, 1280]
+Traceback (most recent call last):
+  File "/home/jhu/xwang457/.local/share/uv/python/cpython-3.10.21-linux-x86_64-gnu/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/home/jhu/xwang457/.local/share/uv/python/cpython-3.10.21-linux-x86_64-gnu/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/scripts/chat_sft.py", line 555, in <module>
+    optimizer.step()
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/optim/optimizer.py", line 517, in wrapper
+    out = func(*args, **kwargs)
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/utils/_contextlib.py", line 120, in decorate_context
+    return func(*args, **kwargs)
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/nanochat/optim.py", line 480, in step
+    self._compute_adamw(group, info, gather_list, rank, world_size)
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/nanochat/optim.py", line 353, in _compute_adamw
+    adamw_step_fused(
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/eval_frame.py", line 832, in compile_wrapper
+    return fn(*args, **kwargs)
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 1875, in __call__
+    result = self._torchdynamo_orig_backend(
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 688, in __call__
+    result = _compile(
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 1434, in _compile
+    guarded_code, tracer_output = compile_inner(code, one_graph, hooks)
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_utils_internal.py", line 92, in wrapper_function
+    return function(*args, **kwargs)
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 1117, in compile_inner
+    return _compile_inner(code, one_graph, hooks)
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 1151, in _compile_inner
+    dynamo_output = compile_frame(
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 1032, in compile_frame
+    bytecode, tracer_output = transform_code_object(code, transform)
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/bytecode_transformation.py", line 1592, in transform_code_object
+    tracer_output = transformations(instructions, code_options)
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 1004, in transform
+    tracer_output = trace_frame(
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 312, in _fn
+    return fn(*args, **kwargs)
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 815, in trace_frame
+    run_tracer()
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 797, in run_tracer
+    tracer.run()
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/symbolic_convert.py", line 1500, in run
+    while self.step():
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/symbolic_convert.py", line 1348, in step
+    self.dispatch_table[inst.opcode](self, inst)
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/symbolic_convert.py", line 904, in wrapper
+    return inner_fn(self, inst)
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/symbolic_convert.py", line 2333, in CALL_FUNCTION
+    self.call_function(fn, args, {})
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/symbolic_convert.py", line 1266, in call_function
+    self.push(fn.call_function(self, args, kwargs))  # type: ignore[arg-type]
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/variables/misc.py", line 1115, in call_function
+    return self.obj.call_method(tx, self.name, args, kwargs)
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/variables/tensor.py", line 713, in call_method
+    return wrap_fx_proxy(
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/variables/builder.py", line 2645, in wrap_fx_proxy
+    return wrap_fx_proxy_cls(target_cls=TensorVariable, **kwargs)
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/variables/builder.py", line 2711, in wrap_fx_proxy_cls
+    return _wrap_fx_proxy(
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/variables/builder.py", line 2809, in _wrap_fx_proxy
+    example_value = get_fake_value(proxy.node, tx, allow_non_graph_fake=True)
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/utils.py", line 3478, in get_fake_value
+    raise TorchRuntimeError(str(e)).with_traceback(e.__traceback__) from None
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/utils.py", line 3376, in get_fake_value
+    ret_val = wrap_fake_exception(
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/utils.py", line 2864, in wrap_fake_exception
+    return fn()
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/utils.py", line 3377, in <lambda>
+    lambda: run_node(tx.output, node, args, kwargs, nnmodule)
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/utils.py", line 3587, in run_node
+    raise RuntimeError(make_error_message(e)).with_traceback(
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/utils.py", line 3557, in run_node
+    return getattr(args[0], node.target)(*args[1:], **kwargs)  # type: ignore[arg-type]
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/utils/_stats.py", line 28, in wrapper
+    return fn(*args, **kwargs)
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py", line 1376, in __torch_dispatch__
+    return self.dispatch(func, types, args, kwargs)
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py", line 2096, in dispatch
+    return self._cached_dispatch_impl(func, types, args, kwargs)
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py", line 1511, in _cached_dispatch_impl
+    output = self._dispatch_impl(func, types, args, kwargs)
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py", line 2755, in _dispatch_impl
+    r = func(*args, **kwargs)
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_ops.py", line 841, in __call__
+    return self._op(*args, **kwargs)
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_meta_registrations.py", line 7824, in _fn
+    out = fn(self, *args, **kwargs)
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_ops.py", line 1255, in __call__
+    return self._op(*args, **kwargs)
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_prims_common/wrappers.py", line 309, in _fn
+    result = fn(*args, **kwargs)
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_meta_registrations.py", line 7850, in lerp
+    return elementwise_meta(
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_meta_registrations.py", line 79, in elementwise_meta
+    args = _maybe_broadcast(*args)
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_refs/__init__.py", line 448, in _maybe_broadcast
+    common_shape = _broadcast_shapes(
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_refs/__init__.py", line 436, in _broadcast_shapes
+    torch._check(
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/__init__.py", line 1695, in _check
+    _check_with(RuntimeError, cond, message)
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/__init__.py", line 1677, in _check_with
+    raise error_type(message_evaluated)
+torch._dynamo.exc.TorchRuntimeError: Dynamo failed to run FX node with fake tensors: call_method lerp_(*(FakeTensor(..., device='cuda:0', size=(4096, 1280)), FakeTensor(..., device='cuda:0', size=(8192, 1280)), FakeTensor(..., size=())), **{}): got RuntimeError('Attempting to broadcast a dimension of length 8192 at -2! Mismatching argument at index 1 had torch.Size([8192, 1280]); but expected shape should be broadcastable to [4096, 1280]')
+
+from user code:
+   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/nanochat/optim.py", line 51, in adamw_step_fused
+    exp_avg32.lerp_(grad32, 1 - beta1_t)
+
+Set TORCHDYNAMO_VERBOSE=1 for the internal stack trace (please do this especially if you're reporting a bug to PyTorch). For even more developer context, set TORCH_LOGS="+dynamo"
+
+[rank0]: Traceback (most recent call last):
+[rank0]:   File "/home/jhu/xwang457/.local/share/uv/python/cpython-3.10.21-linux-x86_64-gnu/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+[rank0]:     return _run_code(code, main_globals, None,
+[rank0]:   File "/home/jhu/xwang457/.local/share/uv/python/cpython-3.10.21-linux-x86_64-gnu/lib/python3.10/runpy.py", line 86, in _run_code
+[rank0]:     exec(code, run_globals)
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/scripts/chat_sft.py", line 555, in <module>
+[rank0]:     optimizer.step()
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/optim/optimizer.py", line 517, in wrapper
+[rank0]:     out = func(*args, **kwargs)
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/utils/_contextlib.py", line 120, in decorate_context
+[rank0]:     return func(*args, **kwargs)
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/nanochat/optim.py", line 480, in step
+[rank0]:     self._compute_adamw(group, info, gather_list, rank, world_size)
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/nanochat/optim.py", line 353, in _compute_adamw
+[rank0]:     adamw_step_fused(
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/eval_frame.py", line 832, in compile_wrapper
+[rank0]:     return fn(*args, **kwargs)
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 1875, in __call__
+[rank0]:     result = self._torchdynamo_orig_backend(
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 688, in __call__
+[rank0]:     result = _compile(
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 1434, in _compile
+[rank0]:     guarded_code, tracer_output = compile_inner(code, one_graph, hooks)
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_utils_internal.py", line 92, in wrapper_function
+[rank0]:     return function(*args, **kwargs)
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 1117, in compile_inner
+[rank0]:     return _compile_inner(code, one_graph, hooks)
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 1151, in _compile_inner
+[rank0]:     dynamo_output = compile_frame(
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 1032, in compile_frame
+[rank0]:     bytecode, tracer_output = transform_code_object(code, transform)
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/bytecode_transformation.py", line 1592, in transform_code_object
+[rank0]:     tracer_output = transformations(instructions, code_options)
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 1004, in transform
+[rank0]:     tracer_output = trace_frame(
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 312, in _fn
+[rank0]:     return fn(*args, **kwargs)
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 815, in trace_frame
+[rank0]:     run_tracer()
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/convert_frame.py", line 797, in run_tracer
+[rank0]:     tracer.run()
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/symbolic_convert.py", line 1500, in run
+[rank0]:     while self.step():
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/symbolic_convert.py", line 1348, in step
+[rank0]:     self.dispatch_table[inst.opcode](self, inst)
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/symbolic_convert.py", line 904, in wrapper
+[rank0]:     return inner_fn(self, inst)
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/symbolic_convert.py", line 2333, in CALL_FUNCTION
+[rank0]:     self.call_function(fn, args, {})
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/symbolic_convert.py", line 1266, in call_function
+[rank0]:     self.push(fn.call_function(self, args, kwargs))  # type: ignore[arg-type]
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/variables/misc.py", line 1115, in call_function
+[rank0]:     return self.obj.call_method(tx, self.name, args, kwargs)
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/variables/tensor.py", line 713, in call_method
+[rank0]:     return wrap_fx_proxy(
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/variables/builder.py", line 2645, in wrap_fx_proxy
+[rank0]:     return wrap_fx_proxy_cls(target_cls=TensorVariable, **kwargs)
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/variables/builder.py", line 2711, in wrap_fx_proxy_cls
+[rank0]:     return _wrap_fx_proxy(
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/variables/builder.py", line 2809, in _wrap_fx_proxy
+[rank0]:     example_value = get_fake_value(proxy.node, tx, allow_non_graph_fake=True)
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/utils.py", line 3478, in get_fake_value
+[rank0]:     raise TorchRuntimeError(str(e)).with_traceback(e.__traceback__) from None
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/utils.py", line 3376, in get_fake_value
+[rank0]:     ret_val = wrap_fake_exception(
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/utils.py", line 2864, in wrap_fake_exception
+[rank0]:     return fn()
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/utils.py", line 3377, in <lambda>
+[rank0]:     lambda: run_node(tx.output, node, args, kwargs, nnmodule)
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/utils.py", line 3587, in run_node
+[rank0]:     raise RuntimeError(make_error_message(e)).with_traceback(
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_dynamo/utils.py", line 3557, in run_node
+[rank0]:     return getattr(args[0], node.target)(*args[1:], **kwargs)  # type: ignore[arg-type]
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/utils/_stats.py", line 28, in wrapper
+[rank0]:     return fn(*args, **kwargs)
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py", line 1376, in __torch_dispatch__
+[rank0]:     return self.dispatch(func, types, args, kwargs)
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py", line 2096, in dispatch
+[rank0]:     return self._cached_dispatch_impl(func, types, args, kwargs)
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py", line 1511, in _cached_dispatch_impl
+[rank0]:     output = self._dispatch_impl(func, types, args, kwargs)
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_subclasses/fake_tensor.py", line 2755, in _dispatch_impl
+[rank0]:     r = func(*args, **kwargs)
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_ops.py", line 841, in __call__
+[rank0]:     return self._op(*args, **kwargs)
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_meta_registrations.py", line 7824, in _fn
+[rank0]:     out = fn(self, *args, **kwargs)
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_ops.py", line 1255, in __call__
+[rank0]:     return self._op(*args, **kwargs)
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_prims_common/wrappers.py", line 309, in _fn
+[rank0]:     result = fn(*args, **kwargs)
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_meta_registrations.py", line 7850, in lerp
+[rank0]:     return elementwise_meta(
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_meta_registrations.py", line 79, in elementwise_meta
+[rank0]:     args = _maybe_broadcast(*args)
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_refs/__init__.py", line 448, in _maybe_broadcast
+[rank0]:     common_shape = _broadcast_shapes(
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/_refs/__init__.py", line 436, in _broadcast_shapes
+[rank0]:     torch._check(
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/__init__.py", line 1695, in _check
+[rank0]:     _check_with(RuntimeError, cond, message)
+[rank0]:   File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/__init__.py", line 1677, in _check_with
+[rank0]:     raise error_type(message_evaluated)
+[rank0]: torch._dynamo.exc.TorchRuntimeError: Dynamo failed to run FX node with fake tensors: call_method lerp_(*(FakeTensor(..., device='cuda:0', size=(4096, 1280)), FakeTensor(..., device='cuda:0', size=(8192, 1280)), FakeTensor(..., size=())), **{}): got RuntimeError('Attempting to broadcast a dimension of length 8192 at -2! Mismatching argument at index 1 had torch.Size([8192, 1280]); but expected shape should be broadcastable to [4096, 1280]')
+
+[rank0]: from user code:
+[rank0]:    File "/weka/scratch/jhu/enalisn1/xiw/nanochat/nanochat/optim.py", line 51, in adamw_step_fused
+[rank0]:     exp_avg32.lerp_(grad32, 1 - beta1_t)
+
+[rank0]: Set TORCHDYNAMO_VERBOSE=1 for the internal stack trace (please do this especially if you're reporting a bug to PyTorch). For even more developer context, set TORCH_LOGS="+dynamo"
+
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33md20-lf-k3-openmath-train1m[0m at: [34mhttps://wandb.ai/xidulu-umass-amherst/nanochat-sft/runs/mt52nu7o[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20260827_163711-mt52nu7o/logs[0m
+W0827 16:38:03.417000 181510 torch/distributed/elastic/multiprocessing/api.py:908] Sending process 181531 closing signal SIGTERM
+W0827 16:38:03.419000 181510 torch/distributed/elastic/multiprocessing/api.py:908] Sending process 181533 closing signal SIGTERM
+W0827 16:38:03.420000 181510 torch/distributed/elastic/multiprocessing/api.py:908] Sending process 181534 closing signal SIGTERM
+E0827 16:38:03.986000 181510 torch/distributed/elastic/multiprocessing/api.py:882] failed (exitcode: 1) local_rank: 1 (pid: 181532) of binary: /weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/bin/python3
+Traceback (most recent call last):
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/bin/torchrun", line 10, in <module>
+    sys.exit(main())
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 357, in wrapper
+    return f(*args, **kwargs)
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/distributed/run.py", line 936, in main
+    run(args)
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/distributed/run.py", line 927, in run
+    elastic_launch(
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 156, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+  File "/weka/scratch/jhu/enalisn1/xiw/nanochat/.venv/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 293, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+============================================================
+scripts.chat_sft FAILED
+------------------------------------------------------------
+Failures:
+  <NO_OTHER_FAILURES>
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2026-08-27_16:38:03
+  host      : gh116.mgmt.ai.cluster
+  rank      : 1 (local_rank: 1)
+  exitcode  : 1 (pid: 181532)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+============================================================
+srun: error: gh116: task 0: Exited with exit code 1
