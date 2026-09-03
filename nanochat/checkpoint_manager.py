@@ -30,6 +30,10 @@ def _patch_missing_config_keys(model_config_kwargs):
     if "weight_tying" not in model_config_kwargs:
         model_config_kwargs["weight_tying"] = False
         log0("Patching missing weight_tying in model config to False")
+    # Historical latent-feedback checkpoints used the original gated product fusion.
+    if "latent_feedback_mode" not in model_config_kwargs:
+        model_config_kwargs["latent_feedback_mode"] = "gate_product"
+        log0("Patching missing latent_feedback_mode in model config to 'gate_product'")
 
 def _patch_missing_keys(model_data, model_config):
     """Add default values for new parameters that may be missing in old checkpoints."""

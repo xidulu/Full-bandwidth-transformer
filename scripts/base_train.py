@@ -25,11 +25,11 @@ import wandb
 import torch
 import torch.distributed as dist
 
-from nanochat.gpt import GPT, GPTConfig, Linear, build_feedback_mask
+from nanochat.gpt import GPT, GPTConfig, LATENT_FEEDBACK_MODES, Linear, build_feedback_mask
 from nanochat.dataloader import tokenizing_distributed_data_loader_bos_bestfit, tokenizing_distributed_data_loader_with_state_bos_bestfit
 from nanochat.common import compute_init, compute_cleanup, print0, DummyWandb, print_banner, get_base_dir, autodetect_device_type, get_peak_flops, COMPUTE_DTYPE, COMPUTE_DTYPE_REASON, is_ddp_initialized
 from nanochat.tokenizer import get_tokenizer, get_token_bytes
-from nanochat.checkpoint_manager import save_checkpoint, load_checkpoint
+from nanochat.checkpoint_manager import save_checkpoint, load_checkpoint, find_last_step, _patch_missing_config_keys
 from nanochat.loss_eval import evaluate_bpb_per_pass
 from nanochat.train_utils import get_active_forward_passes, get_feedback_start_step
 from nanochat.engine import Engine
@@ -56,6 +56,7 @@ parser.add_argument("--window-pattern", type=str, default="SSSL", help="sliding 
 parser.add_argument("--weight-tying", action=argparse.BooleanOptionalAction, default=False, help="share the token embedding and language-model head weights")
 # Latent-feedback training
 parser.add_argument("--num-forward-passes", type=int, default=1, choices=[1, 2, 3], help="total model passes per batch; values above 1 enable latent-feedback training")
+parser.add_argument("--latent-feedback-mode", type=str, default="gate_product", choices=LATENT_FEEDBACK_MODES, help="how latent-feedback states are fused with current token embeddings")
 parser.add_argument("--feedback-jitter", type=float, default=0.02, help="half-width of uniform jitter applied to carried hidden states")
 parser.add_argument("--feedback-prefix-mixin", action=argparse.BooleanOptionalAction, default=True, help="sample an independent plain prefix for each packed document on feedback passes")
 parser.add_argument("--feedback-start-fraction", type=float, default=0.0, help="fraction of optimization steps to train with K=1 before enabling all configured forward passes")
@@ -75,6 +76,9 @@ parser.add_argument("--warmup-steps", type=int, default=40, help="number of step
 parser.add_argument("--warmdown-ratio", type=float, default=0.65, help="ratio of iterations for LR warmdown")
 parser.add_argument("--final-lr-frac", type=float, default=0.05, help="final LR as fraction of initial LR")
 parser.add_argument("--resume-from-step", type=int, default=-1, help="resume training from this step (-1 = disable)")
+parser.add_argument("--resume-from-model-tag", type=str, default=None, help="source base checkpoint tag for resume; defaults to --model-tag")
+parser.add_argument("--init-from-model-tag", type=str, default=None, help="warm-start model weights from an existing base checkpoint tag without optimizer/dataloader state")
+parser.add_argument("--init-from-step", type=int, default=-1, help="checkpoint step for --init-from-model-tag (-1 = latest)")
 # Evaluation
 parser.add_argument("--eval-every", type=int, default=250, help="evaluate val bpb every N steps (-1 = disable)")
 parser.add_argument("--eval-tokens", type=int, default=80*524288, help="number of tokens to evaluate val loss on")
@@ -84,11 +88,20 @@ parser.add_argument("--sample-every", type=int, default=2000, help="sample from 
 parser.add_argument("--save-every", type=int, default=-1, help="save checkpoints every N steps (-1 = only at end)")
 # Output
 parser.add_argument("--model-tag", type=str, default=None, help="override model tag for checkpoint directory name")
+parser.add_argument("--wandb-id", type=str, default=None, help="stable Weights & Biases run id for resuming/appending logs")
+parser.add_argument("--wandb-resume", type=str, default="allow", choices=["allow", "must", "never"], help="Weights & Biases resume policy when --wandb-id is set")
 args = parser.parse_args()
 if args.feedback_jitter < 0:
     parser.error("--feedback-jitter must be non-negative")
 if not math.isfinite(args.feedback_start_fraction) or not 0.0 <= args.feedback_start_fraction <= 1.0:
     parser.error("--feedback-start-fraction must be in [0, 1]")
+if args.resume_from_step != -1 and args.init_from_model_tag is not None:
+    parser.error("--resume-from-step and --init-from-model-tag are mutually exclusive")
+if args.resume_from_model_tag is not None and args.resume_from_step == -1:
+    parser.error("--resume-from-model-tag requires --resume-from-step")
+if args.init_from_step != -1 and args.init_from_model_tag is None:
+    parser.error("--init-from-step requires --init-from-model-tag")
+model_latent_feedback_mode = args.latent_feedback_mode if args.num_forward_passes > 1 else "gate_product"
 user_config = vars(args).copy()  # for logging
 # -----------------------------------------------------------------------------
 # Compute init and wandb logging
@@ -108,7 +121,10 @@ print0(f"COMPUTE_DTYPE: {COMPUTE_DTYPE} ({COMPUTE_DTYPE_REASON})")
 
 # wandb logging init
 use_dummy_wandb = args.run == "dummy" or not master_process
-wandb_run = DummyWandb() if use_dummy_wandb else wandb.init(project="nanochat", name=args.run, config=user_config)
+wandb_kwargs = dict(project="nanochat", name=args.run, config=user_config)
+if args.wandb_id is not None:
+    wandb_kwargs.update(id=args.wandb_id, resume=args.wandb_resume)
+wandb_run = DummyWandb() if use_dummy_wandb else wandb.init(**wandb_kwargs)
 
 # Flash Attention status
 from nanochat.flash_attention import USE_FA3
@@ -150,6 +166,7 @@ def build_model_meta(depth):
         n_layer=depth, n_head=num_heads, n_kv_head=num_heads, n_embd=model_dim,
         window_pattern=args.window_pattern,
         latent_feedback=args.num_forward_passes > 1,
+        latent_feedback_mode=model_latent_feedback_mode,
         weight_tying=args.weight_tying,
     )
     with torch.device("meta"):
@@ -171,18 +188,38 @@ schedule_tag_suffix = (
     if args.num_forward_passes > 1 and args.feedback_start_fraction > 0.0
     else ""
 )
+feedback_mode_tag_suffix = (
+    f"-{model_latent_feedback_mode}"
+    if args.num_forward_passes > 1 and model_latent_feedback_mode != "gate_product"
+    else ""
+)
 weight_tying_tag_suffix = "-wt" if args.weight_tying else ""
 default_model_tag = (
     f"d{args.depth}{weight_tying_tag_suffix}"
     if args.num_forward_passes == 1
-    else f"d{args.depth}-lf-k{args.num_forward_passes}{schedule_tag_suffix}{weight_tying_tag_suffix}"
+    else f"d{args.depth}-lf-k{args.num_forward_passes}{feedback_mode_tag_suffix}{schedule_tag_suffix}{weight_tying_tag_suffix}"
 )
 output_dirname = args.model_tag if args.model_tag else default_model_tag
 checkpoint_dir = os.path.join(base_dir, "base_checkpoints", output_dirname)
+resume_from_info = None
+if args.init_from_model_tag is not None and args.init_from_model_tag == output_dirname:
+    raise ValueError(
+        "--init-from-model-tag must differ from the output --model-tag so the branch "
+        "does not overwrite its source checkpoints"
+    )
 resuming = args.resume_from_step != -1
+checkpoint_feedback_start_fraction = 0.0
+feedback_schedule_changed_on_resume = False
 if resuming:
-    print0(f"Resuming optimization from step {args.resume_from_step}")
-    model_data, optimizer_data, meta_data = load_checkpoint(checkpoint_dir, args.resume_from_step, device, load_optimizer=True, rank=ddp_rank)
+    resume_dirname = args.resume_from_model_tag if args.resume_from_model_tag is not None else output_dirname
+    resume_checkpoint_dir = os.path.join(base_dir, "base_checkpoints", resume_dirname)
+    print0(f"Resuming optimization from {resume_checkpoint_dir} at step {args.resume_from_step}")
+    model_data, optimizer_data, meta_data = load_checkpoint(resume_checkpoint_dir, args.resume_from_step, device, load_optimizer=True, rank=ddp_rank)
+    resume_from_info = {
+        "model_tag": resume_dirname,
+        "step": args.resume_from_step,
+        "checkpoint_dir": resume_checkpoint_dir,
+    }
     checkpoint_forward_passes = meta_data.get("user_config", {}).get("num_forward_passes", 1)
     if checkpoint_forward_passes != args.num_forward_passes:
         raise ValueError(
@@ -190,9 +227,17 @@ if resuming:
             f"checkpoint uses {checkpoint_forward_passes}, requested {args.num_forward_passes}"
         )
     checkpoint_feedback_start_fraction = meta_data.get("user_config", {}).get("feedback_start_fraction", 0.0)
-    if checkpoint_feedback_start_fraction != args.feedback_start_fraction:
-        raise ValueError(
-            "Cannot change --feedback-start-fraction when resuming: "
+    feedback_schedule_changed_on_resume = checkpoint_feedback_start_fraction != args.feedback_start_fraction
+    if feedback_schedule_changed_on_resume:
+        if checkpoint_feedback_start_fraction == 0.0 and args.feedback_start_fraction > 0.0:
+            raise ValueError(
+                "Cannot resume with a newly delayed feedback schedule while preserving optimizer state: "
+                f"checkpoint uses feedback_start_fraction={checkpoint_feedback_start_fraction}, "
+                f"requested {args.feedback_start_fraction}. Use --init-from-model-tag instead if "
+                "you want to branch weights without inheriting optimizer/dataloader state."
+            )
+        print0(
+            "Changing --feedback-start-fraction on resume: "
             f"checkpoint uses {checkpoint_feedback_start_fraction}, requested {args.feedback_start_fraction}"
         )
     checkpoint_weight_tying = meta_data.get("model_config", {}).get("weight_tying", False)
@@ -201,8 +246,98 @@ if resuming:
             "Cannot change --weight-tying when resuming: "
             f"checkpoint uses {checkpoint_weight_tying}, requested {args.weight_tying}"
         )
-    model.load_state_dict(model_data, strict=True, assign=True)
+    checkpoint_feedback_mode = meta_data.get("model_config", {}).get("latent_feedback_mode", "gate_product")
+    if args.num_forward_passes > 1 and checkpoint_feedback_mode != model_latent_feedback_mode:
+        print0(
+            "Changing --latent-feedback-mode on resume: "
+            f"checkpoint uses {checkpoint_feedback_mode}, requested {model_latent_feedback_mode}"
+        )
+    load_result = model.load_state_dict(model_data, strict=False, assign=True)
+    missing_keys = set(load_result.missing_keys)
+    unexpected_keys = set(load_result.unexpected_keys)
+    if unexpected_keys or missing_keys:
+        allowed_missing_keys = {
+            key for key in model.state_dict()
+            if key.startswith("latent_feedback.")
+        }
+        if unexpected_keys or missing_keys - allowed_missing_keys:
+            raise RuntimeError(
+                "Resume state_dict mismatch. "
+                f"Unexpected keys: {sorted(unexpected_keys)}. "
+                f"Disallowed missing keys: {sorted(missing_keys - allowed_missing_keys)}"
+            )
+        raise RuntimeError(
+            "This checkpoint does not contain the full latent-feedback parameter set "
+            "needed for optimizer-preserving resume across fusion modes. Use "
+            "--init-from-model-tag to branch model weights without inheriting optimizer/"
+            "dataloader state, or resume from a checkpoint created after this change."
+        )
     del model_data # free up this memory after the copy
+
+init_from_info = None
+if args.init_from_model_tag is not None:
+    source_checkpoint_dir = os.path.join(base_dir, "base_checkpoints", args.init_from_model_tag)
+    source_step = find_last_step(source_checkpoint_dir) if args.init_from_step == -1 else args.init_from_step
+    print0(f"Warm-starting model weights from {source_checkpoint_dir} at step {source_step}")
+    model_data, _, source_meta_data = load_checkpoint(
+        source_checkpoint_dir,
+        source_step,
+        device,
+        load_optimizer=False,
+        rank=ddp_rank,
+    )
+    model_data = {key.removeprefix("_orig_mod."): value for key, value in model_data.items()}
+    source_config = source_meta_data["model_config"].copy()
+    _patch_missing_config_keys(source_config)
+    compatibility_keys = (
+        "sequence_len",
+        "vocab_size",
+        "n_layer",
+        "n_head",
+        "n_kv_head",
+        "n_embd",
+        "window_pattern",
+        "weight_tying",
+    )
+    mismatches = [
+        f"{key}: source={source_config.get(key)!r}, target={model_config_kwargs.get(key)!r}"
+        for key in compatibility_keys
+        if source_config.get(key) != model_config_kwargs.get(key)
+    ]
+    if mismatches:
+        raise ValueError(
+            "Cannot warm-start from checkpoint with incompatible model config:\n"
+            + "\n".join(mismatches)
+        )
+    source_has_feedback = bool(source_config.get("latent_feedback", False))
+    source_feedback_mode = source_config.get("latent_feedback_mode", "gate_product")
+    if source_has_feedback and source_feedback_mode != model_latent_feedback_mode:
+        print0(
+            "Warm-starting across latent-feedback modes: "
+            f"source uses {source_feedback_mode}, target uses {model_latent_feedback_mode}"
+        )
+    load_result = model.load_state_dict(model_data, strict=False, assign=True)
+    missing_keys = set(load_result.missing_keys)
+    allowed_missing_keys = {
+        key for key in model.state_dict()
+        if key.startswith("latent_feedback.")
+    }
+    unexpected_keys = set(load_result.unexpected_keys)
+    if unexpected_keys or missing_keys - allowed_missing_keys:
+        raise RuntimeError(
+            "Warm-start state_dict mismatch. "
+            f"Unexpected keys: {sorted(unexpected_keys)}. "
+            f"Disallowed missing keys: {sorted(missing_keys - allowed_missing_keys)}"
+        )
+    if missing_keys:
+        print0(f"Initialized new parameters not present in source checkpoint: {sorted(missing_keys)}")
+    init_from_info = {
+        "model_tag": args.init_from_model_tag,
+        "step": source_step,
+        "checkpoint_dir": source_checkpoint_dir,
+        "source_model_config": source_config,
+    }
+    del model_data
 
 # -----------------------------------------------------------------------------
 # FP8 training initialization and management (this has to be done before torch.compile)
@@ -362,6 +497,11 @@ if weight_decay_scaled != args.weight_decay:
 
 # -----------------------------------------------------------------------------
 # Initialize the Optimizer (combined MuonAdamW: Muon for matrix params, AdamW for rest)
+optimizer_uses_separate_feedback_params = (
+    checkpoint_feedback_start_fraction > 0.0
+    if resuming
+    else args.feedback_start_fraction > 0.0
+)
 optimizer = model.setup_optimizer(
     # AdamW hyperparameters
     unembedding_lr=args.unembedding_lr * batch_lr_scale,
@@ -370,7 +510,7 @@ optimizer = model.setup_optimizer(
     # Muon hyperparameters
     matrix_lr=args.matrix_lr * batch_lr_scale,
     weight_decay=weight_decay_scaled,
-    separate_feedback_params=args.feedback_start_fraction > 0.0,
+    separate_feedback_params=optimizer_uses_separate_feedback_params,
 )
 
 if resuming:
@@ -412,13 +552,26 @@ else:
 feedback_start_step = get_feedback_start_step(num_iterations, args.feedback_start_fraction)
 if resuming:
     checkpoint_num_iterations = meta_data.get("num_iterations")
-    if args.feedback_start_fraction > 0.0 and checkpoint_num_iterations is not None and checkpoint_num_iterations != num_iterations:
+    if (
+        not feedback_schedule_changed_on_resume
+        and args.feedback_start_fraction > 0.0
+        and checkpoint_num_iterations is not None
+        and checkpoint_num_iterations != num_iterations
+    ):
         raise ValueError(
             "Cannot change the training horizon when resuming a feedback schedule: "
             f"checkpoint uses {checkpoint_num_iterations} iterations, requested {num_iterations}"
         )
     checkpoint_feedback_start_step = meta_data.get("loop_state", {}).get("feedback_start_step")
-    if checkpoint_feedback_start_step is not None and checkpoint_feedback_start_step != feedback_start_step:
+    if feedback_schedule_changed_on_resume:
+        resume_step = meta_data.get("step", args.resume_from_step)
+        print0(
+            "Feedback schedule changed on resume: "
+            f"checkpoint boundary step {checkpoint_feedback_start_step}, new boundary step {feedback_start_step}"
+        )
+        if resume_step >= feedback_start_step and args.num_forward_passes > 1:
+            print0(f"Feedback passes will be active immediately after resume step {resume_step}.")
+    elif checkpoint_feedback_start_step is not None and checkpoint_feedback_start_step != feedback_start_step:
         raise ValueError(
             "Feedback schedule boundary does not match checkpoint: "
             f"checkpoint uses step {checkpoint_feedback_start_step}, requested {feedback_start_step}"
@@ -568,7 +721,7 @@ while True:
             f"val/bpb_l{pass_idx}": pass_bpb
             for pass_idx, pass_bpb in enumerate(val_bpb_per_pass, start=1)
         })
-        wandb_run.log(val_log_data)
+        wandb_run.log(val_log_data, step=step)
         model.train()
 
     # once in a while: estimate the CORE metric (all ranks participate)
@@ -585,7 +738,7 @@ while True:
             "total_training_flops": flops_so_far,
             "core_metric": results["core_metric"],
             "centered_results": results["centered_results"],
-        })
+        }, step=step)
         model.train()
 
     # once in a while: sample from the model (only on master process)
@@ -621,6 +774,8 @@ while True:
                 "val_bpb": val_bpb, # loss at last step
                 "model_config": model_config_kwargs,
                 "user_config": user_config, # inputs to the training script
+                "resume_from": resume_from_info,
+                "init_from": init_from_info,
                 "device_batch_size": args.device_batch_size,
                 "max_seq_len": args.max_seq_len,
                 "total_batch_size": total_batch_size,
@@ -764,7 +919,7 @@ while True:
             f"train/loss_l{pass_idx}": pass_loss
             for pass_idx, pass_loss in enumerate(debiased_pass_losses, start=1)
         })
-        wandb_run.log(log_data)
+        wandb_run.log(log_data, step=step)
 
     # state update
     first_step_of_run = (step == 0) or (resuming and step == args.resume_from_step)

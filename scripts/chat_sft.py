@@ -441,6 +441,7 @@ def save_sft_checkpoint():
                 "n_embd": model.config.n_embd,
                 "window_pattern": model.config.window_pattern,
                 "latent_feedback": model.config.latent_feedback,
+                "latent_feedback_mode": model.config.latent_feedback_mode,
                 "weight_tying": model.config.weight_tying,
             },
             "user_config": user_config, # inputs to the training script

@@ -313,10 +313,17 @@ class TestWeightTying(unittest.TestCase):
         self.assertIsNotNone(shared.grad)
         self.assertTrue(torch.isfinite(shared.grad).all())
         self.assertGreater(shared.grad.abs().sum().item(), 0.0)
+        active_parameter_ids = {
+            id(parameter)
+            for parameter in model.latent_feedback.active_parameters()
+        }
         for parameter in model.latent_feedback.parameters():
-            self.assertIsNotNone(parameter.grad)
-            self.assertTrue(torch.isfinite(parameter.grad).all())
-            self.assertGreater(parameter.grad.abs().sum().item(), 0.0)
+            if id(parameter) in active_parameter_ids:
+                self.assertIsNotNone(parameter.grad)
+                self.assertTrue(torch.isfinite(parameter.grad).all())
+                self.assertGreater(parameter.grad.abs().sum().item(), 0.0)
+            else:
+                self.assertIsNone(parameter.grad)
 
     def test_legacy_config_defaults_to_untied_and_loads_strictly(self):
         self.assertFalse(GPTConfig().weight_tying)
@@ -330,6 +337,7 @@ class TestWeightTying(unittest.TestCase):
         }
         _patch_missing_config_keys(legacy_config)
         self.assertEqual(legacy_config["window_pattern"], "L")
+        self.assertEqual(legacy_config["latent_feedback_mode"], "gate_product")
         self.assertFalse(legacy_config["weight_tying"])
 
         source = make_tiny_gpt(weight_tying=False, seed=31)

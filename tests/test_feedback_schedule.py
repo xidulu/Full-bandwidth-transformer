@@ -96,12 +96,17 @@ class TestFeedbackSchedule(unittest.TestCase):
         feedback_groups = [
             group for group in optimizer.param_groups if group.get("is_feedback", False)
         ]
-        self.assertEqual(len(feedback_groups), 1)
-        self.assertTrue(feedback_groups[0].get("allow_no_grad", False))
+        self.assertEqual(len(feedback_groups), len(feedback_params))
+        self.assertTrue(all(group.get("allow_no_grad", False) for group in feedback_groups))
         self.assertEqual(
-            {id(parameter) for parameter in feedback_groups[0]["params"]},
+            {
+                id(parameter)
+                for group in feedback_groups
+                for parameter in group["params"]
+            },
             feedback_ids,
         )
+        self.assertTrue(all(len(group["params"]) == 1 for group in feedback_groups))
         for group in optimizer.param_groups:
             if not group.get("is_feedback", False):
                 self.assertTrue(
@@ -163,10 +168,17 @@ class TestFeedbackSchedule(unittest.TestCase):
         )
         loss.backward()
         self.assertEqual(components.shape, (3,))
+        active_feedback_ids = {
+            id(parameter)
+            for parameter in model.latent_feedback.active_parameters()
+        }
         for parameter in feedback_params:
-            self.assertIsNotNone(parameter.grad)
-            self.assertTrue(torch.isfinite(parameter.grad).all())
-            self.assertGreater(parameter.grad.abs().sum().item(), 0.0)
+            if id(parameter) in active_feedback_ids:
+                self.assertIsNotNone(parameter.grad)
+                self.assertTrue(torch.isfinite(parameter.grad).all())
+                self.assertGreater(parameter.grad.abs().sum().item(), 0.0)
+            else:
+                self.assertIsNone(parameter.grad)
 
         optimizer.step()
         self.assertTrue(any(group.get("is_feedback", False) for group in reduced_groups))

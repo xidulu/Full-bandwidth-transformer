@@ -30,6 +30,7 @@ LM_HEAD_INIT_STD = 0.001
 # A tied matrix must retain the small output-head initialization. Restore the
 # legacy lookup scale before RMSNorm so its epsilon remains numerically inert.
 TIED_EMBEDDING_SCALE = EMBEDDING_INIT_STD / LM_HEAD_INIT_STD
+LATENT_FEEDBACK_MODES = ("gate_product", "concat_projection", "linear_addition")
 
 @dataclass
 class GPTConfig:
@@ -45,6 +46,8 @@ class GPTConfig:
     window_pattern: str = "SSSL"
     # Opt-in latent feedback parameters used by multi-pass training.
     latent_feedback: bool = False
+    # How LatentFeedback combines the previous top-layer state and current token embedding.
+    latent_feedback_mode: str = "gate_product"
     # Share the token embedding and output projection matrix.
     weight_tying: bool = False
 
@@ -63,16 +66,52 @@ class Linear(nn.Linear):
 class LatentFeedback(nn.Module):
     """Fuse a previous top-layer state with the current token input."""
 
-    def __init__(self, n_embd):
+    def __init__(self, n_embd, mode="gate_product"):
         super().__init__()
+        if mode not in LATENT_FEEDBACK_MODES:
+            raise ValueError(f"latent_feedback_mode must be one of {LATENT_FEEDBACK_MODES}, got {mode!r}")
+        self.n_embd = n_embd
+        self.mode = mode
+        # Instantiate every supported fusion path regardless of the active mode.
+        # This keeps LF checkpoint structure and optimizer registration stable
+        # when branching from a checkpoint to compare fusion modes.
+        # Keep the historical gate_product names so existing checkpoints can
+        # still warm-start those weights without key migration.
         self.state_proj = Linear(n_embd, n_embd, bias=False)
         self.token_gate = Linear(n_embd, n_embd, bias=False)
+        self.concat_proj = Linear(2 * n_embd, n_embd, bias=False)
+        self.token_proj = Linear(n_embd, n_embd, bias=False)
+
+    def active_parameter_names(self, mode=None):
+        mode = self.mode if mode is None else mode
+        if mode == "gate_product":
+            return ("state_proj.weight", "token_gate.weight")
+        if mode == "concat_projection":
+            return ("concat_proj.weight",)
+        if mode == "linear_addition":
+            return ("state_proj.weight", "token_proj.weight")
+        raise AssertionError(f"Unhandled latent feedback mode: {mode}")
+
+    def active_parameters(self, mode=None):
+        active_names = set(self.active_parameter_names(mode))
+        return [parameter for name, parameter in self.named_parameters() if name in active_names]
+
+    def active_num_parameters(self, mode=None):
+        return sum(parameter.numel() for parameter in self.active_parameters(mode))
 
     def forward(self, previous_hidden, token_input):
-        # The hidden state is the value pathway; token information only enters through the gate.
-        value = self.state_proj(previous_hidden)
-        gate = torch.sigmoid(self.token_gate(norm(token_input)))
-        return norm(value * gate)
+        if self.mode == "gate_product":
+            # The hidden state is the value pathway; token information only enters through the gate.
+            value = self.state_proj(previous_hidden)
+            gate = torch.sigmoid(self.token_gate(norm(token_input)))
+            return norm(value * gate)
+        if self.mode == "concat_projection":
+            return norm(self.concat_proj(torch.cat((norm(previous_hidden), norm(token_input)), dim=-1)))
+        if self.mode == "linear_addition":
+            state = self.state_proj(previous_hidden)
+            token = self.token_proj(norm(token_input))
+            return norm(state + token)
+        raise AssertionError(f"Unhandled latent feedback mode: {self.mode}")
 
 
 def build_feedback_mask(idx, bos_token_id, prefix_mixin=True, generator=None):
@@ -245,7 +284,16 @@ class GPT(nn.Module):
         })
         self.lm_head = Linear(config.n_embd, padded_vocab_size, bias=False)
         self.tie_weights()
-        self.latent_feedback = LatentFeedback(config.n_embd) if config.latent_feedback else None
+        if config.latent_feedback_mode not in LATENT_FEEDBACK_MODES:
+            raise ValueError(
+                f"latent_feedback_mode must be one of {LATENT_FEEDBACK_MODES}, "
+                f"got {config.latent_feedback_mode!r}"
+            )
+        self.latent_feedback = (
+            LatentFeedback(config.n_embd, mode=config.latent_feedback_mode)
+            if config.latent_feedback
+            else None
+        )
         # Per-layer learnable scalars (inspired by modded-nanogpt)
         # resid_lambdas: scales the residual stream at each layer (init 1.0 = neutral)
         # x0_lambdas: blends initial embedding back in at each layer (init 0.0 = disabled)
@@ -315,8 +363,9 @@ class GPT(nn.Module):
             mlp.c_fc:        uniform, std=1/sqrt(n_embd)
             mlp.c_proj:      zeros
         latent feedback:
-            state_proj:      uniform, std=1/sqrt(n_embd)
-            token_gate:      uniform, std=1/sqrt(n_embd)
+            gate_product:       state_proj/token_gate uniform, std=1/sqrt(n_embd)
+            concat_projection:  concat_proj uniform, std=1/sqrt(n_embd)
+            linear_addition:    state_proj/token_proj uniform, std=1/sqrt(n_embd)
         """
 
         # Materializing a meta model with to_empty() breaks cross-module aliases.
@@ -384,8 +433,8 @@ class GPT(nn.Module):
 
         # Keep this last so enabling feedback does not change any existing parameter's RNG stream.
         if self.latent_feedback is not None:
-            torch.nn.init.uniform_(self.latent_feedback.state_proj.weight, -s, s)
-            torch.nn.init.uniform_(self.latent_feedback.token_gate.weight, -s, s)
+            for parameter in self.latent_feedback.parameters():
+                torch.nn.init.uniform_(parameter, -s, s)
 
     def _precompute_rotary_embeddings(self, seq_len, head_dim, base=100000, device=None):
         # TODO: bump base theta more? e.g. 100K is more common more recently
@@ -459,7 +508,7 @@ class GPT(nn.Module):
             effective_seq = t if window < 0 else min(window, t)
             attn_flops += 12 * h * q * effective_seq
         assert num_forward_passes >= 1
-        feedback_params = sum(p.numel() for p in self.latent_feedback.parameters()) if self.latent_feedback is not None else 0
+        feedback_params = self.latent_feedback.active_num_parameters() if self.latent_feedback is not None else 0
         trunk_params = self.num_matmul_params() - feedback_params
         base_pass_flops = 6 * trunk_params + attn_flops
         feedback_flops = 6 * feedback_params
@@ -566,15 +615,17 @@ class GPT(nn.Module):
         # Separate out all parameters into groups
         matrix_params = list(self.transformer.h.parameters())
         feedback_matrix_params = (
-            list(self.latent_feedback.parameters())
+            list(self.latent_feedback.named_parameters())
             if self.latent_feedback is not None
             else []
         )
+        if feedback_matrix_params:
+            # LF always owns parameters for every supported fusion mode. Keep
+            # them in dedicated dormant-capable groups so inactive mode-specific
+            # matrices remain optimizer-registered but are not updated.
+            separate_feedback_params = True
         if not separate_feedback_params:
-            # Preserve the historical fixed-K optimizer grouping (and therefore
-            # optimizer-checkpoint compatibility) unless a pass schedule needs
-            # the feedback module to be independently dormant.
-            matrix_params.extend(feedback_matrix_params)
+            matrix_params.extend(parameter for _name, parameter in feedback_matrix_params)
             feedback_matrix_params = []
         value_embeds_params = list(self.value_embeds.parameters())
         # The shared matrix receives dense output-head gradients, so tied models
@@ -585,8 +636,9 @@ class GPT(nn.Module):
         resid_params = [self.resid_lambdas]
         x0_params = [self.x0_lambdas]
         smear_params = [self.smear_gate.weight, self.smear_lambda, self.backout_lambda]
+        feedback_grouped_params = [parameter for _name, parameter in feedback_matrix_params]
         grouped_params = (
-            matrix_params + feedback_matrix_params + embedding_params + lm_head_params
+            matrix_params + feedback_grouped_params + embedding_params + lm_head_params
             + value_embeds_params + resid_params + x0_params + smear_params
         )
         model_params = list(self.parameters())
@@ -625,12 +677,11 @@ class GPT(nn.Module):
                 momentum=0.95, ns_steps=5, beta2=0.9, weight_decay=weight_decay,
                 is_feedback=False, allow_no_grad=False,
             ))
-        for shape in sorted({p.shape for p in feedback_matrix_params}):
-            group_params = [p for p in feedback_matrix_params if p.shape == shape]
+        for name, parameter in feedback_matrix_params:
             param_groups.append(dict(
-                kind='muon', params=group_params, lr=matrix_lr,
+                kind='muon', params=[parameter], lr=matrix_lr,
                 momentum=0.95, ns_steps=5, beta2=0.9, weight_decay=weight_decay,
-                is_feedback=True, allow_no_grad=True,
+                is_feedback=True, feedback_name=name, allow_no_grad=True,
             ))
 
         optimizer = MuonAdamW(param_groups)

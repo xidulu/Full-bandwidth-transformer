@@ -7,11 +7,11 @@ import torch.nn.functional as F
 
 import nanochat.flash_attention as flash_attention_module
 from nanochat.engine import KVCache
-from nanochat.gpt import GPT, GPTConfig, LatentFeedback, build_feedback_mask, norm
+from nanochat.gpt import GPT, GPTConfig, LATENT_FEEDBACK_MODES, LatentFeedback, build_feedback_mask, norm
 from nanochat.loss_eval import evaluate_bpb, evaluate_bpb_per_pass
 
 
-def make_tiny_gpt(latent_feedback=True, seed=1234):
+def make_tiny_gpt(latent_feedback=True, seed=1234, latent_feedback_mode="gate_product"):
     config = GPTConfig(
         sequence_len=8,
         vocab_size=19,
@@ -21,6 +21,7 @@ def make_tiny_gpt(latent_feedback=True, seed=1234):
         n_embd=32,
         window_pattern="L",
         latent_feedback=latent_feedback,
+        latent_feedback_mode=latent_feedback_mode,
     )
     with torch.device("meta"):
         model = GPT(config, pad_vocab_size_to=1)
@@ -41,7 +42,7 @@ class TestLatentFeedback(unittest.TestCase):
     def tearDownClass(cls):
         flash_attention_module.USE_FA3 = cls.original_use_fa3
 
-    def test_fusion_matches_equation(self):
+    def test_gate_product_fusion_matches_equation(self):
         module = LatentFeedback(4)
         previous_hidden = torch.tensor(
             [[[1.0, -2.0, 0.5, 3.0], [-1.0, 0.25, 2.0, -0.5]]]
@@ -89,17 +90,114 @@ class TestLatentFeedback(unittest.TestCase):
             atol=1e-5,
         )
 
-    def test_init_weights_initializes_feedback_matrices(self):
-        model = make_tiny_gpt()
+    def test_concat_projection_fusion_matches_equation(self):
+        module = LatentFeedback(4, mode="concat_projection")
+        previous_hidden = torch.tensor(
+            [[[1.0, -2.0, 0.5, 3.0], [-1.0, 0.25, 2.0, -0.5]]]
+        )
+        token_input = torch.tensor(
+            [[[0.5, 1.0, -1.5, 2.0], [2.0, -0.25, 0.75, -1.0]]]
+        )
         with torch.no_grad():
-            model.latent_feedback.state_proj.weight.fill_(float("nan"))
-            model.latent_feedback.token_gate.weight.fill_(float("nan"))
+            module.concat_proj.weight.copy_(
+                torch.tensor(
+                    [
+                        [0.5, -0.1, 0.2, 0.3, 0.2, 0.1, 0.0, -0.3],
+                        [0.0, 0.4, -0.2, 0.1, -0.4, 0.5, 0.1, 0.0],
+                        [-0.3, 0.2, 0.6, 0.0, 0.3, -0.2, 0.4, 0.1],
+                        [0.1, 0.1, -0.4, 0.7, 0.0, 0.2, -0.1, 0.6],
+                    ]
+                )
+            )
 
-        torch.manual_seed(99)
-        model.init_weights()
+        expected = norm(
+            F.linear(
+                torch.cat((norm(previous_hidden), norm(token_input)), dim=-1),
+                module.concat_proj.weight,
+            )
+        )
+        actual = module(previous_hidden, token_input)
 
-        self.assertTrue(torch.isfinite(model.latent_feedback.state_proj.weight).all())
-        self.assertTrue(torch.isfinite(model.latent_feedback.token_gate.weight).all())
+        self.assertIsNone(module.concat_proj.bias)
+        self.assertIsNone(module.state_proj.bias)
+        self.assertIsNone(module.token_gate.bias)
+        self.assertIsNone(module.token_proj.bias)
+        self.assertEqual(actual.shape, previous_hidden.shape)
+        self.assertEqual(actual.dtype, previous_hidden.dtype)
+        torch.testing.assert_close(actual, expected)
+
+    def test_linear_addition_fusion_matches_equation(self):
+        module = LatentFeedback(4, mode="linear_addition")
+        previous_hidden = torch.tensor([[[1.0, -2.0, 0.5, 3.0]]])
+        token_input = torch.tensor([[[0.5, 1.0, -1.5, 2.0]]])
+        with torch.no_grad():
+            module.state_proj.weight.copy_(torch.eye(4))
+            module.token_proj.weight.copy_(
+                torch.tensor(
+                    [
+                        [0.25, -0.5, 0.0, 0.75],
+                        [-0.1, 0.2, 0.3, -0.4],
+                        [0.4, 0.0, -0.2, 0.1],
+                        [0.3, -0.3, 0.2, 0.5],
+                    ]
+                )
+            )
+
+        state = F.linear(previous_hidden, module.state_proj.weight)
+        token = F.linear(norm(token_input), module.token_proj.weight)
+        expected = norm(state + token)
+        actual = module(previous_hidden, token_input)
+
+        self.assertIsNone(module.state_proj.bias)
+        self.assertIsNone(module.token_proj.bias)
+        self.assertIsNone(module.token_gate.bias)
+        self.assertIsNone(module.concat_proj.bias)
+        self.assertEqual(actual.shape, previous_hidden.shape)
+        self.assertEqual(actual.dtype, previous_hidden.dtype)
+        torch.testing.assert_close(actual, expected)
+
+    def test_all_modes_register_the_same_feedback_parameters(self):
+        expected_keys = {
+            "state_proj.weight",
+            "token_gate.weight",
+            "concat_proj.weight",
+            "token_proj.weight",
+        }
+        for mode in LATENT_FEEDBACK_MODES:
+            with self.subTest(mode=mode):
+                module = LatentFeedback(8, mode=mode)
+                self.assertEqual(set(module.state_dict().keys()), expected_keys)
+                self.assertEqual(set(dict(module.named_parameters()).keys()), expected_keys)
+                self.assertTrue(
+                    set(module.active_parameter_names()).issubset(expected_keys)
+                )
+
+    def test_latent_feedback_modes_validate_and_preserve_shape(self):
+        previous_hidden = torch.randn(2, 3, 8)
+        token_input = torch.randn(2, 3, 8)
+        for mode in LATENT_FEEDBACK_MODES:
+            with self.subTest(mode=mode):
+                module = LatentFeedback(8, mode=mode)
+                actual = module(previous_hidden, token_input)
+                self.assertEqual(actual.shape, previous_hidden.shape)
+                self.assertTrue(torch.isfinite(actual).all())
+
+        with self.assertRaisesRegex(ValueError, "latent_feedback_mode"):
+            LatentFeedback(8, mode="unknown")
+
+    def test_init_weights_initializes_feedback_matrices(self):
+        for mode in LATENT_FEEDBACK_MODES:
+            with self.subTest(mode=mode):
+                model = make_tiny_gpt(latent_feedback_mode=mode)
+                with torch.no_grad():
+                    for parameter in model.latent_feedback.parameters():
+                        parameter.fill_(float("nan"))
+
+                torch.manual_seed(99)
+                model.init_weights()
+
+                for parameter in model.latent_feedback.parameters():
+                    self.assertTrue(torch.isfinite(parameter).all())
 
     def test_feedback_mask_resets_at_each_packed_bos(self):
         bos = 18
@@ -151,6 +249,8 @@ class TestLatentFeedback(unittest.TestCase):
             {
                 "latent_feedback.state_proj.weight",
                 "latent_feedback.token_gate.weight",
+                "latent_feedback.concat_proj.weight",
+                "latent_feedback.token_proj.weight",
             },
         )
         self.assertEqual(load_result.unexpected_keys, [])
@@ -239,6 +339,37 @@ class TestLatentFeedback(unittest.TestCase):
         torch.testing.assert_close(three_pass_components, torch.stack((loss_1, loss_2, loss_3)))
         self.assertFalse(torch.allclose(fused_2, smeared_fused_2))
         self.assertFalse(torch.isclose(three_pass_loss, loss_1 + loss_2 + loss_3))
+
+    def test_multi_pass_objective_runs_for_all_fusion_modes(self):
+        idx = torch.tensor([[1, 2, 3, 4]])
+        targets = torch.tensor([[2, 3, 4, 5]])
+        feedback_mask = build_feedback_mask(idx, bos_token_id=1, prefix_mixin=False).unsqueeze(0)
+        for mode in LATENT_FEEDBACK_MODES:
+            with self.subTest(mode=mode):
+                model = make_tiny_gpt(seed=9, latent_feedback_mode=mode)
+                loss, components = model(
+                    idx,
+                    targets,
+                    num_forward_passes=2,
+                    feedback_masks=feedback_mask,
+                    feedback_jitter=0.0,
+                    return_loss_components=True,
+                )
+                loss.backward()
+
+                self.assertTrue(torch.isfinite(loss))
+                self.assertEqual(components.shape, (2,))
+                active_parameter_ids = {
+                    id(parameter)
+                    for parameter in model.latent_feedback.active_parameters()
+                }
+                for parameter in model.latent_feedback.parameters():
+                    if id(parameter) in active_parameter_ids:
+                        self.assertIsNotNone(parameter.grad)
+                        self.assertTrue(torch.isfinite(parameter.grad).all())
+                        self.assertGreater(parameter.grad.abs().sum().item(), 0.0)
+                    else:
+                        self.assertIsNone(parameter.grad)
 
     def test_pass_three_uses_shifted_pass_two_state(self):
         model = make_tiny_gpt(seed=11)
@@ -337,10 +468,17 @@ class TestLatentFeedback(unittest.TestCase):
         self.assertEqual(len(first_pass_states), 2)
         self.assertIsNotNone(first_pass_states[0].grad)
         self.assertGreater(first_pass_states[0].grad.abs().sum().item(), 0.0)
+        active_parameter_ids = {
+            id(parameter)
+            for parameter in model.latent_feedback.active_parameters()
+        }
         for parameter in model.latent_feedback.parameters():
-            self.assertIsNotNone(parameter.grad)
-            self.assertTrue(torch.isfinite(parameter.grad).all())
-            self.assertGreater(parameter.grad.abs().sum().item(), 0.0)
+            if id(parameter) in active_parameter_ids:
+                self.assertIsNotNone(parameter.grad)
+                self.assertTrue(torch.isfinite(parameter.grad).all())
+                self.assertGreater(parameter.grad.abs().sum().item(), 0.0)
+            else:
+                self.assertIsNone(parameter.grad)
 
     def test_jitter_is_training_only_and_bounded(self):
         model = make_tiny_gpt(seed=31)
@@ -392,48 +530,56 @@ class TestLatentFeedback(unittest.TestCase):
             torch.testing.assert_close(capture.inputs.pop(), expected_state, rtol=0, atol=0)
 
     def test_compiled_two_pass_backward_and_optimizer_grouping(self):
-        model = make_tiny_gpt(seed=41)
-        compiled_model = torch.compile(model, backend="aot_eager", dynamic=False)
-        optimizer = compiled_model.setup_optimizer()
-        grouped_parameter_ids = [
-            id(parameter)
-            for group in optimizer.param_groups
-            for parameter in group["params"]
-        ]
-        model_parameter_ids = [id(parameter) for parameter in model.parameters()]
-        self.assertEqual(len(grouped_parameter_ids), len(set(grouped_parameter_ids)))
-        self.assertEqual(set(grouped_parameter_ids), set(model_parameter_ids))
-
         idx = torch.tensor([[1, 2, 3, 4]])
         targets = torch.tensor([[2, 3, 4, 5]])
         feedback_mask = build_feedback_mask(idx, bos_token_id=1, prefix_mixin=False).unsqueeze(0)
+        for mode in LATENT_FEEDBACK_MODES:
+            with self.subTest(mode=mode):
+                model = make_tiny_gpt(seed=41, latent_feedback_mode=mode)
+                compiled_model = torch.compile(model, backend="aot_eager", dynamic=False)
+                optimizer = compiled_model.setup_optimizer()
+                grouped_parameter_ids = [
+                    id(parameter)
+                    for group in optimizer.param_groups
+                    for parameter in group["params"]
+                ]
+                model_parameter_ids = [id(parameter) for parameter in model.parameters()]
+                self.assertEqual(len(grouped_parameter_ids), len(set(grouped_parameter_ids)))
+                self.assertEqual(set(grouped_parameter_ids), set(model_parameter_ids))
 
-        one_pass_loss, one_pass_components = compiled_model(
-            idx,
-            targets,
-            num_forward_passes=1,
-            return_loss_components=True,
-        )
-        one_pass_loss.backward()
-        self.assertTrue(torch.isfinite(one_pass_loss))
-        self.assertEqual(one_pass_components.shape, (1,))
-        model.zero_grad(set_to_none=True)
+                one_pass_loss, one_pass_components = compiled_model(
+                    idx,
+                    targets,
+                    num_forward_passes=1,
+                    return_loss_components=True,
+                )
+                one_pass_loss.backward()
+                self.assertTrue(torch.isfinite(one_pass_loss))
+                self.assertEqual(one_pass_components.shape, (1,))
+                model.zero_grad(set_to_none=True)
 
-        loss, pass_losses = compiled_model(
-            idx,
-            targets,
-            num_forward_passes=2,
-            feedback_masks=feedback_mask,
-            feedback_jitter=0.0,
-            return_loss_components=True,
-        )
-        loss.backward()
+                loss, pass_losses = compiled_model(
+                    idx,
+                    targets,
+                    num_forward_passes=2,
+                    feedback_masks=feedback_mask,
+                    feedback_jitter=0.0,
+                    return_loss_components=True,
+                )
+                loss.backward()
 
-        self.assertTrue(torch.isfinite(loss))
-        self.assertEqual(pass_losses.shape, (2,))
-        for parameter in model.latent_feedback.parameters():
-            self.assertIsNotNone(parameter.grad)
-            self.assertTrue(torch.isfinite(parameter.grad).all())
+                self.assertTrue(torch.isfinite(loss))
+                self.assertEqual(pass_losses.shape, (2,))
+                active_parameter_ids = {
+                    id(parameter)
+                    for parameter in model.latent_feedback.active_parameters()
+                }
+                for parameter in model.latent_feedback.parameters():
+                    if id(parameter) in active_parameter_ids:
+                        self.assertIsNotNone(parameter.grad)
+                        self.assertTrue(torch.isfinite(parameter.grad).all())
+                    else:
+                        self.assertIsNone(parameter.grad)
 
     def test_cached_one_pass_matches_naive_forward(self):
         model = make_tiny_gpt(latent_feedback=True, seed=51)
