@@ -289,6 +289,7 @@ done
 
 For mode comparisons on the same examples, prefer the paired exact McNemar counts and p-values in `paired_accuracy` over independent binomial error bars.
 
+# **** Below are all from original NanoChat codebase ***
 
 ## Getting started (inherented from NanoChat)
 
