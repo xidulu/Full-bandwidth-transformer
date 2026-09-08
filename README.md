@@ -1,6 +1,5 @@
 # An open sourced reproduction of Full-bandwidth transformer https://arxiv.org/abs/2608.08888 (based on Nanochat)
 
-(Work in progress)
 
 ## Introduction
 
@@ -18,6 +17,10 @@ The current math reproduction uses a pretrain + mid-train pipeline:
 
 The main completed comparison covers the standard baseline plus two FBT fusion variants, `concat_projection` and `gate_product`. `linear_addition` uses the same recipe but its eval artifacts are not included in the tables below until its queued eval jobs finish.
 
+- `gate_product`: Glu cross style fusing used in the paper.
+- `concat_projection`: Concat embedding and the hidden state, then down project them to the residual stream's dimension.
+- `linear_addition`: Apply a linear transformation to embedding and hidden state, then sum them.
+
 ### GSM8K zero-shot chat-template results
 
 Full GSM8K test set, 1,319 problems. Exact-match grading uses the GSM8K numeric answer parser in `fbt_experiments/evaluate_checkpoint.py`.
@@ -25,12 +28,12 @@ Full GSM8K test set, 1,319 problems. Exact-match grading uses the GSM8K numeric 
 | model | decode | correct | accuracy |
 |---|---:|---:|---:|
 | standard | standard | 642/1319 | 48.67% |
-| concat_projection | standard | 651/1319 | 49.36% |
-| concat_projection | soft | 681/1319 | 51.63% |
-| concat_projection | fused | 691/1319 | 52.39% |
-| gate_product | standard | 632/1319 | 47.92% |
-| gate_product | soft | 650/1319 | 49.28% |
-| gate_product | fused | 692/1319 | 52.46% |
+| concat_projection (FBT)  | standard | 651/1319 | 49.36% |
+| concat_projection (FBT) | soft | 681/1319 | 51.63% |
+| concat_projection (FBT) | fused | 691/1319 | 52.39% |
+| gate_product (FBT) | standard | 632/1319 | 47.92% |
+| gate_product (FBT) | soft | 650/1319 | 49.28% |
+| gate_product  (FBT)| fused | 692/1319 | 52.46% |
 
 Best GSM8K result: `gate_product + fused`, 692/1319 = 52.46%.
 
@@ -41,12 +44,12 @@ Full MATH-500 test set, 500 problems. Final results below use Hugging Face Math-
 | model | decode | correct | accuracy |
 |---|---:|---:|---:|
 | standard | standard | 173/500 | 34.6% |
-| concat_projection | standard | 176/500 | 35.2% |
-| concat_projection | soft | 193/500 | 38.6% |
-| concat_projection | fused | 198/500 | 39.6% |
-| gate_product | standard | 171/500 | 34.2% |
-| gate_product | soft | 183/500 | 36.6% |
-| gate_product | fused | 198/500 | 39.6% |
+| concat_projection (FBT)| standard | 176/500 | 35.2% |
+| concat_projection (FBT)| soft | 193/500 | 38.6% |
+| concat_projection (FBT)| fused | 198/500 | 39.6% |
+| gate_product (FBT)| standard | 171/500 | 34.2% |
+| gate_product (FBT)| soft | 183/500 | 36.6% |
+| gate_product (FBT)| fused | 198/500 | 39.6% |
 
 Best MATH-500 result: tie between `concat_projection + fused` and `gate_product + fused`, both 198/500 = 39.6%.
 
@@ -54,6 +57,8 @@ Across both benchmarks, the clearest signal is that `fused` decoding improves th
 
 
 ## Reproduce the standard-vs-FBT math pipeline
+
+**Note: You not necessarily need to test different variations**
 
 This section documents the exact script flow used for the d20 standard baseline and the latent-feedback / FBT variants, from pretraining through OpenMath SFT and zero-shot math evaluation.
 
@@ -285,7 +290,7 @@ done
 For mode comparisons on the same examples, prefer the paired exact McNemar counts and p-values in `paired_accuracy` over independent binomial error bars.
 
 
-## Getting started
+## Getting started (inherented from NanoChat)
 
 ### Setup
 
