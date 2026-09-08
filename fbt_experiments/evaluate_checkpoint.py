@@ -77,7 +77,18 @@ def parse_args() -> argparse.Namespace:
         metavar="{0,...,8}",
         help="Number of canonical demonstrations retained from the bundled 8-shot prompt",
     )
+    parser.add_argument(
+        "--gsm8k-prompt-format",
+        choices=("qa", "chat"),
+        default="qa",
+        help="Use raw Q:/A: prompting or nanochat's chat template for GSM8K",
+    )
     parser.add_argument("--max-new-tokens", type=int, default=192)
+    parser.add_argument(
+        "--decode-modes",
+        default="standard,soft,fused",
+        help="Comma-separated decoding modes to evaluate; each must be one of: standard, soft, fused",
+    )
     parser.add_argument(
         "--core-max-per-task",
         type=int,
@@ -87,6 +98,18 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--skip-continuation", action="store_true")
     parser.add_argument("--skip-gsm8k", action="store_true")
     return parser.parse_args()
+
+
+def parse_decode_modes(value: str) -> tuple[str, ...]:
+    modes = tuple(mode.strip() for mode in value.split(",") if mode.strip())
+    if not modes:
+        raise ValueError("--decode-modes must specify at least one mode")
+    invalid = [mode for mode in modes if mode not in MODES]
+    if invalid:
+        raise ValueError(f"Invalid decode modes {invalid}; expected modes from {list(MODES)}")
+    if len(set(modes)) != len(modes):
+        raise ValueError(f"Duplicate decode modes are not allowed: {modes}")
+    return modes
 
 
 class Tee:
@@ -601,7 +624,10 @@ def evaluate_continuations(model, tokenizer, args, output_dir: Path):
     bos_id = tokenizer.get_bos_token_id()
     rows = []
 
-    aggregate = {mode: {"nats": 0.0, "bytes": 0, "scored_tokens": 0, "seconds": 0.0} for mode in MODES}
+    aggregate = {
+        mode: {"nats": 0.0, "bytes": 0, "scored_tokens": 0, "seconds": 0.0}
+        for mode in args.decode_modes
+    }
     for doc_index, doc in enumerate(docs):
         row = {
             "document_index": doc_index,
@@ -612,7 +638,7 @@ def evaluate_continuations(model, tokenizer, args, output_dir: Path):
             "continuation_text": tokenizer.decode(doc["tokens"][args.prefix_tokens :]),
             "modes": {},
         }
-        for mode in MODES:
+        for mode in args.decode_modes:
             synchronize(model.get_device())
             started = time.perf_counter()
             result = score_continuation(
@@ -629,9 +655,10 @@ def evaluate_continuations(model, tokenizer, args, output_dir: Path):
                 flush=True,
             )
 
-        standard_first = row["modes"]["standard"]["first_token_nll"]
-        soft_first = row["modes"]["soft"]["first_token_nll"]
-        row["standard_soft_first_token_nll_abs_diff"] = abs(standard_first - soft_first)
+        if "standard" in row["modes"] and "soft" in row["modes"]:
+            standard_first = row["modes"]["standard"]["first_token_nll"]
+            soft_first = row["modes"]["soft"]["first_token_nll"]
+            row["standard_soft_first_token_nll_abs_diff"] = abs(standard_first - soft_first)
         rows.append(row)
 
     summary = {}
@@ -648,6 +675,8 @@ def evaluate_continuations(model, tokenizer, args, output_dir: Path):
             "hidden_abs_max": max(row["modes"][mode]["hidden_abs_max"] for row in rows),
         }
     for mode in ("soft", "fused"):
+        if mode not in summary or "standard" not in summary:
+            continue
         summary[mode]["bpb_delta_vs_standard"] = summary[mode]["bpb"] - summary["standard"]["bpb"]
         summary[mode]["bpb_relative_delta_vs_standard"] = (
             summary[mode]["bpb"] / summary["standard"]["bpb"] - 1.0
@@ -656,9 +685,10 @@ def evaluate_continuations(model, tokenizer, args, output_dir: Path):
             row["modes"][mode]["bpb"] < row["modes"]["standard"]["bpb"] for row in rows
         )
         summary[mode]["documents_evaluated"] = len(rows)
-    summary["standard_soft_first_token_max_abs_diff"] = max(
-        row["standard_soft_first_token_nll_abs_diff"] for row in rows
-    )
+    if all("standard_soft_first_token_nll_abs_diff" in row for row in rows):
+        summary["standard_soft_first_token_max_abs_diff"] = max(
+            row["standard_soft_first_token_nll_abs_diff"] for row in rows
+        )
     dump_jsonl(output_dir / "continuation_details.jsonl", rows)
     return summary
 
@@ -764,6 +794,32 @@ def build_gsm8k_prompt(context: str, num_shots: int) -> str:
     return "\n\nQ:".join([*blocks[:num_shots], target])
 
 
+def extract_gsm8k_question(context: str) -> str:
+    """Return the final target question from a bundled GSM8K 8-shot context."""
+    blocks = context.split("\n\nQ:")
+    if not context.startswith("Q:") or len(blocks) != 9:
+        raise ValueError(
+            "Expected the bundled GSM8K context to contain eight demonstrations and one target question"
+        )
+    question = blocks[-1].strip()
+    if not question:
+        raise ValueError("GSM8K target question is empty")
+    return question
+
+
+def build_gsm8k_chat_prompt_ids(tokenizer, context: str) -> tuple[list[int], str]:
+    """Render the final GSM8K question as a zero-shot nanochat conversation prompt."""
+    question = extract_gsm8k_question(context)
+    conversation = {
+        "messages": [
+            {"role": "user", "content": question},
+            {"role": "assistant", "content": ""},
+        ]
+    }
+    prompt_ids = tokenizer.render_for_completion(conversation)
+    return prompt_ids, tokenizer.decode(prompt_ids)
+
+
 @torch.inference_mode()
 def evaluate_gsm8k(model, tokenizer, args, output_dir: Path, base_dir: Path):
     from nanochat.engine import Engine
@@ -782,9 +838,14 @@ def evaluate_gsm8k(model, tokenizer, args, output_dir: Path, base_dir: Path):
     with generations_path.open("w", encoding="utf-8") as generations_handle:
         for shard_offset, example in enumerate(examples):
             example_index = args.gsm8k_start + shard_offset
-            prompt_context = build_gsm8k_prompt(example["context"], args.gsm8k_shots)
-            prompt = prompt_context + "\n\nA:"
-            prompt_ids = tokenizer.encode(prompt, prepend=bos_id)
+            if args.gsm8k_prompt_format == "chat":
+                if args.gsm8k_shots != 0:
+                    raise ValueError("Chat-template GSM8K evaluation currently supports zero-shot only")
+                prompt_ids, prompt = build_gsm8k_chat_prompt_ids(tokenizer, example["context"])
+            else:
+                prompt_context = build_gsm8k_prompt(example["context"], args.gsm8k_shots)
+                prompt = prompt_context + "\n\nA:"
+                prompt_ids = tokenizer.encode(prompt, prepend=bos_id)
             if len(prompt_ids) + args.max_new_tokens > model.config.sequence_len:
                 raise ValueError(
                     f"GSM8K example {example_index} would exceed context: "
@@ -794,13 +855,14 @@ def evaluate_gsm8k(model, tokenizer, args, output_dir: Path, base_dir: Path):
             record = {
                 "example_index": example_index,
                 "gsm8k_shots": args.gsm8k_shots,
+                "gsm8k_prompt_format": args.gsm8k_prompt_format,
                 "prompt": prompt,
                 "prompt_tokens": len(prompt_ids),
                 "reference_answer": reference,
                 "modes": {},
             }
 
-            for mode in MODES:
+            for mode in args.decode_modes:
                 synchronize(model.get_device())
                 started = time.perf_counter()
                 stream = engine.generate(
@@ -858,22 +920,33 @@ def evaluate_gsm8k(model, tokenizer, args, output_dir: Path, base_dir: Path):
                     flush=True,
                 )
 
-            mode_tokens = {mode: record["modes"][mode]["completion_token_ids"] for mode in MODES}
-            record["pairwise"] = {
-                "standard_soft_same_first_token": bool(
-                    mode_tokens["standard"] and mode_tokens["soft"]
-                    and mode_tokens["standard"][0] == mode_tokens["soft"][0]
-                ),
-                "standard_soft_identical": mode_tokens["standard"] == mode_tokens["soft"],
-                "standard_fused_identical": mode_tokens["standard"] == mode_tokens["fused"],
-                "soft_fused_identical": mode_tokens["soft"] == mode_tokens["fused"],
+            mode_tokens = {
+                mode: record["modes"][mode]["completion_token_ids"] for mode in args.decode_modes
             }
+            record["pairwise"] = {}
+            if {"standard", "soft"}.issubset(mode_tokens):
+                record["pairwise"]["standard_soft_same_first_token"] = bool(
+                    mode_tokens["standard"]
+                    and mode_tokens["soft"]
+                    and mode_tokens["standard"][0] == mode_tokens["soft"][0]
+                )
+                record["pairwise"]["standard_soft_identical"] = (
+                    mode_tokens["standard"] == mode_tokens["soft"]
+                )
+            if {"standard", "fused"}.issubset(mode_tokens):
+                record["pairwise"]["standard_fused_identical"] = (
+                    mode_tokens["standard"] == mode_tokens["fused"]
+                )
+            if {"soft", "fused"}.issubset(mode_tokens):
+                record["pairwise"]["soft_fused_identical"] = (
+                    mode_tokens["soft"] == mode_tokens["fused"]
+                )
             records.append(record)
             generations_handle.write(json.dumps(record, ensure_ascii=False) + "\n")
             generations_handle.flush()
 
     summary = {}
-    for mode in MODES:
+    for mode in args.decode_modes:
         seconds = sum(record["modes"][mode]["seconds"] for record in records)
         tokens = sum(record["modes"][mode]["completion_tokens"] for record in records)
         summary[mode] = {
@@ -893,6 +966,8 @@ def evaluate_gsm8k(model, tokenizer, args, output_dir: Path, base_dir: Path):
     }
     summary["paired_accuracy"] = {}
     for left, right in (("standard", "soft"), ("standard", "fused"), ("soft", "fused")):
+        if left not in args.decode_modes or right not in args.decode_modes:
+            continue
         both_correct = sum(
             record["modes"][left]["correct"] and record["modes"][right]["correct"]
             for record in records
@@ -918,6 +993,7 @@ def evaluate_gsm8k(model, tokenizer, args, output_dir: Path, base_dir: Path):
 
 
 def render_summary(metrics, meta, args) -> str:
+    report_modes = tuple(metrics.get("modes", MODES))
     lines = [
         "# SOFT/FUSED checkpoint evaluation",
         "",
@@ -936,7 +1012,7 @@ def render_summary(metrics, meta, args) -> str:
                 "|---|---:|---:|---:|---:|:---:|---:|",
             ]
         )
-        for mode in MODES:
+        for mode in report_modes:
             row = continuation[mode]
             delta = row.get("bpb_delta_vs_standard", 0.0)
             relative = row.get("bpb_relative_delta_vs_standard", 0.0)
@@ -949,14 +1025,15 @@ def render_summary(metrics, meta, args) -> str:
                 f"| {mode} | {row['bpb']:.6f} | {delta:+.6f} | {relative:+.3%} | {wins} | "
                 f"{row['all_finite']} | {row['hidden_rms_min']:.6f}–{row['hidden_rms_max']:.6f} |"
             )
-        first_diff = continuation["standard_soft_first_token_max_abs_diff"]
-        lines.extend(
-            [
-                "",
-                f"STANDARD and SOFT share the ordinary prompt prefill; their first-target NLL max difference was `{first_diff:.3g}`.",
-                "",
-            ]
-        )
+        if "standard_soft_first_token_max_abs_diff" in continuation:
+            first_diff = continuation["standard_soft_first_token_max_abs_diff"]
+            lines.extend(
+                [
+                    "",
+                    f"STANDARD and SOFT share the ordinary prompt prefill; their first-target NLL max difference was `{first_diff:.3g}`.",
+                    "",
+                ]
+            )
 
     core_prefill = metrics.get("core_prefill")
     if core_prefill:
@@ -991,13 +1068,13 @@ def render_summary(metrics, meta, args) -> str:
     if gsm8k:
         lines.extend(
             [
-                f"## {args.gsm8k_shots}-shot GSM8K ({gsm8k['standard']['examples']} problems)",
+                f"## {args.gsm8k_shots}-shot GSM8K ({gsm8k['standard']['examples']} problems, prompt_format={getattr(args, 'gsm8k_prompt_format', 'qa')})",
                 "",
                 "| mode | exact | accuracy | 95% Wilson CI | parsed | output tokens | tokens/s |",
                 "|---|---:|---:|---:|---:|---:|---:|",
             ]
         )
-        for mode in MODES:
+        for mode in report_modes:
             row = gsm8k[mode]
             ci_low, ci_high = row["accuracy_wilson_95"]
             lines.append(
@@ -1005,58 +1082,64 @@ def render_summary(metrics, meta, args) -> str:
                 f"{ci_low:.1%}–{ci_high:.1%} | {row['answer_parse_rate']:.1%} | "
                 f"{row['completion_tokens']} | {row['tokens_per_second']:.2f} |"
             )
-        lines.extend(
-            [
-                "",
-                f"STANDARD/SOFT first generated token match rate: {gsm8k['pairwise']['standard_soft_same_first_token']:.1%} (expected 100%).",
-                "",
-                "Paired exact McNemar p-values: "
-                f"STANDARD↔SOFT `{gsm8k['paired_accuracy']['standard_vs_soft']['exact_mcnemar_p']:.4g}`, "
-                f"STANDARD↔FUSED `{gsm8k['paired_accuracy']['standard_vs_fused']['exact_mcnemar_p']:.4g}`, "
-                f"SOFT↔FUSED `{gsm8k['paired_accuracy']['soft_vs_fused']['exact_mcnemar_p']:.4g}`.",
-                "",
-            ]
-        )
+        if "standard_soft_same_first_token" in gsm8k["pairwise"]:
+            lines.extend(
+                [
+                    "",
+                    f"STANDARD/SOFT first generated token match rate: {gsm8k['pairwise']['standard_soft_same_first_token']:.1%} (expected 100%).",
+                    "",
+                ]
+            )
+        if gsm8k["paired_accuracy"]:
+            p_values = ", ".join(
+                f"{name.replace('_vs_', '↔')} `{row['exact_mcnemar_p']:.4g}`"
+                for name, row in gsm8k["paired_accuracy"].items()
+            )
+            lines.extend(["Paired exact McNemar p-values: " + p_values + ".", ""])
 
         if not continuation:
-            standard_correct = gsm8k["standard"]["correct"]
-            soft_correct = gsm8k["soft"]["correct"]
-            fused_correct = gsm8k["fused"]["correct"]
-            smallest_p = min(
-                comparison["exact_mcnemar_p"]
-                for comparison in gsm8k["paired_accuracy"].values()
+            score_text = "; ".join(
+                f"{mode.upper()} scored {gsm8k[mode]['correct']}/{gsm8k[mode]['examples']}"
+                for mode in report_modes
             )
-            significance_sentence = (
-                f"None of the paired exact tests is significant at 0.05 (smallest p={smallest_p:.4g}), "
-                "so this run does not establish an accuracy difference among the decoding modes."
-                if smallest_p >= 0.05
-                else
-                f"At least one paired exact test is below 0.05 (smallest p={smallest_p:.4g}); "
-                "inspect the paired counts above before drawing a conclusion."
-            )
+            if gsm8k["paired_accuracy"]:
+                smallest_p = min(
+                    comparison["exact_mcnemar_p"]
+                    for comparison in gsm8k["paired_accuracy"].values()
+                )
+                significance_sentence = (
+                    f" None of the paired exact tests is significant at 0.05 (smallest p={smallest_p:.4g}), "
+                    "so this run does not establish an accuracy difference among the decoding modes."
+                    if smallest_p >= 0.05
+                    else
+                    f" At least one paired exact test is below 0.05 (smallest p={smallest_p:.4g}); "
+                    "inspect the paired counts above before drawing a conclusion."
+                )
+            else:
+                significance_sentence = ""
             lines.extend(
                 [
                     "## Verdict",
                     "",
-                    f"STANDARD scored {standard_correct}/{gsm8k['standard']['examples']}; "
-                    f"SOFT scored {soft_correct}/{gsm8k['soft']['examples']} "
-                    f"({soft_correct - standard_correct:+d} versus STANDARD), and FUSED scored "
-                    f"{fused_correct}/{gsm8k['fused']['examples']} "
-                    f"({fused_correct - standard_correct:+d} versus STANDARD). "
-                    + significance_sentence,
+                    score_text + "." + significance_sentence,
                     "",
                 ]
             )
 
     if continuation:
-        soft_delta = continuation["soft"]["bpb_relative_delta_vs_standard"]
-        fused_delta = continuation["fused"]["bpb_relative_delta_vs_standard"]
+        delta_text = []
+        for mode in ("soft", "fused"):
+            if mode in continuation and "bpb_relative_delta_vs_standard" in continuation[mode]:
+                delta_text.append(
+                    f"{mode.upper()} changes BPB by {continuation[mode]['bpb_relative_delta_vs_standard']:+.3%}"
+                )
+        quality_text = "; ".join(delta_text) if delta_text else "BPB was measured for the selected modes"
         lines.extend(
             [
                 "## Verdict",
                 "",
                 "Both decoding algorithms operate correctly and remain numerically stable on this checkpoint. "
-                f"Quality is different: SOFT changes BPB by {soft_delta:+.3%}, while FUSED changes it by {fused_delta:+.3%}. "
+                f"Quality is different: {quality_text}. "
                 "Negative BPB deltas favor feedback decoding; positive deltas favor STANDARD. "
                 "The exact shared-first-token invariant provides an additional implementation check.",
                 "",
@@ -1104,6 +1187,7 @@ def render_summary(metrics, meta, args) -> str:
 
 
 def run(args: argparse.Namespace) -> None:
+    args.decode_modes = parse_decode_modes(args.decode_modes)
     checkpoint, meta_path, step, base_dir = checkpoint_paths(args.checkpoint)
     args.checkpoint = checkpoint
     output_dir = args.output_dir.expanduser().resolve()
@@ -1139,25 +1223,30 @@ def run(args: argparse.Namespace) -> None:
         "num_gsm8k": args.num_gsm8k,
         "gsm8k_start": args.gsm8k_start,
         "gsm8k_shots": args.gsm8k_shots,
+        "gsm8k_prompt_format": args.gsm8k_prompt_format,
         "max_new_tokens": args.max_new_tokens,
         "core_max_per_task": args.core_max_per_task,
         "skip_continuation": args.skip_continuation,
         "skip_gsm8k": args.skip_gsm8k,
-        "modes": list(MODES),
+        "modes": list(args.decode_modes),
         "core_prefill_modes": list(CORE_PREFILL_MODES),
     }
     dump_json(output_dir / "run_config.json", config)
 
     print(json.dumps(config, indent=2), flush=True)
     model, tokenizer, loaded_meta = build_model(str(checkpoint.parent), step, device, phase="eval")
-    if loaded_meta["model_config"].get("latent_feedback") is not True:
-        raise RuntimeError("The exact checkpoint metadata does not enable latent feedback")
+    has_latent_feedback = loaded_meta["model_config"].get("latent_feedback") is True
+    requested_feedback_decode = any(mode in {"soft", "fused"} for mode in args.decode_modes)
+    if requested_feedback_decode and not has_latent_feedback:
+        raise RuntimeError("SOFT/FUSED decoding requires latent-feedback checkpoint metadata")
+    if args.core_max_per_task != 0 and not has_latent_feedback:
+        raise RuntimeError("CORE fused-prefill evaluation requires latent-feedback checkpoint metadata")
     print(f"loaded model parameters={sum(p.numel() for p in model.parameters()):,}", flush=True)
 
     metrics = {
         "checkpoint": str(checkpoint),
         "step": step,
-        "modes": list(MODES),
+        "modes": list(args.decode_modes),
     }
     if args.core_max_per_task != 0:
         metrics["core_prefill"] = evaluate_core_prefill(model, tokenizer, args, output_dir, base_dir)

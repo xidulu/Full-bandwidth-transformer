@@ -27,6 +27,7 @@ try:
     # Package import (tests and `python -m fbt_experiments.merge_gsm8k_shards`).
     from .evaluate_checkpoint import (
         MODES,
+        build_gsm8k_chat_prompt_ids,
         build_gsm8k_prompt,
         dump_json,
         dump_jsonl,
@@ -40,6 +41,7 @@ except ImportError:
     # Direct `python fbt_experiments/merge_gsm8k_shards.py` execution.
     from evaluate_checkpoint import (  # type: ignore[no-redef]
         MODES,
+        build_gsm8k_chat_prompt_ids,
         build_gsm8k_prompt,
         dump_json,
         dump_jsonl,
@@ -101,6 +103,39 @@ DECODE_PROTOCOL = {
 
 class MergeError(ValueError):
     """Raised when shard inputs are incomplete or incompatible."""
+
+
+def _validate_modes(value: Any, label: str) -> tuple[str, ...]:
+    if not isinstance(value, list) or not value:
+        raise MergeError(f"{label} must be a non-empty list")
+    if any(not isinstance(mode, str) for mode in value):
+        raise MergeError(f"{label} must contain only strings")
+    invalid = [mode for mode in value if mode not in MODES]
+    if invalid:
+        raise MergeError(f"{label} contains invalid modes {invalid}; expected modes from {list(MODES)}")
+    if len(set(value)) != len(value):
+        raise MergeError(f"{label} contains duplicate modes: {value}")
+    return tuple(value)
+
+
+def _validate_prompt_format(value: Any, label: str) -> str:
+    if value is None:
+        return "qa"
+    if value not in {"qa", "chat"}:
+        raise MergeError(f"{label} must be 'qa' or 'chat', got {value!r}")
+    return value
+
+
+def _pairwise_keys_for_modes(modes: tuple[str, ...]) -> tuple[str, ...]:
+    keys: list[str] = []
+    mode_set = set(modes)
+    if {"standard", "soft"}.issubset(mode_set):
+        keys.extend(("standard_soft_same_first_token", "standard_soft_identical"))
+    if {"standard", "fused"}.issubset(mode_set):
+        keys.append("standard_fused_identical")
+    if {"soft", "fused"}.issubset(mode_set):
+        keys.append("soft_fused_identical")
+    return tuple(keys)
 
 
 def parse_args() -> argparse.Namespace:
@@ -244,21 +279,31 @@ def _validate_mode_row(mode_row: Any, label: str, reference: str | None) -> None
         raise MergeError(f"{label}.stop_reason must be a string")
 
 
-def _expected_pairwise(row: dict[str, Any]) -> dict[str, bool]:
-    tokens = {mode: row["modes"][mode]["completion_token_ids"] for mode in MODES}
-    return {
-        "standard_soft_same_first_token": bool(
+def _expected_pairwise(row: dict[str, Any], modes: tuple[str, ...]) -> dict[str, bool]:
+    tokens = {mode: row["modes"][mode]["completion_token_ids"] for mode in modes}
+    expected: dict[str, bool] = {}
+    if {"standard", "soft"}.issubset(tokens):
+        expected["standard_soft_same_first_token"] = bool(
             tokens["standard"]
             and tokens["soft"]
             and tokens["standard"][0] == tokens["soft"][0]
-        ),
-        "standard_soft_identical": tokens["standard"] == tokens["soft"],
-        "standard_fused_identical": tokens["standard"] == tokens["fused"],
-        "soft_fused_identical": tokens["soft"] == tokens["fused"],
-    }
+        )
+        expected["standard_soft_identical"] = tokens["standard"] == tokens["soft"]
+    if {"standard", "fused"}.issubset(tokens):
+        expected["standard_fused_identical"] = tokens["standard"] == tokens["fused"]
+    if {"soft", "fused"}.issubset(tokens):
+        expected["soft_fused_identical"] = tokens["soft"] == tokens["fused"]
+    return expected
 
 
-def _validate_record(row: dict[str, Any], expected_index: int, shots: int, source: Path) -> None:
+def _validate_record(
+    row: dict[str, Any],
+    expected_index: int,
+    shots: int,
+    source: Path,
+    modes: tuple[str, ...],
+    prompt_format: str,
+) -> None:
     label = f"{source}/gsm8k_generations.jsonl example {expected_index}"
     if type(row.get("example_index")) is not int or row["example_index"] != expected_index:
         raise MergeError(
@@ -269,22 +314,29 @@ def _validate_record(row: dict[str, Any], expected_index: int, shots: int, sourc
         raise MergeError(
             f"{label}: gsm8k_shots={row.get('gsm8k_shots')!r}, expected {shots}"
         )
+    row_prompt_format = _validate_prompt_format(
+        row.get("gsm8k_prompt_format", "qa"), f"{label}: gsm8k_prompt_format"
+    )
+    if row_prompt_format != prompt_format:
+        raise MergeError(
+            f"{label}: gsm8k_prompt_format={row_prompt_format!r}, expected {prompt_format!r}"
+        )
     if not isinstance(row.get("prompt"), str):
         raise MergeError(f"{label}: prompt must be a string")
     _require_nonnegative_int(row.get("prompt_tokens"), f"{label}: prompt_tokens")
     reference = row.get("reference_answer")
     if not isinstance(reference, str):
         raise MergeError(f"{label}: reference_answer must be a string")
-    modes = row.get("modes")
-    if not isinstance(modes, dict) or set(modes) != set(MODES):
-        raise MergeError(f"{label}: modes must be exactly {list(MODES)}")
-    for mode in MODES:
-        _validate_mode_row(modes[mode], f"{label}.modes.{mode}", reference)
+    row_modes = row.get("modes")
+    if not isinstance(row_modes, dict) or set(row_modes) != set(modes):
+        raise MergeError(f"{label}: modes must be exactly {list(modes)}")
+    for mode in modes:
+        _validate_mode_row(row_modes[mode], f"{label}.modes.{mode}", reference)
 
     pairwise = row.get("pairwise")
-    if not isinstance(pairwise, dict) or set(pairwise) != set(PAIRWISE_KEYS):
-        raise MergeError(f"{label}: pairwise fields must be exactly {list(PAIRWISE_KEYS)}")
-    expected_pairwise = _expected_pairwise(row)
+    expected_pairwise = _expected_pairwise(row, modes)
+    if not isinstance(pairwise, dict) or set(pairwise) != set(expected_pairwise):
+        raise MergeError(f"{label}: pairwise fields must be exactly {list(expected_pairwise)}")
     if pairwise != expected_pairwise:
         raise MergeError(
             f"{label}: stored pairwise flags do not match token IDs; "
@@ -293,13 +345,16 @@ def _validate_record(row: dict[str, Any], expected_index: int, shots: int, sourc
 
 
 def summarize_gsm8k_records(
-    records: list[dict[str, Any]], num_shots: int
+    records: list[dict[str, Any]], num_shots: int, modes: tuple[str, ...] | None = None
 ) -> dict[str, Any]:
     """Recompute the evaluator's GSM8K aggregate schema from raw records."""
     if not records:
         raise MergeError("Cannot summarize zero GSM8K records")
+    if modes is None:
+        available = set(records[0]["modes"])
+        modes = tuple(mode for mode in MODES if mode in available)
     summary: dict[str, Any] = {}
-    for mode in MODES:
+    for mode in modes:
         seconds = sum(record["modes"][mode]["seconds"] for record in records)
         tokens = sum(record["modes"][mode]["completion_tokens"] for record in records)
         correct = sum(record["modes"][mode]["correct"] for record in records)
@@ -316,12 +371,15 @@ def summarize_gsm8k_records(
             "accuracy_wilson_95": wilson_interval(correct, len(records)),
         }
 
+    pairwise_keys = _pairwise_keys_for_modes(modes)
     summary["pairwise"] = {
         key: sum(record["pairwise"][key] for record in records) / len(records)
-        for key in PAIRWISE_KEYS
+        for key in pairwise_keys
     }
     summary["paired_accuracy"] = {}
     for left, right in (("standard", "soft"), ("standard", "fused"), ("soft", "fused")):
+        if left not in modes or right not in modes:
+            continue
         both_correct = sum(
             record["modes"][left]["correct"] and record["modes"][right]["correct"]
             for record in records
@@ -425,10 +483,14 @@ def _load_shard(source: Path) -> dict[str, Any]:
     shots = _require_nonnegative_int(config["gsm8k_shots"], f"{source}: gsm8k_shots")
     if not 0 <= shots <= 8:
         raise MergeError(f"{source}: gsm8k_shots must be in [0, 8]")
+    prompt_format = _validate_prompt_format(
+        config.get("gsm8k_prompt_format", "qa"), f"{source}: gsm8k_prompt_format"
+    )
+    if prompt_format == "chat" and shots != 0:
+        raise MergeError(f"{source}: chat prompt format currently requires gsm8k_shots=0")
     if config.get("skip_gsm8k") is not False:
         raise MergeError(f"Shard {source} did not run GSM8K (skip_gsm8k must be false)")
-    if config["modes"] != list(MODES):
-        raise MergeError(f"Shard {source} modes must be exactly {list(MODES)}")
+    modes = _validate_modes(config["modes"], f"{source}: modes")
     if len(rows) != count:
         raise MergeError(
             f"Shard {source} contains {len(rows)} complete rows but run_config requests {count}; "
@@ -437,7 +499,7 @@ def _load_shard(source: Path) -> dict[str, Any]:
     if count == 0:
         raise MergeError(f"Shard {source} contains no GSM8K rows")
     for offset, row in enumerate(rows):
-        _validate_record(row, start + offset, shots, source)
+        _validate_record(row, start + offset, shots, source, modes, prompt_format)
 
     if meta.get("step") != config["step"]:
         raise MergeError(
@@ -448,11 +510,11 @@ def _load_shard(source: Path) -> dict[str, Any]:
         raise MergeError(f"Shard {source} metrics checkpoint does not match run_config")
     if stored_metrics.get("step") != config["step"]:
         raise MergeError(f"Shard {source} metrics step does not match run_config")
-    if stored_metrics.get("modes") != list(MODES):
+    if stored_metrics.get("modes") != list(modes):
         raise MergeError(f"Shard {source} metrics modes do not match the evaluator modes")
     if "gsm8k" not in stored_metrics:
         raise MergeError(f"Shard {source} metrics.json has no GSM8K aggregate")
-    recomputed = summarize_gsm8k_records(rows, shots)
+    recomputed = summarize_gsm8k_records(rows, shots, modes)
     _assert_metric_matches(recomputed, stored_metrics["gsm8k"], f"{source}/metrics.json.gsm8k")
 
     return {
@@ -462,6 +524,8 @@ def _load_shard(source: Path) -> dict[str, Any]:
         "rows": rows,
         "start": start,
         "count": count,
+        "modes": modes,
+        "prompt_format": prompt_format,
     }
 
 
@@ -477,6 +541,14 @@ def _validate_source_dataset(
         raise MergeError(f"Canonical GSM8K source dataset is unavailable: {dataset_path}")
     source_rows = _read_jsonl(dataset_path)
     shots = config["gsm8k_shots"]
+    prompt_format = _validate_prompt_format(
+        config.get("gsm8k_prompt_format", "qa"), "run_config.gsm8k_prompt_format"
+    )
+    tokenizer = None
+    if prompt_format == "chat":
+        from nanochat.tokenizer import get_tokenizer
+
+        tokenizer = get_tokenizer()
     for record in records:
         index = record["example_index"]
         if index >= len(source_rows):
@@ -486,7 +558,11 @@ def _validate_source_dataset(
         source_row = source_rows[index]
         if not isinstance(source_row.get("context"), str) or "answer" not in source_row:
             raise MergeError(f"Malformed canonical GSM8K source row {index} in {dataset_path}")
-        expected_prompt = build_gsm8k_prompt(source_row["context"], shots) + "\n\nA:"
+        if prompt_format == "chat":
+            assert tokenizer is not None
+            _, expected_prompt = build_gsm8k_chat_prompt_ids(tokenizer, source_row["context"])
+        else:
+            expected_prompt = build_gsm8k_prompt(source_row["context"], shots) + "\n\nA:"
         expected_reference = normalize_number(str(source_row["answer"]))
         if record["prompt"] != expected_prompt:
             raise MergeError(
@@ -543,6 +619,7 @@ def _merged_run_config(
         "step",
         "seed",
         "gsm8k_shots",
+        "gsm8k_prompt_format",
         "max_new_tokens",
         "modes",
     ):
@@ -606,12 +683,19 @@ def merge_shards(
             _assert_same(
                 f"run_config.{key}", first["config"][key], shard["config"][key], shard["path"]
             )
+        _assert_same(
+            "run_config.gsm8k_prompt_format",
+            first["prompt_format"],
+            shard["prompt_format"],
+            shard["path"],
+        )
         _assert_same("checkpoint_meta.json", first["meta"], shard["meta"], shard["path"])
 
     rows = sorted(
         (row for shard in shards for row in shard["rows"]),
         key=lambda row: row["example_index"],
     )
+    modes = tuple(first["config"]["modes"])
     actual_indices = [row["example_index"] for row in rows]
     expected_indices = list(range(expected_start, expected_start + len(rows)))
     if actual_indices != expected_indices:
@@ -628,11 +712,11 @@ def merge_shards(
 
     shots = first["config"]["gsm8k_shots"]
     source_dataset = _validate_source_dataset(first["config"], rows)
-    gsm8k_metrics = summarize_gsm8k_records(rows, shots)
+    gsm8k_metrics = summarize_gsm8k_records(rows, shots, modes)
     metrics = {
         "checkpoint": first["config"]["checkpoint"],
         "step": first["config"]["step"],
-        "modes": list(MODES),
+        "modes": list(modes),
         "gsm8k": gsm8k_metrics,
     }
     invoked_command = command or [sys.executable, *sys.argv]
@@ -640,10 +724,11 @@ def merge_shards(
         first["config"], shards, expected_start, len(rows), invoked_command
     )
     run_config["source_dataset"] = source_dataset
-    run_config["decoding"] = DECODE_PROTOCOL
+    run_config["decoding"] = {**DECODE_PROTOCOL, "modes": list(modes)}
     summary_args = SimpleNamespace(
         checkpoint=Path(first["config"]["checkpoint"]),
         gsm8k_shots=shots,
+        gsm8k_prompt_format=first["prompt_format"],
     )
     summary = render_summary(metrics, first["meta"], summary_args)
     summary += (
@@ -671,10 +756,11 @@ def merge_shards(
             "checkpoint": first["config"]["checkpoint"],
             "step": first["config"]["step"],
             "protocol": {key: first["config"][key] for key in PROTOCOL_KEYS},
-            "decoding": DECODE_PROTOCOL,
+            "decoding": {**DECODE_PROTOCOL, "modes": list(modes)},
             "source_dataset": source_dataset,
             "gsm8k_start": expected_start,
             "num_gsm8k": len(rows),
+            "gsm8k_prompt_format": first["prompt_format"],
             "first_example_index": rows[0]["example_index"],
             "last_example_index": rows[-1]["example_index"],
             "sources": [_source_manifest(shard) for shard in shards],

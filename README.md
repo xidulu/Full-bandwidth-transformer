@@ -6,25 +6,283 @@
 
 (*No Microsoft resources or assets are used for the reproduction*)
 
-An attempt (fully agentic implementation) to reproduce Full-bandwidth transformer using Nanochat codebase.
+An attempt (fully agentic implementation) to reproduce Full-bandwidth transformer using the Nanochat codebase.
 
-In order to acquire a non-zero value on generative tasks such as gsm8k or mbpp,
-we now follow a pre-train + mid-train pipeline, where mid-train data are domain specific corpus (OpenMath and StackEdu).
+The current math reproduction uses a pretrain + mid-train pipeline:
 
-The multi-pass scheduling is chosen as:
-- (Pre-train) 60% one pass
-- (Pre-train) 40% two passes
-- (Mid-train) 100% three passes
+- Standard baseline: d20 Nanochat model trained to step 60k with one-pass behavior.
+- FBT variants: initialized from the standard d20 checkpoint at step 40k, then trained to step 60k with K=2 latent-feedback pretraining.
+- SFT / mid-training: OpenMathInstruct-2 `train_5M`, one epoch after reserving 4096 validation examples.
+- Standard SFT uses one forward pass. FBT SFT uses K=3, `--no-feedback-prefix-mixin`, and `--feedback-jitter 0.02`.
+- Reported math evals are zero-shot chat-template greedy decoding. FBT checkpoints are evaluated with `standard`, `soft`, and `fused` decoding; the standard checkpoint is evaluated with `standard` decoding only.
 
-And it seems to work on gsm8k
+The main completed comparison covers the standard baseline plus two FBT fusion variants, `concat_projection` and `gate_product`. `linear_addition` uses the same recipe but its eval artifacts are not included in the tables below until its queued eval jobs finish.
 
-| mode | exact | accuracy | 95% Wilson CI | parsed | output tokens | tokens/s |
-|---|---:|---:|---:|---:|---:|---:|
-| standard | 278/1319 | 21.1% | 19.0%–23.4% | 99.8% | 115677 | 91.94 |
-| soft | 360/1319 | 27.3% | 25.0%–29.8% | 99.8% | 125456 | 91.54 |
-| fused | 448/1319 | 34.0% | 31.5%–36.6% | 99.8% | 127829 | 90.47 |
+### GSM8K zero-shot chat-template results
 
-STANDARD/SOFT first generated token match rate: 100.0% (expected 100%).
+Full GSM8K test set, 1,319 problems. Exact-match grading uses the GSM8K numeric answer parser in `fbt_experiments/evaluate_checkpoint.py`.
+
+| model | decode | correct | accuracy |
+|---|---:|---:|---:|
+| standard | standard | 642/1319 | 48.67% |
+| concat_projection | standard | 651/1319 | 49.36% |
+| concat_projection | soft | 681/1319 | 51.63% |
+| concat_projection | fused | 691/1319 | 52.39% |
+| gate_product | standard | 632/1319 | 47.92% |
+| gate_product | soft | 650/1319 | 49.28% |
+| gate_product | fused | 692/1319 | 52.46% |
+
+Best GSM8K result: `gate_product + fused`, 692/1319 = 52.46%.
+
+### MATH-500 zero-shot chat-template results
+
+Full MATH-500 test set, 500 problems. Final results below use Hugging Face Math-Verify symbolic grading from `fbt_experiments/regrade_math500_math_verify.py`.
+
+| model | decode | correct | accuracy |
+|---|---:|---:|---:|
+| standard | standard | 173/500 | 34.6% |
+| concat_projection | standard | 176/500 | 35.2% |
+| concat_projection | soft | 193/500 | 38.6% |
+| concat_projection | fused | 198/500 | 39.6% |
+| gate_product | standard | 171/500 | 34.2% |
+| gate_product | soft | 183/500 | 36.6% |
+| gate_product | fused | 198/500 | 39.6% |
+
+Best MATH-500 result: tie between `concat_projection + fused` and `gate_product + fused`, both 198/500 = 39.6%.
+
+Across both benchmarks, the clearest signal is that `fused` decoding improves the FBT checkpoints relative to their own `standard` decoding. For paired comparisons on the same examples, use the McNemar counts/p-values in the saved `metrics.json` or `metrics_math_verify.json` files rather than independent binomial error bars.
+
+
+## Reproduce the standard-vs-FBT math pipeline
+
+This section documents the exact script flow used for the d20 standard baseline and the latent-feedback / FBT variants, from pretraining through OpenMath SFT and zero-shot math evaluation.
+
+The checked-in Slurm scripts are cluster-specific. Before running on a new clone, edit the `cd /weka/scratch/jhu/enalisn1/xiw/nanochat` line in the scripts if your repo lives elsewhere, and set `NANOCHAT_BASE_DIR` to a large external cache/checkpoint directory. The paths below assume:
+
+```bash
+export NANOCHAT_BASE_DIR=/home/jhu/xwang457/work/nanochat_cache
+```
+
+Install the GPU environment and the symbolic verifier used for final MATH-500 grading:
+
+```bash
+uv sync --extra gpu --group dev
+uv pip install --python .venv/bin/python 'math-verify[antlr4_13_2]'
+source .venv/bin/activate
+```
+
+### 1. Pretrain the standard d20 baseline
+
+Run:
+
+```bash
+std_pretrain=$(sbatch --parsable runs/train_d20_standard_60k_4xh100.slurm)
+echo "${std_pretrain}"
+```
+
+This trains the standard baseline tag:
+
+```text
+base_checkpoints/d20-standard-60k/model_060000.pt
+```
+
+The script is intentionally configured with `--num-forward-passes=2 --feedback-start-fraction=1.0`, which keeps the whole run in the one-pass regime while preserving the same training script surface. It also saves intermediate checkpoints every 10k steps; the FBT runs below resume from step 40k.
+
+### 2. Pretrain the FBT variants from standard step 40k
+
+Run after the standard pretraining job succeeds:
+
+```bash
+fbt_pretrain=$(sbatch --parsable --dependency=afterok:${std_pretrain} runs/train_d20_lf_k2_modes_from40k_a100.slurm)
+echo "${fbt_pretrain}"
+```
+
+This is a three-element Slurm array:
+
+```text
+array task 0: gate_product
+array task 1: concat_projection
+array task 2: linear_addition
+```
+
+It resumes from:
+
+```text
+base_checkpoints/d20-standard-60k/model_040000.pt
+```
+
+and writes:
+
+```text
+base_checkpoints/d20-from40k-lf-k2-gate_product/model_060000.pt
+base_checkpoints/d20-from40k-lf-k2-concat_projection/model_060000.pt
+base_checkpoints/d20-from40k-lf-k2-linear_addition/model_060000.pt
+```
+
+The FBT pretraining recipe uses K=2 from the start of this resumed phase:
+
+```text
+--num-forward-passes=2
+--feedback-start-fraction=0.0
+--no-feedback-prefix-mixin
+--feedback-jitter=0.02
+--weight-tying
+```
+
+### 3. SFT on OpenMathInstruct-2 train_5M
+
+Submit standard SFT after standard pretraining, and the FBT SFT jobs after the FBT pretraining array:
+
+```bash
+sft_std=$(sbatch --parsable --dependency=afterok:${std_pretrain} runs/openmath_standard_sft_train5m_a100.slurm)
+sft_concat=$(sbatch --parsable --dependency=afterok:${fbt_pretrain} runs/openmath_concat_projection_k3_sft_train5m_a100.slurm)
+sft_gate=$(sbatch --parsable --dependency=afterok:${fbt_pretrain} runs/openmath_gate_product_k3_sft_train5m_a100.slurm)
+sft_linear=$(sbatch --parsable --dependency=afterok:${fbt_pretrain} runs/openmath_linear_addition_k3_sft_train5m_a100.slurm)
+echo "${sft_std} ${sft_concat} ${sft_gate} ${sft_linear}"
+```
+
+The standard SFT job uses one forward pass:
+
+```text
+--num-forward-passes 1
+```
+
+The FBT SFT jobs use three passes and inherit their `latent_feedback_mode` from the source checkpoint metadata:
+
+```text
+--num-forward-passes 3
+--no-feedback-prefix-mixin
+--feedback-jitter 0.02
+```
+
+All four scripts use OpenMathInstruct-2 `train_5M`, reserve 4096 validation examples, train over the remaining examples once, and save only the final checkpoint:
+
+```text
+--sft-dataset openmath
+--openmath-split train_5M
+--openmath-val-examples 4096
+--openmath-train-examples -1
+--save-every -1
+```
+
+Expected SFT outputs:
+
+```text
+chatsft_checkpoints/d20-standard-60k-openmath-train5m-k1-anygpu/model_004407.pt
+chatsft_checkpoints/d20-from40k-lf-k2-concat_projection-openmath-train5m-k3-anygpu/model_004407.pt
+chatsft_checkpoints/d20-from40k-lf-k2-gate_product-openmath-train5m-k3-anygpu/model_004407.pt
+chatsft_checkpoints/d20-from40k-lf-k2-linear_addition-openmath-train5m-k3-anygpu/model_004407.pt
+```
+
+### 4. Run zero-shot chat-template GSM8K
+
+The main three-model eval array covers the standard, concat-projection, and gate-product SFT checkpoints:
+
+```bash
+main_gsm8k=$(sbatch --parsable --dependency=afterok:${sft_std}:${sft_concat}:${sft_gate} runs/eval_openmath_train5m_anygpu_gsm8k_0shot_chat_array.slurm)
+main_gsm8k_merge_std=$(sbatch --parsable --dependency=afterok:${main_gsm8k} runs/merge_openmath_train5m_anygpu_standard_gsm8k_0shot_chat.slurm)
+main_gsm8k_merge_concat=$(sbatch --parsable --dependency=afterok:${main_gsm8k} runs/merge_openmath_train5m_anygpu_concat_gsm8k_0shot_chat.slurm)
+main_gsm8k_merge_gate=$(sbatch --parsable --dependency=afterok:${main_gsm8k} runs/merge_openmath_train5m_anygpu_gate_gsm8k_0shot_chat.slurm)
+echo "${main_gsm8k} ${main_gsm8k_merge_std} ${main_gsm8k_merge_concat} ${main_gsm8k_merge_gate}"
+```
+
+This evaluates all 1,319 GSM8K test examples with:
+
+```text
+--gsm8k-shots 0
+--gsm8k-prompt-format chat
+--max-new-tokens 192
+--decode-modes standard                  # standard model
+--decode-modes standard,soft,fused       # FBT models
+```
+
+To also evaluate `linear_addition` on GSM8K:
+
+```bash
+linear_gsm8k=$(sbatch --parsable --dependency=afterok:${sft_linear} runs/eval_openmath_train5m_anygpu_linear_addition_gsm8k_0shot_chat.slurm)
+linear_gsm8k_merge=$(sbatch --parsable --dependency=afterok:${linear_gsm8k} runs/merge_openmath_train5m_anygpu_linear_addition_gsm8k_0shot_chat.slurm)
+echo "${linear_gsm8k} ${linear_gsm8k_merge}"
+```
+
+Final GSM8K result directories:
+
+```text
+fbt_experiments/results/d20_standard_60k_openmath_train5m_k1_anygpu_004407_gsm8k_0shot_chat_full
+fbt_experiments/results/d20_from40k_lf_k2_concat_projection_openmath_train5m_k3_anygpu_004407_gsm8k_0shot_chat_full
+fbt_experiments/results/d20_from40k_lf_k2_gate_product_openmath_train5m_k3_anygpu_004407_gsm8k_0shot_chat_full
+fbt_experiments/results/d20_from40k_lf_k2_linear_addition_openmath_train5m_k3_anygpu_004407_gsm8k_0shot_chat_full
+```
+
+### 5. Run zero-shot chat-template MATH-500 and Math-Verify regrading
+
+The main three-model MATH-500 eval array covers the same standard, concat-projection, and gate-product checkpoints:
+
+```bash
+main_math500=$(sbatch --parsable --dependency=afterok:${sft_std}:${sft_concat}:${sft_gate} runs/eval_openmath_train5m_anygpu_math500_0shot_chat_array.slurm)
+main_math500_merge_std=$(sbatch --parsable --dependency=afterok:${main_math500} runs/merge_openmath_train5m_anygpu_standard_math500_0shot_chat.slurm)
+main_math500_merge_concat=$(sbatch --parsable --dependency=afterok:${main_math500} runs/merge_openmath_train5m_anygpu_concat_math500_0shot_chat.slurm)
+main_math500_merge_gate=$(sbatch --parsable --dependency=afterok:${main_math500} runs/merge_openmath_train5m_anygpu_gate_math500_0shot_chat.slurm)
+main_math500_regrade=$(sbatch --parsable --dependency=afterok:${main_math500_merge_std}:${main_math500_merge_concat}:${main_math500_merge_gate} runs/regrade_openmath_train5m_anygpu_math500_0shot_chat_math_verify.slurm)
+echo "${main_math500} ${main_math500_merge_std} ${main_math500_merge_concat} ${main_math500_merge_gate} ${main_math500_regrade}"
+```
+
+This evaluates all 500 MATH-500 examples with zero-shot chat prompts, `--max-new-tokens 512`, and the same decode-mode policy as GSM8K. The merge creates lightweight exact-match metrics; the regrade job adds Math-Verify symbolic metrics:
+
+```text
+metrics_math_verify.json
+summary_math_verify.md
+math500_generations_math_verify.jsonl
+```
+
+To also evaluate and Math-Verify regrade `linear_addition`:
+
+```bash
+linear_math500=$(sbatch --parsable --dependency=afterok:${sft_linear} runs/eval_openmath_train5m_anygpu_linear_addition_math500_0shot_chat.slurm)
+linear_math500_merge=$(sbatch --parsable --dependency=afterok:${linear_math500} runs/merge_openmath_train5m_anygpu_linear_addition_math500_0shot_chat.slurm)
+linear_math500_regrade=$(sbatch --parsable --dependency=afterok:${linear_math500_merge} runs/regrade_openmath_train5m_anygpu_linear_addition_math500_0shot_chat_math_verify.slurm)
+echo "${linear_math500} ${linear_math500_merge} ${linear_math500_regrade}"
+```
+
+Final MATH-500 result directories:
+
+```text
+fbt_experiments/results/d20_standard_60k_openmath_train5m_k1_anygpu_004407_math500_0shot_chat_full
+fbt_experiments/results/d20_from40k_lf_k2_concat_projection_openmath_train5m_k3_anygpu_004407_math500_0shot_chat_full
+fbt_experiments/results/d20_from40k_lf_k2_gate_product_openmath_train5m_k3_anygpu_004407_math500_0shot_chat_full
+fbt_experiments/results/d20_from40k_lf_k2_linear_addition_openmath_train5m_k3_anygpu_004407_math500_0shot_chat_full
+```
+
+### 6. Inspect final metrics
+
+GSM8K:
+
+```bash
+for d in \
+  fbt_experiments/results/d20_standard_60k_openmath_train5m_k1_anygpu_004407_gsm8k_0shot_chat_full \
+  fbt_experiments/results/d20_from40k_lf_k2_concat_projection_openmath_train5m_k3_anygpu_004407_gsm8k_0shot_chat_full \
+  fbt_experiments/results/d20_from40k_lf_k2_gate_product_openmath_train5m_k3_anygpu_004407_gsm8k_0shot_chat_full \
+  fbt_experiments/results/d20_from40k_lf_k2_linear_addition_openmath_train5m_k3_anygpu_004407_gsm8k_0shot_chat_full
+do
+  echo "${d}"
+  jq '.gsm8k | {standard, soft, fused, paired_accuracy}' "${d}/metrics.json"
+done
+```
+
+MATH-500, using Math-Verify:
+
+```bash
+for d in \
+  fbt_experiments/results/d20_standard_60k_openmath_train5m_k1_anygpu_004407_math500_0shot_chat_full \
+  fbt_experiments/results/d20_from40k_lf_k2_concat_projection_openmath_train5m_k3_anygpu_004407_math500_0shot_chat_full \
+  fbt_experiments/results/d20_from40k_lf_k2_gate_product_openmath_train5m_k3_anygpu_004407_math500_0shot_chat_full \
+  fbt_experiments/results/d20_from40k_lf_k2_linear_addition_openmath_train5m_k3_anygpu_004407_math500_0shot_chat_full
+do
+  echo "${d}"
+  jq '.math500_math_verify | {standard, soft, fused, paired_accuracy}' "${d}/metrics_math_verify.json"
+done
+```
+
+For mode comparisons on the same examples, prefer the paired exact McNemar counts and p-values in `paired_accuracy` over independent binomial error bars.
 
 
 ## Getting started
