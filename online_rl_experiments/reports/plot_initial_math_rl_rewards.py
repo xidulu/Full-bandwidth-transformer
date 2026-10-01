@@ -9,9 +9,11 @@ from statistics import mean
 ROOT = Path(__file__).resolve().parents[1]
 OUT = Path(__file__).resolve().parent
 RUNS = [
-    ('standard', 'Standard', '899298', '899298-preflight', '#1764ab'),
-    ('three_pass', 'LF three-pass', '906530', '904517-preflight', '#d27b13'),
-    ('hidden_replay', 'LF hidden-state replay', '906531', '904906-preflight', '#14836b'),
+    ('standard', 'Standard transformer', '899298', '899298-preflight', '#1764ab'),
+    ('three_pass', 'Full bandwidth transformer,\nthree pass likelihood estimation',
+     '906530', '904517-preflight', '#d27b13'),
+    ('hidden_replay', 'vLLM hidden state replay\nlikelihood estimation',
+     '906531', '904906-preflight', '#14836b'),
 ]
 WINDOW = 25
 
@@ -57,7 +59,7 @@ def plot():
     assert len(records) == 900
     plt.rcParams.update({'font.family': 'DejaVu Sans', 'font.size': 11,
                          'svg.fonttype': 'none', 'svg.hashsalt': 'initial-math-rl'})
-    fig, ax = plt.subplots(figsize=(11, 6.4))
+    fig, ax = plt.subplots(figsize=(12, 7))
     fig.subplots_adjust(left=.09, right=.97, bottom=.25, top=.77)
     fig.text(.09, .94, 'Reward improves during initial math RL', fontsize=19, weight='bold')
     fig.text(.09, .89, 'Hendrycks-MATH training split  |  128 questions × 8 responses per update', color='#505861')
@@ -76,8 +78,8 @@ def plot():
         stats[key] = {'job_id': job, 'first_25_mean': first, 'last_25_mean': last,
                       'gain_percentage_points': 100 * (last-first)}
         x = .09 + i * .305
-        fig.text(x, .135, label, color=color, weight='bold')
-        fig.text(x, .095, f'{first:.1%} → {last:.1%}  (+{100*(last-first):.1f} pp)', fontsize=13)
+        fig.text(x, .165, label, color=color, weight='bold', fontsize=10, va='top')
+        fig.text(x, .075, f'{first:.1%} → {last:.1%}  (+{100*(last-first):.1f} pp)', fontsize=13)
     ax.set(xlim=(1, 300), ylim=(.30, .65), xlabel='RL update', ylabel='Mean training reward')
     ax.yaxis.set_major_formatter(PercentFormatter(1, decimals=0))
     ax.set_xticks([1, 50, 100, 150, 200, 250, 300])
@@ -87,7 +89,8 @@ def plot():
         ax.spines[spine].set_visible(False)
     for spine in ['left', 'bottom']:
         ax.spines[spine].set_color('#bbc2ca')
-    ax.legend(loc='lower left', bbox_to_anchor=(0, 1.01), ncol=3, frameon=False, borderaxespad=0)
+    ax.legend(loc='lower left', bbox_to_anchor=(0, 1.01), ncol=3, frameon=False,
+              borderaxespad=0, fontsize=10, columnspacing=1.5)
     fig.text(.09, .035, 'Faint: individual updates. Bold: trailing 25-update mean. Below: first vs last 25 updates.',
              fontsize=10, color='#505861')
     fig.savefig(OUT / 'initial_math_rl_rewards.png', dpi=180, facecolor='white')
