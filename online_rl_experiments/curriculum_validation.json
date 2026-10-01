@@ -1,0 +1,12 @@
+{
+  "eligible_questions": 232263,
+  "tested_updates": 50,
+  "unique_questions_per_update": 512,
+  "checkpoint_resume_equivalence_steps": [
+    1253,
+    1276
+  ],
+  "adaptive_refresh_after_step": 1275,
+  "reward_statistics": "synthetic for sampler validation only",
+  "config_sha256": "9d91a3594c6acc22c274469442ec6fc0c42af7c90ca1ed051d0470f50c5dc3ae"
+}

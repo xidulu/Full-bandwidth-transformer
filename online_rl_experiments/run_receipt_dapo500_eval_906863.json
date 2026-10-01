@@ -1,0 +1,56 @@
+{
+  "job_id": 906863,
+  "account": "enalisn1",
+  "submitted_at_utc": "2026-09-27T01:19:37.874983+00:00",
+  "checkpoint": "results/899298/checkpoints/model_000300.pt",
+  "checkpoint_sha256": "ea01dc0b2d77d01aa74233b38b5a70ff28bd4c1964e15eebb2e9adb13274dccf",
+  "dataset": "BytedTsinghua-SIA/DAPO-Math-17k",
+  "dataset_revision": "65877096c24ffa7abc4e4fa5edb95cf3413a5674",
+  "questions": 500,
+  "seed": 42,
+  "max_new_tokens": 1024,
+  "temperature": 0.0,
+  "decode_mode": "standard",
+  "rollout_engine": "vllm",
+  "verifier": "Math-Verify; grade answers present at length cap, report completed-only accuracy separately",
+  "output": "results/dapo500-rl-906863",
+  "log": "logs/dapo500-eval-906863.log",
+  "source_sha256": {
+    "evaluate_orz_subset.py": "1a9c6887abc4ff09974e47f4d2f4be2297942da12c132512d5972ad1219565fb",
+    "evaluate_dapo_subset.slurm": "57cc4229cb52cf97eaa59bd890c17a6dd05fd5b515281c0ae3ee5ec5e5cd3432",
+    "verifier.py": "b241a30cbd6adb76982d02d86e511da4f8c27a041bd364f008ecbd2d58c93cf7",
+    "vllm_rollout.py": "f9e3e1ac8cfacacee7a99e6bb9eaac8b1b6e59263171a3e79b3df1d058612526"
+  },
+  "status": "COMPLETED",
+  "elapsed_seconds": 262,
+  "summary": {
+    "greedy": {
+      "prompts": 500,
+      "responses": 500,
+      "correct": 32,
+      "accuracy": 0.064,
+      "prompt_cluster_standard_error": 0.01095664621097098,
+      "accuracy_normal_95": [
+        0.04252497342649688,
+        0.08547502657350312
+      ],
+      "any_correct_fraction": 0.064,
+      "all_wrong_groups": 468,
+      "all_correct_groups": 32,
+      "mixed_groups": 0,
+      "truncation_rate": 0.07,
+      "parse_rate": 0.934,
+      "verifier_errors": 0,
+      "completed_only_correct": 32,
+      "completed_only_accuracy": 0.064
+    }
+  },
+  "wandb": {
+    "id": "89zi5yoz",
+    "url": "https://wandb.ai/xidulu-umass-amherst/nanochat-online-rl/runs/89zi5yoz"
+  },
+  "subset_sha256": "07206a3a45d0a5b7236a5b823b26d006f68228205c8ad082487161065b04bb42",
+  "eligible_prompts": 17377,
+  "excluded_long_prompts": 14,
+  "coverage_verified": true
+}

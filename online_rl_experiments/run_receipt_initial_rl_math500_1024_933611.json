@@ -1,0 +1,131 @@
+{
+  "submitted_at_utc": "2026-09-29T18:52:20.119299+00:00",
+  "account": "enalisn1_fall2026",
+  "eval_array": 933611,
+  "merge_job": 933613,
+  "dependency": "afterok:933611",
+  "training_job": 906530,
+  "checkpoint": {
+    "checkpoint": "/weka/scratch/jhu/enalisn1/xiw/nanochat/online_rl_experiments/results/906530/checkpoints/model_000300.pt",
+    "checkpoint_sha256": "cd7f70058e25ee0170c535e9d2eaadad1a49d01fd7218f052673426a41a9eabb",
+    "metadata_sha256": "8ef3c955c01caeff34651531b6d410a9e151a5b5a02a99994ea9773c0a426fd3",
+    "step": 300,
+    "likelihood_estimator": "three_pass_detached",
+    "model_config": {
+      "sequence_len": 2048,
+      "vocab_size": 32768,
+      "n_layer": 20,
+      "n_head": 10,
+      "n_kv_head": 10,
+      "n_embd": 1280,
+      "window_pattern": "SSSL",
+      "latent_feedback": true,
+      "latent_feedback_mode": "gate_product",
+      "weight_tying": true
+    }
+  },
+  "examples": 500,
+  "decode_mode": "soft",
+  "temperature": 0,
+  "max_new_tokens": 1024,
+  "verifier": "Math-Verify",
+  "shards": 8,
+  "max_concurrent_gpus": 4,
+  "comparison_output": "results/math500-initial-rl-1024-comparison-933611",
+  "comparison_eval_dirs": [
+    "results/math500-soft-924333",
+    "results/math500-soft-924201",
+    "results/math500-soft-924202"
+  ],
+  "source_sha256": {
+    "evaluate_soft_rl_math500.slurm": "1884f601498e15ececbaeae189844d42f737aa14095ba9666448c2b099224a90",
+    "evaluate_rl_math500.py": "c6121b73555480c5c63355a6a5d4a1b8e2e39382443de122bf8b46950bea79c1",
+    "report_large_batch_math500.py": "9f0d6f4983eb0417778f1ea8705564c1da8ae0597db3496ce2f671720e90c06c",
+    "report_soft_math500.py": "50bbf64f29d7f1840b0928e709b397dad47475e6ff4ba80ca30835d00492c6b1",
+    "merge_initial_rl_math500_1024.slurm": "9ba84bc92a6d3f563b28f4fcbc0efb618a11177add5e70e93c9f3fd38a353594"
+  },
+  "status": "completed",
+  "completed_at_utc": "2026-09-29T19:27:17.440679+00:00",
+  "results": {
+    "lf_sft": {
+      "examples": 500,
+      "correct": 200,
+      "accuracy": 0.4,
+      "standard_error": 0.021908902300206645,
+      "answers_parsed": 500,
+      "answer_parse_rate": 1.0,
+      "completion_tokens": 230038,
+      "original_generation_seconds": 2497.4136605969907,
+      "math_verify_seconds": 2.5258096551988274,
+      "accuracy_wilson_95": [
+        0.35797899079473766,
+        0.44354587729757294
+      ],
+      "truncation_rate": 0.162,
+      "verifier_errors": 0
+    },
+    "initial_rl": {
+      "examples": 500,
+      "correct": 215,
+      "accuracy": 0.43,
+      "standard_error": 0.022140460699813815,
+      "answers_parsed": 500,
+      "answer_parse_rate": 1.0,
+      "completion_tokens": 193442,
+      "original_generation_seconds": 2965.8417901559515,
+      "math_verify_seconds": 2.45646666851826,
+      "accuracy_wilson_95": [
+        0.38730164759035934,
+        0.4737657600742581
+      ],
+      "truncation_rate": 0.048,
+      "verifier_errors": 0
+    },
+    "uniform": {
+      "examples": 500,
+      "correct": 217,
+      "accuracy": 0.434,
+      "standard_error": 0.02216501748251059,
+      "answers_parsed": 500,
+      "answer_parse_rate": 1.0,
+      "completion_tokens": 204492,
+      "original_generation_seconds": 3524.658224113004,
+      "math_verify_seconds": 9.88074998720549,
+      "accuracy_wilson_95": [
+        0.3912235726331776,
+        0.47778284030774737
+      ],
+      "truncation_rate": 0.034,
+      "verifier_errors": 0
+    },
+    "curriculum": {
+      "examples": 500,
+      "correct": 231,
+      "accuracy": 0.462,
+      "standard_error": 0.022296008611408458,
+      "answers_parsed": 500,
+      "answer_parse_rate": 1.0,
+      "completion_tokens": 205713,
+      "original_generation_seconds": 2264.423457343992,
+      "math_verify_seconds": 1.4887274685315788,
+      "accuracy_wilson_95": [
+        0.41875629515879303,
+        0.505823154716285
+      ],
+      "truncation_rate": 0.04,
+      "verifier_errors": 0
+    }
+  },
+  "wandb": {
+    "id": "v0g86gy2",
+    "url": "https://wandb.ai/xidulu-umass-amherst/nanochat-online-rl/runs/v0g86gy2"
+  },
+  "paired_baseline_vs_initial_rl": {
+    "both_correct": 159,
+    "left_only_correct": 41,
+    "right_only_correct": 56,
+    "both_wrong": 244,
+    "accuracy_delta_right_minus_left": 0.03,
+    "exact_mcnemar_p": 0.15481578503443227
+  }
+}

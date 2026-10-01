@@ -1,0 +1,51 @@
+{
+  "rollout_engine": "vllm",
+  "vllm_version": "0.14.0",
+  "regression_tests": {
+    "passed": 52,
+    "includes_four_process_ddp": true
+  },
+  "gpu_validation": {
+    "job_id": 890252,
+    "status": "completed",
+    "gpu": "NVIDIA L40S",
+    "greedy_parity": true,
+    "changed_weights_verified": true,
+    "restored_policy_parity": true,
+    "steps": 2,
+    "optimizer_updates": 2,
+    "wandb_url": "https://wandb.ai/xidulu-umass-amherst/nanochat-online-rl/runs/xbykn0el",
+    "per_step": [
+      {
+        "step": 1,
+        "rollout/policy_version": 0,
+        "train/optimizer_updates": 1,
+        "time/rollout_seconds": 14.439061647979543,
+        "time/weight_sync_seconds": 0.8753484119661152,
+        "time/generation_seconds": 13.19867409998551
+      },
+      {
+        "step": 2,
+        "rollout/policy_version": 1,
+        "train/optimizer_updates": 2,
+        "time/rollout_seconds": 13.962134295841679,
+        "time/weight_sync_seconds": 0.7239498000126332,
+        "time/generation_seconds": 13.180336472112685
+      }
+    ]
+  },
+  "four_gpu_validation": {
+    "job_id": 890232,
+    "status_at_write": "pending_resources",
+    "output": "results/vllm-smoke-890232",
+    "log": "logs/vllm-validate-890232.log"
+  },
+  "sources": {
+    "main.py": "5720cbeab38d1c20265be470cc2b7249b30df44efc3218779d2e04efd7549fc9",
+    "vllm_rollout.py": "f8a96b90a6d71849b45684d71024e20758dc233ad4ba311c914770f132ee915f",
+    "train.slurm": "9c139b340fd853659a627812ccb14ff36c29fa99931605fe87a18600d5f54b42",
+    "validate_vllm.py": "e770f7d3a001fd97dd74528e2bc362f4355cc90c30e08e8c5dc742b8e1e168a3",
+    "validate_vllm.slurm": "f0a4966dac7748b5235dfd13b3182db4d5ab96f4ae4905e75615ad2e1b2048fb"
+  },
+  "note": "Worker cleanup was added after the single-GPU check; the queued four-GPU job will exercise it."
+}

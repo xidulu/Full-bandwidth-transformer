@@ -1,0 +1,68 @@
+{
+  "job_id": 945294,
+  "parent_job_id": 942120,
+  "submitted_at_utc": "2026-10-01T01:16:27.674704+00:00",
+  "account": "enalisn1_fall2026",
+  "partitions": [
+    "h100",
+    "a100"
+  ],
+  "source_checkpoint": "/weka/scratch/jhu/enalisn1/xiw/nanochat/online_rl_experiments/results/942120/checkpoints/model_001500.pt",
+  "start_step": 1500,
+  "target_step": 1750,
+  "remaining_updates": 250,
+  "lr": 1e-05,
+  "gpus": 4,
+  "global_prompts": 512,
+  "samples_per_prompt": 8,
+  "global_sequences": 4096,
+  "microbatch_size_per_gpu": 8,
+  "gradient_accumulation_steps": 128,
+  "rollout_concurrency_per_gpu": 64,
+  "kv_cache_gib_per_gpu": 16,
+  "max_new_tokens": 1024,
+  "decode_mode": "soft",
+  "likelihood_estimator": "three_pass_detached",
+  "optimizer_restore": true,
+  "curriculum_state_restore": true,
+  "curriculum_origin_step": 1250,
+  "curriculum_refresh": "Preserve already learned phase-two weights",
+  "requeue_behavior": "Select latest complete compatible checkpoint in this job output or restart attempts; preserve existing directories and use a new output directory; append Slurm log.",
+  "validation": {
+    "plan": {
+      "checkpoint": "/weka/scratch/jhu/enalisn1/xiw/nanochat/online_rl_experiments/results/942120/checkpoints/model_001500.pt",
+      "start_step": 1500,
+      "target_step": 1750,
+      "remaining_updates": 250,
+      "output": "results/verifier-resume-validation-unused",
+      "attempt": 0
+    },
+    "hashes": {
+      "model_001500.pt": "f113f0c12d01c4f4acd15ca046b4e7756fe50f9f9fca5fa3aca8dee783dbe0ef",
+      "meta_001500.json": "58b0402180d24f2d250ef344456253f50c83f7242d94e6c1333b20c9f916401c",
+      "optim_001500_rank0.pt": "07411d2f4893902fa85408cf26360fb2b57281d6c5333174f02012f776770217"
+    },
+    "lr": 1e-05,
+    "curriculum_origin_step": 1250,
+    "curriculum_completed_step": 1500,
+    "tests_passed": 33
+  },
+  "tests_passed": 33,
+  "output": "results/945294",
+  "log": "logs/bigmath-lf512-curriculum-lr10x-resume-945294.log",
+  "status": "pending",
+  "source_sha256": {
+    "main.py": "acacb6776a946245bfb311e83df709cb2a43543983231718d69638020daba1dd",
+    "verifier.py": "d4cf08b26cebeee7f7cca4ca723b64de3f7101556a3d1aac18a81a7287bc28e2",
+    "test_verifier.py": "2ce934cf376900cd577905bbfd910872063d4b80f3d44b1cb60c600412dd16e5",
+    "restart_curriculum_lr10x.py": "2e727b1722dc3ba1f947c1f10138b99d8d8ece6a6378aea21108503b3a994d11",
+    "restart_curriculum_lr10x.slurm": "9befce05ef77c4da7d147d0b764803a396a04cef5f4ad2b2f83b50f5e0c0c7df"
+  },
+  "fix": "Catch symbolic prediction formatting exceptions; preserve reward and verification errors; log JSON-safe placeholder.",
+  "pending_reason": "Priority",
+  "scheduler_verified_partitions": [
+    "h100",
+    "a100"
+  ],
+  "scheduler_verified_gpus": 4
+}

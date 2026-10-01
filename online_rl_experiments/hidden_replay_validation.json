@@ -1,0 +1,34 @@
+{
+  "feature": "soft vLLM hidden-state replay",
+  "validation_job": 904856,
+  "validation_state": "COMPLETED",
+  "account": "enalisn1_fall2026",
+  "cpu_tests_passed": 78,
+  "distributed_tests_passed": 2,
+  "gpu_metrics": "results/replay-validation-904856/metrics.json",
+  "smoke_completed": {
+    "steps": 1,
+    "optimizer_updates": 0,
+    "wandb_url": "https://wandb.ai/xidulu-umass-amherst/nanochat-online-rl/runs/k2punqdl"
+  },
+  "resume_completed": {
+    "steps": 2,
+    "optimizer_updates": 0,
+    "wandb_url": "https://wandb.ai/xidulu-umass-amherst/nanochat-online-rl/runs/0bczg8my"
+  },
+  "source_sha256": {
+    "main.py": "8b480954840c7bbf153025a5e3401154c25538726a9c72f3cc75e42411e10f64",
+    "soft_likelihood.py": "d53b6a199a36c8c4a42a1728520ac12cecf69a31eb8875271597813fa0bfb654",
+    "vllm_rollout.py": "f9e3e1ac8cfacacee7a99e6bb9eaac8b1b6e59263171a3e79b3df1d058612526",
+    "hidden_replay.py": "665301e6ad4342e4c89f67573a78a287cee8197d653333b1f61aa77a6e443264",
+    "replay_worker.py": "0b48faaf63b7f4e4b69c0b63e15951a69669c01f4d7dfca3b2b8fa0228e9eb2f",
+    "validate_soft.py": "b16a2b2072f00bf205b35daba60577dc7e40e6d3f6175d42670d87a212c3e02e",
+    "validate_hidden_replay.slurm": "3bff13991def1629f60ba96d7c212a9184a93c44a2060cbc3a3828b72a3f4c94",
+    "test_hidden_replay.py": "8e2d47d13d6e75626868770e982661ba768f85393c7d00f27a1aaa3113202e0f",
+    "test_soft_likelihood.py": "3eb3a4abaad0304d08bb81553d71f61bcd7f431f4a5176f791578f6d9eece015",
+    "test_vllm_rollout.py": "213e8eee4a6d1052483c494b6c05d242685560063b2d1c2490291d148a6d76bb",
+    "train_soft_replay_math.slurm": "02cade27c7f20c3b03bdb93eaa5d1a99b20083d97a98f6e4ece8cd1df674fd12"
+  },
+  "full_replay_training_submitted": false,
+  "existing_three_pass_job": 904517
+}

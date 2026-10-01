@@ -1,0 +1,17 @@
+{
+  "source_checkpoint": "/weka/scratch/jhu/enalisn1/xiw/nanochat/online_rl_experiments/results/938603/checkpoints/model_001300.pt",
+  "source_step": 1300,
+  "target_step": 1750,
+  "remaining_updates": 450,
+  "lr": 1e-05,
+  "optimizer_states": 148,
+  "curriculum_origin_step": 1250,
+  "curriculum_completed_step": 1300,
+  "curriculum_sha256": "9d91a3594c6acc22c274469442ec6fc0c42af7c90ca1ed051d0470f50c5dc3ae",
+  "data_sha256": "02d362006faf63939091d05ab78c04bc9f2a0c418c30ceff795d865c65258531",
+  "hashes": {
+    "model_001300.pt": "2112d7b26ee5df7851380ccacc7048171d724434fd298857db439270a4d6a0ec",
+    "meta_001300.json": "4a91b7733e9c0e725a424e08c4d3e2f2e88d6ab2f47d7ff9c120f9a23ea71730",
+    "optim_001300_rank0.pt": "cd9ff38332a24e1f667d4cdf7f1ade3fa29892b2ebf70de4393a3a7d97a4573d"
+  }
+}

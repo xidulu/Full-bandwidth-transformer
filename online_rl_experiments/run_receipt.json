@@ -1,0 +1,42 @@
+{
+  "job_id": 855770,
+  "smoke_job_id": 855765,
+  "wandb_url": "https://wandb.ai/xidulu-umass-amherst/nanochat-online-rl/runs/odmcg298",
+  "source_checkpoint": "/home/jhu/xwang457/work/nanochat_cache/chatsft_checkpoints/d20-standard-60k-openmath-train5m-k1-anygpu/model_004407.pt",
+  "source_meta": "/home/jhu/xwang457/work/nanochat_cache/chatsft_checkpoints/d20-standard-60k-openmath-train5m-k1-anygpu/meta_004407.json",
+  "checkpoint_sha256": "48a01a95bfa1c153a129965f867861b31072c9fe2e085afe06da0ee1a6f8f189",
+  "metadata_sha256": "8604a192a55ba81e57eedfb36894d7fee1692633dd257e1926c2704f147d8685",
+  "source_gsm8k": {
+    "correct": 642,
+    "examples": 1319,
+    "accuracy": 0.48673237300985595,
+    "max_new_tokens": 192
+  },
+  "dataset": {
+    "dataset": "BytedTsinghua-SIA/DAPO-Math-17k",
+    "revision": "65877096c24ffa7abc4e4fa5edb95cf3413a5674",
+    "source_rows": 1791700,
+    "unique_rows": 17391,
+    "conflicting_prompts_dropped": 7,
+    "source_sha256": "534375d6bb8630d22ab46a56e11f2ffec1d288d8f7d04099bc82d68948705941",
+    "prepared_sha256": "0aa7750e60fb0fdddc4167d8769549ed3153be8f0d40c1708dc9d890a76946f7",
+    "deduplication": "exact prompt; exclude prompts with conflicting integer answers"
+  },
+  "planned_steps": 100,
+  "prompts_per_step": 4,
+  "samples_per_prompt": 8,
+  "lr": 1e-06,
+  "output": "results/855770",
+  "status_at_submission": "running",
+  "status_note": "Read results/855770/completed.json and Slurm for final completion; this receipt is not a final result.",
+  "validation": {
+    "baseline_examples": 128,
+    "exact_completion_matches": 128,
+    "baseline_correct": 66,
+    "unit_tests_passed": 12,
+    "gpu_smoke_job": 855765,
+    "first_verified_update_batch": 5,
+    "first_update_grad_norm": 0.21398888528347015,
+    "wandb_training_history_verified": true
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "job_id": 870835,
+  "smoke_job_id": 870833,
+  "wandb": {
+    "id": "e7xh1s96",
+    "url": "https://wandb.ai/xidulu-umass-amherst/nanochat-online-rl/runs/e7xh1s96"
+  },
+  "status_at_handoff": "cancelled",
+  "status_note": "Cancelled at user request; no replacement job submitted. Existing outputs use the original regex verifier.",
+  "hardware": "4 x NVIDIA A100-SXM4-80GB",
+  "planned_steps": 100,
+  "world_size": 4,
+  "microbatch_size_per_gpu": 8,
+  "gradient_accumulation_steps": 4,
+  "global_sequences_per_update": 128,
+  "global_prompts_per_update": 16,
+  "samples_per_prompt": 8,
+  "learning_rate": 1e-06,
+  "source_checkpoint": "/home/jhu/xwang457/work/nanochat_cache/chatsft_checkpoints/d20-standard-60k-openmath-train5m-k1-anygpu/model_004407.pt",
+  "checkpoint_sha256": "48a01a95bfa1c153a129965f867861b31072c9fe2e085afe06da0ee1a6f8f189",
+  "trainer_sha256": "a52ccf285f8f9d57c6f7de7f27f5bc9a419d426aab6b5d9bedbcc67238c81087",
+  "validation": {
+    "unit_tests_passed": 14,
+    "four_process_gradient_equivalence": "passed",
+    "smoke_job": 870833,
+    "smoke_steps": 2,
+    "smoke_optimizer_updates": 2,
+    "smoke_peak_gpu_gb": 32.845113856,
+    "first_batch_distinct_prompts": 16,
+    "first_batch_responses": 128,
+    "reward_aggregation_verified": true
+  },
+  "cancellation": {
+    "confirmed_slurm_state": "CANCELLED",
+    "confirmed_at_utc": "2026-09-24T12:53:12.422451+00:00",
+    "last_completed_batch": 28,
+    "last_saved_checkpoint_step": 25
+  }
+}

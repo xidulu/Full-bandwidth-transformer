@@ -1,0 +1,20 @@
+{
+  "source_step": 1300,
+  "target_step": 1500,
+  "additional_updates": 200,
+  "curriculum_origin_step": 1250,
+  "curriculum_completed_step": 1300,
+  "curriculum_groups_seen": 25600.0,
+  "curriculum_frozen_weights_preserved": true,
+  "model_tensors": 151,
+  "optimizer_states": 148,
+  "curriculum_sha256": "9d91a3594c6acc22c274469442ec6fc0c42af7c90ca1ed051d0470f50c5dc3ae",
+  "hashes": {
+    "model_001300.pt": "d3b8332945b341810c2b1c483fd433c45c702c6b4da86a027ca92654d100de87",
+    "meta_001300.json": "225d4ad51b625bc4d3108c7986afa71a4030d68168b2454bf666874ad9269dec",
+    "optim_001300_rank0.pt": "e13e674c6b939848fd91a272bfc5dd5b90e797a2599dc5f8da5ffeac933ab16c",
+    "continue_big_math_curriculum_200.slurm": "910ee7b9a450915bcea20c69c38489932c8cb1cf532e5cdf2a7336e4b3f0f31b",
+    "main.py": "d03a39c9b086936969f1f2cc8e6b59124bf98d7ff70049a819c17497cbf18a48",
+    "curriculum.py": "9b86a0d07b51bab0ab1ffcdc7044e9feb592c28e5f63cabf6e3cc5564190717d"
+  }
+}

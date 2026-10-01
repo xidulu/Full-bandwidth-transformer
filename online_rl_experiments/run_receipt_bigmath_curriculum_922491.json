@@ -1,0 +1,500 @@
+{
+  "job_id": 922491,
+  "control_job_id": 920647,
+  "submitted_at_utc": "2026-09-29T01:13:40.605784+00:00",
+  "account": "enalisn1_fall2026",
+  "source_checkpoint": "/weka/scratch/jhu/enalisn1/xiw/nanochat/online_rl_experiments/results/919724/checkpoints/model_001250.pt",
+  "source_step": 1250,
+  "target_step": 1300,
+  "preflight_target_step": 1252,
+  "steps": 50,
+  "global_prompts": 512,
+  "samples_per_prompt": 8,
+  "global_sequences": 4096,
+  "gpus": 4,
+  "microbatch_size_per_gpu": 8,
+  "gradient_accumulation_steps": 128,
+  "rollout_concurrency_per_gpu": 64,
+  "kv_cache_gib_per_gpu": 16,
+  "lr": 1e-06,
+  "curriculum": {
+    "version": 1,
+    "data_sha256": "02d362006faf63939091d05ab78c04bc9f2a0c418c30ceff795d865c65258531",
+    "calibration_sha256": "51f9569d0886afddcf7661c45f3ee1e0039c95232b27dadd80cc5e37b6118c46",
+    "calibration_checkpoint": {
+      "path": "/weka/scratch/jhu/enalisn1/xiw/nanochat/online_rl_experiments/results/906530/checkpoints/model_000300.pt",
+      "sha256": "cd7f70058e25ee0170c535e9d2eaadad1a49d01fd7218f052673426a41a9eabb",
+      "metadata_sha256": "8ef3c955c01caeff34651531b6d410a9e151a5b5a02a99994ea9773c0a426fd3"
+    },
+    "refresh_after_updates": 25,
+    "prior_groups": 20,
+    "pools": [
+      {
+        "name": "big_math",
+        "questions": 154,
+        "strata": [
+          "big_math/0.25_to_0.5",
+          "big_math/0.5_to_0.75",
+          "big_math/0.75_to_0.9"
+        ]
+      },
+      {
+        "name": "math",
+        "questions": 102,
+        "strata": [
+          "math/0.125_to_0.25",
+          "math/0.25_to_0.5",
+          "math/0.5_to_0.75",
+          "math/0.75_to_0.9"
+        ]
+      },
+      {
+        "name": "cn_k12",
+        "questions": 102,
+        "strata": [
+          "cn_k12/0.25_to_0.5",
+          "cn_k12/0.5_to_0.75",
+          "cn_k12/0.75_to_0.9"
+        ]
+      },
+      {
+        "name": "orca_math",
+        "questions": 77,
+        "strata": [
+          "orca_math/0.5_to_0.75",
+          "orca_math/0.75_to_0.9"
+        ]
+      },
+      {
+        "name": "competition",
+        "questions": 51,
+        "strata": [
+          "olympiads/0.25_to_0.5",
+          "olympiads/0.5_to_0.75",
+          "olympiads/0.75_to_0.9",
+          "aops_forum/0.5_to_0.75",
+          "aops_forum/0.75_to_0.9",
+          "omnimath/0.125_to_0.25",
+          "omnimath/0.25_to_0.5",
+          "omnimath/0.5_to_0.75",
+          "omnimath/0.75_to_0.9"
+        ]
+      },
+      {
+        "name": "exploration",
+        "questions": 26,
+        "strata": [
+          "amc_aime/0.125_to_0.25",
+          "amc_aime/0.25_to_0.5",
+          "amc_aime/0_to_0.125",
+          "aops_forum/0.125_to_0.25",
+          "aops_forum/0.25_to_0.5",
+          "aops_forum/0.5_to_0.75",
+          "aops_forum/0.75_to_0.9",
+          "aops_forum/0.9_to_1",
+          "aops_forum/0_to_0.125",
+          "big_math/0.125_to_0.25",
+          "big_math/0.25_to_0.5",
+          "big_math/0.5_to_0.75",
+          "big_math/0.75_to_0.9",
+          "big_math/0.9_to_1",
+          "big_math/0_to_0.125",
+          "cn_k12/0.125_to_0.25",
+          "cn_k12/0.25_to_0.5",
+          "cn_k12/0.5_to_0.75",
+          "cn_k12/0.75_to_0.9",
+          "cn_k12/0.9_to_1",
+          "cn_k12/0_to_0.125",
+          "gsm8k/0.125_to_0.25",
+          "gsm8k/0.25_to_0.5",
+          "gsm8k/0.5_to_0.75",
+          "gsm8k/0.75_to_0.9",
+          "gsm8k/0.9_to_1",
+          "gsm8k/0_to_0.125",
+          "harp/0_to_0.125",
+          "harp/missing",
+          "math/0.125_to_0.25",
+          "math/0.25_to_0.5",
+          "math/0.5_to_0.75",
+          "math/0.75_to_0.9",
+          "math/0.9_to_1",
+          "math/0_to_0.125",
+          "olympiads/0.125_to_0.25",
+          "olympiads/0.25_to_0.5",
+          "olympiads/0.5_to_0.75",
+          "olympiads/0.75_to_0.9",
+          "olympiads/0.9_to_1",
+          "olympiads/0_to_0.125",
+          "omnimath/0.125_to_0.25",
+          "omnimath/0.25_to_0.5",
+          "omnimath/0.5_to_0.75",
+          "omnimath/0.75_to_0.9",
+          "omnimath/0.9_to_1",
+          "omnimath/0_to_0.125",
+          "openmath/0.125_to_0.25",
+          "openmath/0.25_to_0.5",
+          "openmath/0.5_to_0.75",
+          "openmath/0.75_to_0.9",
+          "openmath/0.9_to_1",
+          "openmath/0_to_0.125",
+          "orca_math/0.125_to_0.25",
+          "orca_math/0.25_to_0.5",
+          "orca_math/0.5_to_0.75",
+          "orca_math/0.75_to_0.9",
+          "orca_math/0.9_to_1",
+          "orca_math/0_to_0.125",
+          "orca_math/missing"
+        ]
+      }
+    ],
+    "strata": {
+      "cn_k12/0.125_to_0.25": {
+        "population": 7458,
+        "mixed_fraction": 0.4864864864864865,
+        "truncation_rate": 0.02027027027027027
+      },
+      "cn_k12/0.25_to_0.5": {
+        "population": 9684,
+        "mixed_fraction": 0.5675675675675675,
+        "truncation_rate": 0.010135135135135136
+      },
+      "cn_k12/0.5_to_0.75": {
+        "population": 8209,
+        "mixed_fraction": 0.4864864864864865,
+        "truncation_rate": 0.010135135135135136
+      },
+      "cn_k12/0.75_to_0.9": {
+        "population": 7053,
+        "mixed_fraction": 0.5945945945945946,
+        "truncation_rate": 0.02702702702702703
+      },
+      "cn_k12/0_to_0.125": {
+        "population": 17255,
+        "mixed_fraction": 0.21621621621621623,
+        "truncation_rate": 0.016891891891891893
+      },
+      "cn_k12/0.9_to_1": {
+        "population": 10052,
+        "mixed_fraction": 0.40540540540540543,
+        "truncation_rate": 0.0033783783783783786
+      },
+      "orca_math/0.75_to_0.9": {
+        "population": 12857,
+        "mixed_fraction": 0.6756756756756757,
+        "truncation_rate": 0.0033783783783783786
+      },
+      "orca_math/0.25_to_0.5": {
+        "population": 10187,
+        "mixed_fraction": 0.4864864864864865,
+        "truncation_rate": 0.016891891891891893
+      },
+      "orca_math/0.125_to_0.25": {
+        "population": 5832,
+        "mixed_fraction": 0.4594594594594595,
+        "truncation_rate": 0.006756756756756757
+      },
+      "orca_math/0.5_to_0.75": {
+        "population": 12389,
+        "mixed_fraction": 0.5405405405405406,
+        "truncation_rate": 0.006756756756756757
+      },
+      "orca_math/0_to_0.125": {
+        "population": 10125,
+        "mixed_fraction": 0.10810810810810811,
+        "truncation_rate": 0.02027027027027027
+      },
+      "orca_math/0.9_to_1": {
+        "population": 30811,
+        "mixed_fraction": 0.4594594594594595,
+        "truncation_rate": 0.0033783783783783786
+      },
+      "orca_math/missing": {
+        "population": 3,
+        "mixed_fraction": 0.6666666666666666,
+        "truncation_rate": 0.0
+      },
+      "olympiads/0_to_0.125": {
+        "population": 19298,
+        "mixed_fraction": 0.1891891891891892,
+        "truncation_rate": 0.016891891891891893
+      },
+      "olympiads/0.125_to_0.25": {
+        "population": 4383,
+        "mixed_fraction": 0.35135135135135137,
+        "truncation_rate": 0.010135135135135136
+      },
+      "olympiads/0.5_to_0.75": {
+        "population": 1593,
+        "mixed_fraction": 0.6486486486486487,
+        "truncation_rate": 0.010135135135135136
+      },
+      "olympiads/0.25_to_0.5": {
+        "population": 3304,
+        "mixed_fraction": 0.5405405405405406,
+        "truncation_rate": 0.02027027027027027
+      },
+      "olympiads/0.75_to_0.9": {
+        "population": 780,
+        "mixed_fraction": 0.5675675675675675,
+        "truncation_rate": 0.010135135135135136
+      },
+      "olympiads/0.9_to_1": {
+        "population": 734,
+        "mixed_fraction": 0.5675675675675675,
+        "truncation_rate": 0.010135135135135136
+      },
+      "aops_forum/0_to_0.125": {
+        "population": 3983,
+        "mixed_fraction": 0.2702702702702703,
+        "truncation_rate": 0.016891891891891893
+      },
+      "aops_forum/0.25_to_0.5": {
+        "population": 405,
+        "mixed_fraction": 0.5135135135135135,
+        "truncation_rate": 0.0033783783783783786
+      },
+      "aops_forum/0.125_to_0.25": {
+        "population": 752,
+        "mixed_fraction": 0.43243243243243246,
+        "truncation_rate": 0.02027027027027027
+      },
+      "aops_forum/0.5_to_0.75": {
+        "population": 113,
+        "mixed_fraction": 0.7297297297297297,
+        "truncation_rate": 0.006756756756756757
+      },
+      "aops_forum/0.9_to_1": {
+        "population": 39,
+        "mixed_fraction": 0.5405405405405406,
+        "truncation_rate": 0.010135135135135136
+      },
+      "aops_forum/0.75_to_0.9": {
+        "population": 43,
+        "mixed_fraction": 0.7027027027027027,
+        "truncation_rate": 0.0033783783783783786
+      },
+      "gsm8k/0.9_to_1": {
+        "population": 853,
+        "mixed_fraction": 0.4594594594594595,
+        "truncation_rate": 0.0
+      },
+      "gsm8k/0.5_to_0.75": {
+        "population": 178,
+        "mixed_fraction": 0.8108108108108109,
+        "truncation_rate": 0.0
+      },
+      "gsm8k/0.25_to_0.5": {
+        "population": 61,
+        "mixed_fraction": 0.7297297297297297,
+        "truncation_rate": 0.0
+      },
+      "gsm8k/0.75_to_0.9": {
+        "population": 297,
+        "mixed_fraction": 0.6486486486486487,
+        "truncation_rate": 0.0
+      },
+      "gsm8k/0.125_to_0.25": {
+        "population": 20,
+        "mixed_fraction": 0.7,
+        "truncation_rate": 0.0
+      },
+      "gsm8k/0_to_0.125": {
+        "population": 21,
+        "mixed_fraction": 0.42857142857142855,
+        "truncation_rate": 0.005952380952380952
+      },
+      "amc_aime/0_to_0.125": {
+        "population": 71,
+        "mixed_fraction": 0.05405405405405406,
+        "truncation_rate": 0.030405405405405407
+      },
+      "amc_aime/0.125_to_0.25": {
+        "population": 4,
+        "mixed_fraction": 0.0,
+        "truncation_rate": 0.0
+      },
+      "amc_aime/0.25_to_0.5": {
+        "population": 1,
+        "mixed_fraction": 0.0,
+        "truncation_rate": 0.125
+      },
+      "math/0.75_to_0.9": {
+        "population": 1504,
+        "mixed_fraction": 0.7567567567567568,
+        "truncation_rate": 0.013513513513513514
+      },
+      "math/0.9_to_1": {
+        "population": 3112,
+        "mixed_fraction": 0.40540540540540543,
+        "truncation_rate": 0.0033783783783783786
+      },
+      "math/0_to_0.125": {
+        "population": 1128,
+        "mixed_fraction": 0.16216216216216217,
+        "truncation_rate": 0.02364864864864865
+      },
+      "math/0.25_to_0.5": {
+        "population": 1081,
+        "mixed_fraction": 0.7297297297297297,
+        "truncation_rate": 0.02702702702702703
+      },
+      "math/0.125_to_0.25": {
+        "population": 638,
+        "mixed_fraction": 0.6486486486486487,
+        "truncation_rate": 0.037162162162162164
+      },
+      "math/0.5_to_0.75": {
+        "population": 1373,
+        "mixed_fraction": 0.7567567567567568,
+        "truncation_rate": 0.006756756756756757
+      },
+      "omnimath/0_to_0.125": {
+        "population": 1838,
+        "mixed_fraction": 0.13513513513513514,
+        "truncation_rate": 0.0
+      },
+      "omnimath/0.125_to_0.25": {
+        "population": 131,
+        "mixed_fraction": 0.6216216216216216,
+        "truncation_rate": 0.037162162162162164
+      },
+      "omnimath/0.5_to_0.75": {
+        "population": 59,
+        "mixed_fraction": 0.5675675675675675,
+        "truncation_rate": 0.010135135135135136
+      },
+      "omnimath/0.25_to_0.5": {
+        "population": 108,
+        "mixed_fraction": 0.6216216216216216,
+        "truncation_rate": 0.013513513513513514
+      },
+      "omnimath/0.75_to_0.9": {
+        "population": 46,
+        "mixed_fraction": 0.7837837837837838,
+        "truncation_rate": 0.013513513513513514
+      },
+      "omnimath/0.9_to_1": {
+        "population": 118,
+        "mixed_fraction": 0.2702702702702703,
+        "truncation_rate": 0.006756756756756757
+      },
+      "openmath/0.75_to_0.9": {
+        "population": 423,
+        "mixed_fraction": 0.4594594594594595,
+        "truncation_rate": 0.0
+      },
+      "openmath/0.25_to_0.5": {
+        "population": 131,
+        "mixed_fraction": 0.8648648648648649,
+        "truncation_rate": 0.0
+      },
+      "openmath/0.5_to_0.75": {
+        "population": 369,
+        "mixed_fraction": 0.5405405405405406,
+        "truncation_rate": 0.006756756756756757
+      },
+      "openmath/0.9_to_1": {
+        "population": 300,
+        "mixed_fraction": 0.35135135135135137,
+        "truncation_rate": 0.0
+      },
+      "openmath/0.125_to_0.25": {
+        "population": 43,
+        "mixed_fraction": 0.6486486486486487,
+        "truncation_rate": 0.010135135135135136
+      },
+      "openmath/0_to_0.125": {
+        "population": 48,
+        "mixed_fraction": 0.4594594594594595,
+        "truncation_rate": 0.010135135135135136
+      },
+      "harp/0_to_0.125": {
+        "population": 2941,
+        "mixed_fraction": 0.13513513513513514,
+        "truncation_rate": 0.02364864864864865
+      },
+      "harp/missing": {
+        "population": 1,
+        "mixed_fraction": 0.0,
+        "truncation_rate": 0.0
+      },
+      "big_math/0_to_0.125": {
+        "population": 9836,
+        "mixed_fraction": 0.35135135135135137,
+        "truncation_rate": 0.033783783783783786
+      },
+      "big_math/0.5_to_0.75": {
+        "population": 6730,
+        "mixed_fraction": 0.8108108108108109,
+        "truncation_rate": 0.010135135135135136
+      },
+      "big_math/0.25_to_0.5": {
+        "population": 6853,
+        "mixed_fraction": 0.8108108108108109,
+        "truncation_rate": 0.02027027027027027
+      },
+      "big_math/0.75_to_0.9": {
+        "population": 5431,
+        "mixed_fraction": 0.7837837837837838,
+        "truncation_rate": 0.006756756756756757
+      },
+      "big_math/0.125_to_0.25": {
+        "population": 5025,
+        "mixed_fraction": 0.6486486486486487,
+        "truncation_rate": 0.037162162162162164
+      },
+      "big_math/0.9_to_1": {
+        "population": 4148,
+        "mixed_fraction": 0.40540540540540543,
+        "truncation_rate": 0.02364864864864865
+      }
+    },
+    "sampling": "Without replacement within each update; shuffled stratum decks persist across updates.",
+    "phase_two": "Keep pool quotas; weight stratum populations by smoothed mixed-group fraction times (1-truncation). Floor 0.1. Exploration remains uniform over remaining questions.",
+    "uniform_cursor": "Frozen at branch point; curriculum_state is authoritative for all subsequent sampling."
+  },
+  "curriculum_refresh_after_step": 1275,
+  "curriculum_sampler_validation": {
+    "eligible_questions": 232263,
+    "tested_updates": 50,
+    "unique_questions_per_update": 512,
+    "checkpoint_resume_equivalence_steps": [
+      1253,
+      1276
+    ],
+    "adaptive_refresh_after_step": 1275,
+    "reward_statistics": "synthetic for sampler validation only",
+    "config_sha256": "9d91a3594c6acc22c274469442ec6fc0c42af7c90ca1ed051d0470f50c5dc3ae"
+  },
+  "source_checkpoint_validation": {
+    "source_step": 1250,
+    "target_step": 1300,
+    "source_optimizer_updates": 1250,
+    "data_cursor": 121600,
+    "data_epoch": 0,
+    "data_start_step": 300,
+    "global_sequences": 4096,
+    "local_sequences": 1024,
+    "model_tensors": 151,
+    "optimizer_states": 148,
+    "hashes": {
+      "model_001250.pt": "ef5bdeb80f52a743459a4548ef9f50ea1f7e6d1a0a453c85fa8e432c6140403b",
+      "meta_001250.json": "510d84127226a3d30328aecb0e1d1992ae07a6ca048f92a429be310612996e73",
+      "optim_001250_rank0.pt": "12e6be03320773117f7842c1147d72eaec5757088091d5f31c6649855bb2758a",
+      "main.py": "8c994cd0ee1199838030286a596b4d593322e9b957ce5673d794a5672b6a2a6f",
+      "restart_big_math_lf512.slurm": "e6db732e3f7481d76c9cbe1c21d2021e279a7f726daeafb2e1d18d6ba315639b"
+    }
+  },
+  "unit_tests_passed": 39,
+  "distributed_tests_passed": 1,
+  "output": "results/922491",
+  "preflight_output": "results/922491-preflight",
+  "log": "logs/bigmath-lf512-curriculum-922491.log",
+  "source_sha256": {
+    "main.py": "14bccbe00311da3ef211c8bdb8107f07ead1d91d164b3abbd8321a1454b3a068",
+    "curriculum.py": "9b86a0d07b51bab0ab1ffcdc7044e9feb592c28e5f63cabf6e3cc5564190717d",
+    "prepare_curriculum.py": "1a0835e877b70c86a2fe68cbacffe880bf9efa9e7f553109e63f2625f9cd5ed7",
+    "data/bigmath-lf-curriculum.json": "9d91a3594c6acc22c274469442ec6fc0c42af7c90ca1ed051d0470f50c5dc3ae",
+    "train_big_math_lf512_curriculum.slurm": "eadee0c4ecc0df882b99c70b588e84be885307c4ebc28d594bec341e6446070c"
+  }
+}

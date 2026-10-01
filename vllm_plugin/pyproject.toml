@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nanochat-vllm"
+version = "0.1.0"
+description = "Out-of-tree vLLM standard/soft rollout adapter for this Nanochat fork"
+requires-python = ">=3.10"
+dependencies = [
+    "safetensors>=0.4.3",
+    "vllm==0.14.0",
+]
+
+[project.scripts]
+nanochat-export-vllm = "nanochat_vllm.export_checkpoint:main"
+
+[project.entry-points."vllm.general_plugins"]
+nanochat = "nanochat_vllm:register"
+
+[tool.setuptools.packages.find]
+where = ["src"]

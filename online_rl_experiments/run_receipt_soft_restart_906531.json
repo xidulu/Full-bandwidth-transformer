@@ -1,0 +1,27 @@
+{
+  "job_id": 906531,
+  "replaces_job": 904906,
+  "submitted_at_utc": "2026-09-26T23:57:56.599304+00:00",
+  "account": "enalisn1",
+  "submission_command": "sbatch --parsable --account=enalisn1 train_soft_replay_math.slurm results/904906-preflight/checkpoints/model_000002.pt",
+  "resume_from": "results/904906-preflight/checkpoints/model_000002.pt",
+  "resume_step": 2,
+  "resume_optimizer_updates": 2,
+  "steps": 300,
+  "gpus": 4,
+  "global_responses_per_update": 1024,
+  "microbatch_size_per_gpu": 8,
+  "gradient_accumulation_steps": 32,
+  "likelihood_estimator": "hidden_state_replay",
+  "data": "data/hendrycks-math-benchmark.train.jsonl",
+  "wandb_project": "nanochat-online-rl",
+  "output": "results/906531",
+  "source_sha256": {
+    "main.py": "8b480954840c7bbf153025a5e3401154c25538726a9c72f3cc75e42411e10f64",
+    "soft_likelihood.py": "d53b6a199a36c8c4a42a1728520ac12cecf69a31eb8875271597813fa0bfb654",
+    "vllm_rollout.py": "f9e3e1ac8cfacacee7a99e6bb9eaac8b1b6e59263171a3e79b3df1d058612526",
+    "hidden_replay.py": "665301e6ad4342e4c89f67573a78a287cee8197d653333b1f61aa77a6e443264",
+    "replay_worker.py": "0b48faaf63b7f4e4b69c0b63e15951a69669c01f4d7dfca3b2b8fa0228e9eb2f",
+    "train_soft_replay_math.slurm": "d874f4e9286ff0c727b891bb03af2d6243375b1879e73cd22850c383c788c605"
+  }
+}

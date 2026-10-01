@@ -1,0 +1,145 @@
+{
+  "world_size": 4,
+  "partitions": [
+    "h100",
+    "a100"
+  ],
+  "slurm_time_limit_hours": 24,
+  "rollout_engine": "vllm",
+  "target_step": 300,
+  "global_prompts_per_step": 128,
+  "samples_per_prompt": 8,
+  "global_sequences_per_update": 1024,
+  "microbatch_size_per_gpu": 8,
+  "gradient_accumulation_steps": 32,
+  "local_sequences_per_update": 256,
+  "vllm_max_sequences_per_gpu": 64,
+  "vllm_kv_cache_gib_per_gpu": 8,
+  "vllm_max_batched_tokens": 2048,
+  "lr": 1e-06,
+  "verifier": "math-verify",
+  "objective": "on-policy group-standardized REINFORCE, batch token mean",
+  "initial_checkpoint": "/home/jhu/xwang457/work/nanochat_cache/chatsft_checkpoints/d20-standard-60k-openmath-train5m-k1-anygpu/model_004407.pt",
+  "initial_checkpoint_sha256": "48a01a95bfa1c153a129965f867861b31072c9fe2e085afe06da0ee1a6f8f189",
+  "initial_metadata_sha256": "8604a192a55ba81e57eedfb36894d7fee1692633dd257e1926c2704f147d8685",
+  "wandb_project": "nanochat-online-rl",
+  "job_id": 899298,
+  "status": "completed",
+  "launcher": "train_math_large_batch.slurm",
+  "log": "logs/online-rl-math-899298.log",
+  "replaces_cancelled_job": 891757,
+  "initialization": "Fresh original SFT checkpoint and optimizer",
+  "dataset": {
+    "dataset": "nlile/hendrycks-MATH-benchmark",
+    "revision": "465bcdb36f5962aa3512891498966df785fc3c18",
+    "split": "train",
+    "source_file": "data/train-00000-of-00001.parquet",
+    "source_rows": 12000,
+    "invalid_schema_rows": 2,
+    "duplicate_prompt_rows": 1,
+    "conflicting_prompts_dropped": 0,
+    "unique_prompts_before_reference_validation": 11997,
+    "unverifiable_reference_rows_dropped": 18,
+    "unique_rows": 11979,
+    "source_sha256": "5bb914caa970c120a9a139ccedef764da11e62965ac31f4dfff3ccf774199375",
+    "prepared_sha256": "4dd8000b5bba3b5f03456a5bc12808264a8f830f3e42e6d47db3fc67ae9f4fee",
+    "rejected_sha256": "c10f2c52596adf0da21dae65d7cb4542bd41768c732183c080d7648198d127db",
+    "preparation_sha256": "347576f70f93a09cfe1ed231516f241f15b88bf9d9f684a2327fdbf3bb25e503",
+    "preparation_dependency_sha256": "73ce033582dea1d699264f6392f77a16183889f22dd86778aba89b86a08d8f83",
+    "verifier_sha256": "b241a30cbd6adb76982d02d86e511da4f8c27a041bd364f008ecbd2d58c93cf7",
+    "deduplication": "exact question; exclude conflicting stripped reference strings",
+    "reference_validation": "Math-Verify gold parsing and boxed-answer self-verification",
+    "verifier": {
+      "package": "math-verify",
+      "version": "0.9.0",
+      "latex2sympy2_extended_version": "1.11.0",
+      "antlr4_runtime_version": "4.13.2",
+      "sympy_version": "1.14.0",
+      "parse_timeout_seconds": 5,
+      "verify_timeout_seconds": 5,
+      "gold_extraction": "LatexExtractionConfig on $reference$",
+      "prediction_extraction": "LatexExtractionConfig + ExprExtractionConfig; anchors required",
+      "fallback_mode": "no_fallback",
+      "extraction_mode": "first_match",
+      "strict": true,
+      "truncated_training_reward": 0.0,
+      "evaluation_verifier": "math-verify"
+    },
+    "prompt_suffix": "\n\nPut your final answer in \\boxed{}.",
+    "solution_used_in_prompt": false
+  },
+  "context_check": {
+    "eligible_prompts": 11960,
+    "skipped_long_prompts": 19,
+    "max_prompt_tokens": 1024,
+    "max_new_tokens": 1024,
+    "subjects": {
+      "Algebra": 2804,
+      "Prealgebra": 1989,
+      "Counting & Probability": 1203,
+      "Precalculus": 1231,
+      "Geometry": 1300,
+      "Number Theory": 1342,
+      "Intermediate Algebra": 2091
+    },
+    "levels": {
+      "3": 2610,
+      "2": 2147,
+      "5": 3477,
+      "4": 2772,
+      "1": 954
+    },
+    "prepared_sha256": "4dd8000b5bba3b5f03456a5bc12808264a8f830f3e42e6d47db3fc67ae9f4fee"
+  },
+  "math500_overlap_check": {
+    "source_train_rows": 12000,
+    "evaluation_examples": 500,
+    "overlapping_ids": [],
+    "overlapping_exact_problems": []
+  },
+  "validation": {
+    "targeted_tests_passed": 6,
+    "shell_syntax_checked": true,
+    "all_retained_references_validated": true
+  },
+  "monitoring": "results/monitoring/899298/status.json",
+  "stages": [
+    {
+      "steps": [
+        1,
+        2
+      ],
+      "output": "results/899298-preflight",
+      "verify_all_loaded_weights": true
+    },
+    {
+      "steps": [
+        3,
+        300
+      ],
+      "output": "results/899298",
+      "resume_from": "results/899298-preflight/checkpoints/model_000002.pt"
+    }
+  ],
+  "sources": {
+    "main.py": "5884f0e6ae3864a53f82f625f7bd4ca484fe70cdb1dc06330c43cabcedc29f2e",
+    "verifier.py": "b241a30cbd6adb76982d02d86e511da4f8c27a041bd364f008ecbd2d58c93cf7",
+    "vllm_rollout.py": "5ffd2765f4a5057cf91eb5848e4689cc5e66940b1a2440c88c8554db9fe513f5",
+    "prepare_math_data.py": "347576f70f93a09cfe1ed231516f241f15b88bf9d9f684a2327fdbf3bb25e503",
+    "prepare_orz_data.py": "73ce033582dea1d699264f6392f77a16183889f22dd86778aba89b86a08d8f83",
+    "train_math_large_batch.slurm": "5e40dbb4896328788d57b0dec9f449541499a3b543e10c6319c82031d8bbebf2",
+    "monitor_run.py": "7fb8046ab44f0a48ad58934ac1aa6eb12e04826afecf2f3a7131b048117bef6c"
+  },
+  "restarts_job": 891864,
+  "restart_reason": "User requested restart; no prior RL checkpoint was saved",
+  "scheduler_estimated_start": "2026-09-26T07:08:00-04:00",
+  "scheduler_pending_reason": "None",
+  "account": "enalisn1",
+  "qos": "scavenger",
+  "completed": {
+    "steps": 300,
+    "optimizer_updates": 300,
+    "wandb_url": "https://wandb.ai/xidulu-umass-amherst/nanochat-online-rl/runs/0ffmpzn7"
+  },
+  "math500_evaluation_job": 904082
+}

@@ -1,0 +1,64 @@
+{
+  "submitted_at_utc": "2026-09-29T14:19:45.192030+00:00",
+  "account": "enalisn1_fall2026",
+  "uniform_training_job": 920647,
+  "curriculum_training_job": 922491,
+  "uniform_eval_array": 924201,
+  "curriculum_eval_array": 924202,
+  "merge_job": 924203,
+  "dependency": "afterok:924201:924202",
+  "checkpoint_step": 1300,
+  "examples_per_model": 500,
+  "decode_mode": "soft",
+  "temperature": 0,
+  "max_new_tokens": 1024,
+  "verifier": "Math-Verify",
+  "shards_per_model": 8,
+  "max_concurrent_shards_per_model": 4,
+  "comparison_output": "results/math500-large-batch-comparison-924201-924202",
+  "checkpoints": {
+    "uniform": {
+      "path": "/weka/scratch/jhu/enalisn1/xiw/nanochat/online_rl_experiments/results/920647/checkpoints/model_001300.pt",
+      "sha256": "e75dc7252d83c4ed5b6d523837d9d8d0b1e2a3331e7251c1a3b8c52368199e5c",
+      "metadata_sha256": "26aa2b130eb417023bc0fdc2196d777917ee5fccae0f80e62a6c46d6c14a8731"
+    },
+    "curriculum": {
+      "path": "/weka/scratch/jhu/enalisn1/xiw/nanochat/online_rl_experiments/results/922491/checkpoints/model_001300.pt",
+      "sha256": "d3b8332945b341810c2b1c483fd433c45c702c6b4da86a027ca92654d100de87",
+      "metadata_sha256": "225d4ad51b625bc4d3108c7986afa71a4030d68168b2454bf666874ad9269dec"
+    }
+  },
+  "source_sha256": {
+    "evaluate_rl_math500.py": "c6121b73555480c5c63355a6a5d4a1b8e2e39382443de122bf8b46950bea79c1",
+    "evaluate_soft_rl_math500.slurm": "1884f601498e15ececbaeae189844d42f737aa14095ba9666448c2b099224a90",
+    "report_large_batch_math500.py": "b6141b85107390da1cb78dc93904096bce5482d4ba6eca93dc751d9618373b0d",
+    "report_soft_math500.py": "50bbf64f29d7f1840b0928e709b397dad47475e6ff4ba80ca30835d00492c6b1",
+    "merge_large_batch_math500.slurm": "412b2cea083d20dcf44e185bd7a042f66835b4207307bcc652a19db6023060e7"
+  },
+  "previous_512_token_comparison": "results/math500-large-batch-comparison-924045-924046",
+  "max_prompt_tokens_verified": 889,
+  "status": "complete",
+  "results": {
+    "uniform": {
+      "correct": 217,
+      "accuracy": 0.434,
+      "truncation_rate": 0.034,
+      "verifier_errors": 0
+    },
+    "curriculum": {
+      "correct": 231,
+      "accuracy": 0.462,
+      "truncation_rate": 0.04,
+      "verifier_errors": 0
+    }
+  },
+  "paired_comparison": {
+    "both_correct": 202,
+    "left_only_correct": 15,
+    "right_only_correct": 29,
+    "both_wrong": 254,
+    "accuracy_delta_right_minus_left": 0.028,
+    "exact_mcnemar_p": 0.04876676590447507
+  },
+  "wandb_url": "https://wandb.ai/xidulu-umass-amherst/nanochat-online-rl/runs/d4xjmv6l"
+}

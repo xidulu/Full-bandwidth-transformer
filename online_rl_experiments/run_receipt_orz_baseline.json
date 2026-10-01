@@ -1,0 +1,70 @@
+{
+  "job_id": 891694,
+  "status": "completed",
+  "launcher": "evaluate_orz_subset.slurm",
+  "output": "results/orz-baseline-891694",
+  "prompts": 512,
+  "subset_seed": 20260924,
+  "temperatures": [
+    0.0,
+    1.0
+  ],
+  "samples_per_prompt": {
+    "greedy": 1,
+    "sampled": 8
+  },
+  "max_new_tokens": 1024,
+  "optimizer_updates": 0,
+  "checkpoint": "d20-standard-60k-openmath-train5m-k1-anygpu/model_004407.pt",
+  "sources": {
+    "evaluate_orz_subset.py": "f1cf84be3b536b96668de34c0d42ed02b25b2093e7e924f0cb90b7a954ade5ee",
+    "evaluate_orz_subset.slurm": "069b95b79ff4d5993d1f39b7937b7ee0b9bf00db3bdbbdef2c5215c9ac29af3f",
+    "vllm_rollout.py": "5ffd2765f4a5057cf91eb5848e4689cc5e66940b1a2440c88c8554db9fe513f5",
+    "verifier.py": "b241a30cbd6adb76982d02d86e511da4f8c27a041bd364f008ecbd2d58c93cf7"
+  },
+  "world_size": 1,
+  "cancelled_queued_job": 891693,
+  "scheduling_note": "Single GPU evaluation to avoid estimated 40-minute four-GPU queue",
+  "summary": {
+    "greedy": {
+      "prompts": 512,
+      "responses": 512,
+      "correct": 58,
+      "accuracy": 0.11328125,
+      "prompt_cluster_standard_error": 0.014020435769797756,
+      "accuracy_normal_95": [
+        0.08580119589119639,
+        0.1407613041088036
+      ],
+      "any_correct_fraction": 0.11328125,
+      "all_wrong_groups": 454,
+      "all_correct_groups": 58,
+      "mixed_groups": 0,
+      "truncation_rate": 0.26171875,
+      "parse_rate": 0.75,
+      "verifier_errors": 0
+    },
+    "sampled": {
+      "prompts": 512,
+      "responses": 4096,
+      "correct": 304,
+      "accuracy": 0.07421875,
+      "prompt_cluster_standard_error": 0.007554051270913898,
+      "accuracy_normal_95": [
+        0.05941280950900876,
+        0.08902469049099124
+      ],
+      "any_correct_fraction": 0.248046875,
+      "all_wrong_groups": 385,
+      "all_correct_groups": 1,
+      "mixed_groups": 126,
+      "truncation_rate": 0.13134765625,
+      "parse_rate": 0.8642578125,
+      "verifier_errors": 0
+    }
+  },
+  "wandb": {
+    "id": "vaavgbmx",
+    "url": "https://wandb.ai/xidulu-umass-amherst/nanochat-online-rl/runs/vaavgbmx"
+  }
+}

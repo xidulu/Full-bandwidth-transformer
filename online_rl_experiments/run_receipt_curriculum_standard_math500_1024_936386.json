@@ -1,0 +1,105 @@
+{
+  "submitted_at_utc": "2026-09-29T21:00:55.427908+00:00",
+  "account": "enalisn1_fall2026",
+  "partitions": [
+    "a100",
+    "h100",
+    "h200"
+  ],
+  "eval_array": 936386,
+  "merge_job": 936516,
+  "checkpoint": {
+    "checkpoint": "/weka/scratch/jhu/enalisn1/xiw/nanochat/online_rl_experiments/results/922491/checkpoints/model_001300.pt",
+    "checkpoint_sha256": "d3b8332945b341810c2b1c483fd433c45c702c6b4da86a027ca92654d100de87",
+    "metadata_sha256": "225d4ad51b625bc4d3108c7986afa71a4030d68168b2454bf666874ad9269dec",
+    "step": 1300,
+    "model_config": {
+      "sequence_len": 2048,
+      "vocab_size": 32768,
+      "n_layer": 20,
+      "n_head": 10,
+      "n_kv_head": 10,
+      "n_embd": 1280,
+      "window_pattern": "SSSL",
+      "latent_feedback": true,
+      "latent_feedback_mode": "gate_product",
+      "weight_tying": true
+    }
+  },
+  "examples": 500,
+  "decode_mode": "standard",
+  "temperature": 0.0,
+  "max_new_tokens": 1024,
+  "verifier": "Math-Verify",
+  "shards": 8,
+  "max_concurrent_gpus": 4,
+  "comparison_output": "results/math500-curriculum-decoding-1024-936386",
+  "soft_comparison": "results/math500-soft-924202",
+  "status": "completed",
+  "source_sha256": {
+    "evaluate_rl_math500.py": "c6121b73555480c5c63355a6a5d4a1b8e2e39382443de122bf8b46950bea79c1",
+    "evaluate_rl_math500.slurm": "f448e9a19cc0e3ff00acdb0ae9b5fe81c54139052d926f5730fa46da00d0015e",
+    "merge_curriculum_standard_math500_1024.slurm": "7f95623bf6654df5f7604233d2e272102d80cd9c36b490404b8c8bc41e2517b5",
+    "report_lfsft_decoding_math500.py": "34a1736c9a02118275c1796d8a046e463a489080085f4d4939e7d955eb3b3323"
+  },
+  "dependency": "afterok:936386",
+  "completed_at_utc": "2026-09-29T21:12:40.588219+00:00",
+  "results": {
+    "standard": {
+      "examples": 500,
+      "correct": 206,
+      "accuracy": 0.412,
+      "standard_error": 0.02201163328787757,
+      "answers_parsed": 500,
+      "answer_parse_rate": 1.0,
+      "completion_tokens": 211442,
+      "original_generation_seconds": 2375.259361456991,
+      "math_verify_seconds": 2.0242404313758016,
+      "accuracy_wilson_95": [
+        0.369688475931219,
+        0.4556534079900142
+      ],
+      "truncation_rate": 0.052,
+      "verifier_errors": 0
+    },
+    "soft": {
+      "examples": 500,
+      "correct": 231,
+      "accuracy": 0.462,
+      "standard_error": 0.022296008611408458,
+      "answers_parsed": 500,
+      "answer_parse_rate": 1.0,
+      "completion_tokens": 205713,
+      "original_generation_seconds": 2264.423457343992,
+      "math_verify_seconds": 1.4887274685315788,
+      "accuracy_wilson_95": [
+        0.41875629515879303,
+        0.505823154716285
+      ],
+      "truncation_rate": 0.04,
+      "verifier_errors": 0
+    }
+  },
+  "paired": {
+    "both_correct": 178,
+    "standard_only_correct": 28,
+    "soft_only_correct": 53,
+    "both_wrong": 241,
+    "accuracy_delta_soft_minus_standard": 0.05,
+    "exact_mcnemar_p": 0.0072755020363083804
+  },
+  "generation_hardware": {
+    "standard": [
+      "NVIDIA A100-SXM4-80GB",
+      "NVIDIA H100 80GB HBM3",
+      "NVIDIA H100 NVL"
+    ],
+    "soft": [
+      "NVIDIA H100 NVL"
+    ]
+  },
+  "wandb": {
+    "id": "5ou7xp1k",
+    "url": "https://wandb.ai/xidulu-umass-amherst/nanochat-online-rl/runs/5ou7xp1k"
+  }
+}

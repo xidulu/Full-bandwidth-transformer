@@ -1,0 +1,41 @@
+{
+  "training_job": 899298,
+  "checkpoint": "/weka/scratch/jhu/enalisn1/xiw/nanochat/online_rl_experiments/results/899298/checkpoints/model_000300.pt",
+  "checkpoint_sha256": "ea01dc0b2d77d01aa74233b38b5a70ff28bd4c1964e15eebb2e9adb13274dccf",
+  "metadata_sha256": "933b14e01751bf7156ed91e67d7141cb30490b316d9f14cec6af891e4f893531",
+  "eval_job": 904082,
+  "merge_grade_job": 904083,
+  "dependency": "afterok:904082",
+  "examples": 500,
+  "decode_mode": "standard",
+  "temperature": 0.0,
+  "max_new_tokens": 512,
+  "verifier": "Math-Verify; same grader applied to RL and saved SFT baseline",
+  "output": "results/math500-rl-904082",
+  "sources": {
+    "evaluate_rl_math500.py": "c6121b73555480c5c63355a6a5d4a1b8e2e39382443de122bf8b46950bea79c1",
+    "evaluate_rl_math500.slurm": "5139e12cd8059c191794ab1bc0b54858235e464d899c82692eb01873f2eaefe0",
+    "report_math500_post_rl.py": "07ccc8d923b676236a1712b9c3299fc498458d2c59d23324528ec93f8d56968b",
+    "merge_rl_math500.slurm": "707f46de48b85fad63ad759f3c65b510379795e295eccbd146b076435f68fbba"
+  },
+  "status": "completed",
+  "grading_execution": {
+    "cancelled_batch_job": 904083,
+    "reason": "QOSMaxCpuPerUserLimit",
+    "existing_cpu_allocation": 904047,
+    "all_gpu_shards_completed_before_merge": true
+  },
+  "summary": {
+    "rl_correct": 200,
+    "baseline_correct": 173,
+    "examples": 500,
+    "accuracy_delta": 0.05400000000000005,
+    "exact_mcnemar_p": 0.005013598900146091,
+    "verifier_errors": 0
+  },
+  "wandb": {
+    "id": "a8fjnjdm",
+    "url": "https://wandb.ai/xidulu-umass-amherst/nanochat-online-rl/runs/a8fjnjdm"
+  },
+  "eval_data_sha256": "0e8aa28c4324d6ac98f1e58812954c17d3367db19e41af5f9505e7f5b302f171"
+}

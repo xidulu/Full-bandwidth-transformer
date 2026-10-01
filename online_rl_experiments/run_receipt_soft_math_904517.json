@@ -1,0 +1,33 @@
+{
+  "job_id": 904517,
+  "submitted_at_utc": "2026-09-26T18:54:30.037446+00:00",
+  "account": "enalisn1_fall2026",
+  "submission_command": "sbatch --parsable --account=enalisn1_fall2026 train_soft_math.slurm",
+  "steps": 300,
+  "preflight_steps_included": 2,
+  "gpus": 4,
+  "partitions": [
+    "h100",
+    "a100"
+  ],
+  "global_responses_per_update": 1024,
+  "prompts_per_update": 128,
+  "samples_per_prompt": 8,
+  "microbatch_size_per_gpu": 8,
+  "gradient_accumulation_steps": 32,
+  "decode_mode": "soft",
+  "likelihood_estimator": "three_pass_detached",
+  "checkpoint_tag": "d20-from40k-lf-k2-gate_product-openmath-train5m-k3-anygpu",
+  "checkpoint_step": 4407,
+  "data": "data/hendrycks-math-benchmark.train.jsonl",
+  "wandb_project": "nanochat-online-rl",
+  "preflight_output": "results/904517-preflight",
+  "output": "results/904517",
+  "log": "logs/online-rl-soft-math-904517.log",
+  "source_sha256": {
+    "main.py": "45099e62b8a4d9148786aeaf662740841877f701843188974bb93f9ce667401e",
+    "soft_likelihood.py": "117ac8bc9050a8a03ff7b2a6f33b8cac83c898f8e8aa41a272be8b1d27fced7b",
+    "vllm_rollout.py": "ebd50e448b90bb7e8c18f56dad051473553a9c03e4691400a839de34940be272",
+    "train_soft_math.slurm": "48fa6f47f9e23764d78ff41cb6b6c5569bf2ac0a284cda62767c695dac9df661"
+  }
+}

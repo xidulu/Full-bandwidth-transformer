@@ -1,0 +1,89 @@
+{
+  "job_id": 891102,
+  "status_at_handoff": "cancelled_by_user",
+  "launcher": "train_large_batch.slurm",
+  "log": "logs/online-rl-large-891102.log",
+  "world_size": 4,
+  "partitions": [
+    "h100",
+    "a100"
+  ],
+  "slurm_time_limit_hours": 24,
+  "rollout_engine": "vllm",
+  "target_step": 300,
+  "global_prompts_per_step": 128,
+  "samples_per_prompt": 8,
+  "global_sequences_per_update": 1024,
+  "microbatch_size_per_gpu": 8,
+  "gradient_accumulation_steps": 32,
+  "local_sequences_per_update": 256,
+  "vllm_max_sequences_per_gpu": 64,
+  "vllm_kv_cache_gib_per_gpu": 8,
+  "vllm_max_batched_tokens": 2048,
+  "lr": 1e-06,
+  "verifier": "math-verify",
+  "objective": "on-policy group-standardized REINFORCE, batch token mean",
+  "initial_checkpoint": "/home/jhu/xwang457/work/nanochat_cache/chatsft_checkpoints/d20-standard-60k-openmath-train5m-k1-anygpu/model_004407.pt",
+  "stages": [
+    {
+      "steps": [
+        1,
+        2
+      ],
+      "output": "results/891102-preflight",
+      "verify_all_loaded_weights": true,
+      "wandb_name": "standard-vllm-b1024-preflight-891102",
+      "wandb": {
+        "id": "qqf392r6",
+        "url": "https://wandb.ai/xidulu-umass-amherst/nanochat-online-rl/runs/qqf392r6"
+      },
+      "completed": {
+        "steps": 2,
+        "optimizer_updates": 2,
+        "wandb_url": "https://wandb.ai/xidulu-umass-amherst/nanochat-online-rl/runs/qqf392r6"
+      }
+    },
+    {
+      "steps": [
+        3,
+        300
+      ],
+      "output": "results/891102",
+      "resume_from": "results/891102-preflight/checkpoints/model_000002.pt",
+      "condition": "preflight succeeds",
+      "wandb_name": "standard-vllm-b1024-300steps-891102",
+      "wandb": {
+        "id": "va9an00h",
+        "url": "https://wandb.ai/xidulu-umass-amherst/nanochat-online-rl/runs/va9an00h"
+      }
+    }
+  ],
+  "wandb_project": "nanochat-online-rl",
+  "validation": {
+    "targeted_tests_passed": 28,
+    "batch_layout_verified": true,
+    "shell_syntax_checked": true,
+    "prior_probability_audit": "results/train-inference-890340/summary.json",
+    "prior_strict_parity_job": {
+      "job_id": 890232,
+      "status": "failed at exact greedy parity; no distributed training ran",
+      "note": "One of four H100 greedy continuations differed. Weight transfer and restoration passed. Probability-level H100 audit separately measured mild numerical mismatch."
+    },
+    "four_gpu_preflight_completed": true,
+    "audited_optimizer_updates": 2,
+    "resume_optimizer_restored": true
+  },
+  "sources": {
+    "main.py": "413f111618bf3702168133c8022e2c61894d68ad9ff5897b2bcf4afd366c24fb",
+    "vllm_rollout.py": "5ffd2765f4a5057cf91eb5848e4689cc5e66940b1a2440c88c8554db9fe513f5",
+    "verifier.py": "b241a30cbd6adb76982d02d86e511da4f8c27a041bd364f008ecbd2d58c93cf7",
+    "train_large_batch.slurm": "0de9ac51b0555e75fbc4506fe50a9c118b1a4e652ffc2d2d8d083368187d3aba"
+  },
+  "initial_checkpoint_sha256": "48a01a95bfa1c153a129965f867861b31072c9fe2e085afe06da0ee1a6f8f189",
+  "initial_metadata_sha256": "8604a192a55ba81e57eedfb36894d7fee1692633dd257e1926c2704f147d8685",
+  "node": "gh111",
+  "gpu": "NVIDIA H100 80GB HBM3",
+  "last_completed_training_step": 75,
+  "last_saved_checkpoint_step": 75,
+  "cancellation_reason": "User requested replacement with Open-Reasoner-Zero/orz_math_72k_collection_extended"
+}

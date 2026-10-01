@@ -1,0 +1,60 @@
+{
+  "job_id": 870904,
+  "replaces_cancelled_job": 870835,
+  "status_at_handoff": "failed",
+  "status_note": "Job failed during batch 68 after 67 completed updates; latest checkpoint is step 50. Timeout handler fixed locally; no replacement job submitted.",
+  "wandb": {
+    "id": "ioakkp3w",
+    "url": "https://wandb.ai/xidulu-umass-amherst/nanochat-online-rl/runs/ioakkp3w"
+  },
+  "hardware": "4 x NVIDIA A100-SXM4-80GB",
+  "planned_steps": 100,
+  "world_size": 4,
+  "microbatch_size_per_gpu": 8,
+  "gradient_accumulation_steps": 4,
+  "global_sequences_per_update": 128,
+  "global_prompts_per_update": 16,
+  "samples_per_prompt": 8,
+  "learning_rate": 1e-06,
+  "checkpoint_sha256": "48a01a95bfa1c153a129965f867861b31072c9fe2e085afe06da0ee1a6f8f189",
+  "trainer_sha256": "14007fd8b5bd3dc526b00c856fd56ee9b5a47e89cb40bf97cee3cf90d2456d08",
+  "verifier": {
+    "package": "math-verify",
+    "version": "0.9.0",
+    "latex2sympy2_extended_version": "1.11.0",
+    "antlr4_runtime_version": "4.13.2",
+    "sympy_version": "1.14.0",
+    "parse_timeout_seconds": 5,
+    "verify_timeout_seconds": 5,
+    "gold_extraction": "LatexExtractionConfig on $reference$",
+    "prediction_extraction": "LatexExtractionConfig + ExprExtractionConfig; anchors required",
+    "fallback_mode": "no_fallback",
+    "extraction_mode": "first_match",
+    "strict": true,
+    "truncated_training_reward": 0.0,
+    "evaluation_verifier": "math-verify"
+  },
+  "verifier_sha256": "5612c8e85cd661e3e9a3f4e59a565ab6a5382bea464904bbdfef352d5d56255e",
+  "group_metrics": [
+    "reward/all_wrong_groups",
+    "reward/all_correct_groups",
+    "reward/mixed_groups"
+  ],
+  "group_metric_scope": "per rollout batch, summed across all ranks; final binary training rewards",
+  "validation": {
+    "targeted_tests_passed": 29,
+    "source_snapshot_hashes_verified": true
+  },
+  "failure": {
+    "slurm_state": "FAILED",
+    "exit_code": "1:0",
+    "elapsed": "01:12:39",
+    "last_completed_step": 67,
+    "last_saved_checkpoint_step": 50,
+    "rank": 3,
+    "exception": "math_verify.errors.TimeoutException",
+    "cause": "TimeoutException derives from BaseException and escaped the Exception-only handler",
+    "fix": "Catch TimeoutException explicitly alongside Exception"
+  },
+  "resumed_by_job": 875331
+}

@@ -1,0 +1,68 @@
+{
+  "submitted_at_utc": "2026-09-29T21:16:18.163456+00:00",
+  "account": "enalisn1_fall2026",
+  "partitions": [
+    "a100",
+    "h100",
+    "h200"
+  ],
+  "eval_array": 936570,
+  "merge_job": 936588,
+  "dependency": "afterok:936570",
+  "checkpoint": {
+    "checkpoint": "/weka/scratch/jhu/enalisn1/xiw/nanochat/online_rl_experiments/results/922491/checkpoints/model_001300.pt",
+    "checkpoint_sha256": "d3b8332945b341810c2b1c483fd433c45c702c6b4da86a027ca92654d100de87",
+    "metadata_sha256": "225d4ad51b625bc4d3108c7986afa71a4030d68168b2454bf666874ad9269dec",
+    "evaluation_metadata_sha256": "d8e4cfda4cb0b1f34db3819abfa8686215150a6652c0a979de06923d78f906dc",
+    "step": 1300
+  },
+  "examples": 1319,
+  "decode_mode": "standard",
+  "temperature": 0.0,
+  "max_new_tokens": 1024,
+  "gsm8k_shots": 0,
+  "gsm8k_prompt_format": "chat",
+  "verifier": "Math-Verify",
+  "shards": 8,
+  "max_concurrent_gpus": 4,
+  "output": "results/gsm8k-rl-936570",
+  "soft_comparison": "results/gsm8k-rl-936300",
+  "status": "completed",
+  "source_sha256": {
+    "evaluate_rl_gsm8k.py": "d0ed2c9bde6c00ddf21ca3246853331ffb6a2a817f97638ef3780c89c7d8f63d",
+    "evaluate_rl_gsm8k.slurm": "10088dc6f25f6e56fac1e8482b713c3835ab77dbeed2eabdb0806ffc3736b9d4",
+    "merge_rl_gsm8k.py": "f33e0fdd6e99c025d0184092ea19091c16397286b6758687269997e4d20827f0",
+    "merge_rl_gsm8k.slurm": "c3ca49ae3dffd0d2e2e8df1a07fe409445d8e1bc41ac8e6e8b5968465294ac7d",
+    "report_rl_gsm8k.py": "4ca76cb43f0bf014fbacf7595f70264f322d32b0a69efa4223288b55cfdecdee",
+    "verifier.py": "b241a30cbd6adb76982d02d86e511da4f8c27a041bd364f008ecbd2d58c93cf7"
+  },
+  "completed_at_utc": "2026-09-29T21:30:10.979784+00:00",
+  "results": {
+    "examples": 1319,
+    "correct": 810,
+    "accuracy": 0.6141015921152388,
+    "accuracy_wilson_95": [
+      0.5875349834560537,
+      0.6400055112819476
+    ],
+    "truncated": 14,
+    "truncation_rate": 0.01061410159211524,
+    "mean_completion_tokens": 193.61031084154664,
+    "verifier_errors": 0,
+    "answer_parse_rate": 0.9878695981804397
+  },
+  "paired": {
+    "both_correct": 738,
+    "standard_only_correct": 72,
+    "soft_only_correct": 88,
+    "both_wrong": 421,
+    "accuracy_delta_soft_minus_standard": 0.012130401819560273,
+    "exact_mcnemar_p": 0.23558242646926356
+  },
+  "wandb": {
+    "id": "qrt4clte",
+    "url": "https://wandb.ai/xidulu-umass-amherst/nanochat-online-rl/runs/qrt4clte"
+  },
+  "summary": "results/gsm8k-summary-936570/summary.json",
+  "report_integration_check": "Passed identical saved-output control: 1319 examples, 826 correct, zero discordant pairs, McNemar p=1. This validates reporting only."
+}

@@ -1,0 +1,42 @@
+{
+  "job_id": 919724,
+  "parent_job_id": 910519,
+  "submitted_at_utc": "2026-09-28T15:39:29.788928+00:00",
+  "account": "enalisn1_fall2026",
+  "source_checkpoint": "/weka/scratch/jhu/enalisn1/xiw/nanochat/online_rl_experiments/results/910519/checkpoints/model_000975.pt",
+  "source_step": 975,
+  "preflight_target_step": 977,
+  "target_step": 1300,
+  "remaining_updates": 325,
+  "last_parent_logged_step": 997,
+  "unsaved_parent_updates": 22,
+  "rollout_sequences_per_gpu": 64,
+  "vllm_kv_cache_gib_per_gpu": 16,
+  "gpus": 4,
+  "global_sequences_per_update": 1024,
+  "gradient_accumulation_steps": 32,
+  "microbatch_size": 8,
+  "restore_optimizer": true,
+  "restore_dataset_position": true,
+  "validation": {
+    "source_step": 975,
+    "target_step": 1300,
+    "data_cursor": 86400,
+    "data_epoch": 0,
+    "data_start_step": 300,
+    "safe_concurrency": 73,
+    "model_tensors": 151,
+    "optimizer_states": 148,
+    "hashes": {
+      "model_000975.pt": "3327a4844fdd807c4dde9a71420a258389333de75a8eaa7202eb44dc2e5a59ae",
+      "meta_000975.json": "66dfd17afd302fd58cee896b21575607b1fc568c44ca1f076cd0316fb91f73a6",
+      "optim_000975_rank0.pt": "fa1d1a0ccf66b3f276d265a110823b2cb2fae7c934d1252bcc3b901da534e52b",
+      "restart_big_math_lf64.slurm": "09a695a0464cdbf3349c81fa2e2b9fb995f37598398b308ec29b104fd9b02987"
+    }
+  },
+  "unit_tests_passed": 19,
+  "output": "results/919724",
+  "preflight_output": "results/919724-preflight",
+  "log": "logs/bigmath-lf64-resume-919724.log",
+  "parent_stop_reason": "Slurm association billing-minute limit; limit subsequently increased"
+}

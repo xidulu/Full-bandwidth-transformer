@@ -1,0 +1,18 @@
+{
+  "task": "detached three-pass soft post-training",
+  "validation_job": 904477,
+  "validation_metrics": "results/soft-validation-904477/metrics.json",
+  "cpu_tests_passed": 70,
+  "distributed_tests_passed": 1,
+  "source_sha256": {
+    "main.py": "45099e62b8a4d9148786aeaf662740841877f701843188974bb93f9ce667401e",
+    "soft_likelihood.py": "117ac8bc9050a8a03ff7b2a6f33b8cac83c898f8e8aa41a272be8b1d27fced7b",
+    "vllm_rollout.py": "ebd50e448b90bb7e8c18f56dad051473553a9c03e4691400a839de34940be272",
+    "train_soft_math.slurm": "1f4c93a65618e8a4830e1bc42c59309ba2045f22f6d7812d8ce4ab8c1cf53207",
+    "validate_soft.py": "295302ced70afa7b76dd90886ab8a3649a2b1f287972963f246e300f3dac0ae8",
+    "validate_soft.slurm": "7fe0ce66b9481ad52572ea4ca2d075924e7191a080947afaa64bc2d35282a1d4",
+    "test_soft_likelihood.py": "c26cf9997a8cb29b528926853dc545fc453e42b55cd28c94fc7a008cf6a43ce8",
+    "test_vllm_rollout.py": "3413f2ce5993a65909574e2748eaf95c2431c9137516e9481d72b7cb83b0b1ec"
+  },
+  "full_training_submitted": false
+}

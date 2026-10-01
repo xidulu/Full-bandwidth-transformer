@@ -1,0 +1,131 @@
+{
+  "submitted_at_utc": "2026-09-27T14:18:50.434694+00:00",
+  "account": "enalisn1_fall2026",
+  "evaluations": [
+    {
+      "training_job": 906530,
+      "eval_job": 910153,
+      "likelihood_estimator": "three_pass_detached",
+      "checkpoint": "/weka/scratch/jhu/enalisn1/xiw/nanochat/online_rl_experiments/results/906530/checkpoints/model_000300.pt",
+      "checkpoint_sha256": "cd7f70058e25ee0170c535e9d2eaadad1a49d01fd7218f052673426a41a9eabb",
+      "metadata_sha256": "8ef3c955c01caeff34651531b6d410a9e151a5b5a02a99994ea9773c0a426fd3",
+      "output": "results/math500-soft-910153"
+    },
+    {
+      "training_job": 906531,
+      "eval_job": 910154,
+      "likelihood_estimator": "hidden_state_replay",
+      "checkpoint": "/weka/scratch/jhu/enalisn1/xiw/nanochat/online_rl_experiments/results/906531/checkpoints/model_000300.pt",
+      "checkpoint_sha256": "98dc183607f3c162c9f13aae67f231f33ff6c9d73654dc2b59ffae485ebe96ff",
+      "metadata_sha256": "95ed8419012b7205a5638d672b4b538ea3da10e96e71716cde9f469cb81e14ce",
+      "output": "results/math500-soft-910154"
+    }
+  ],
+  "merge_grade_job": 910244,
+  "dependency": "afterok:910153:910154",
+  "examples_per_model": 500,
+  "max_new_tokens": 512,
+  "temperature": 0.0,
+  "decode_mode": "soft",
+  "inference_engine": "native",
+  "verifier": "Math-Verify; same settings as prior MATH-500 evaluation",
+  "baseline": "d20-from40k-lf-k2-gate_product-openmath-train5m-k3-anygpu/model_004407.pt, soft",
+  "output": "results/math500-soft-comparison-910153-910154",
+  "source_sha256": {
+    "evaluate_rl_math500.py": "c6121b73555480c5c63355a6a5d4a1b8e2e39382443de122bf8b46950bea79c1",
+    "evaluate_soft_rl_math500.slurm": "43ebfbbaffa71da73b6ceff0a84e7af80193d0d599a797f26b8008ce4ee72a7d",
+    "merge_soft_rl_math500.slurm": "595b7738a13f7c7d12b28a641915257d86e63e50d60aad62fc1a8cf2c895408b",
+    "report_soft_math500.py": "50bbf64f29d7f1840b0928e709b397dad47475e6ff4ba80ca30835d00492c6b1"
+  },
+  "status": "completed",
+  "grading_resubmission": {
+    "cancelled_job": 910163,
+    "reason": "Interactive CPU partition limit is 4 CPUs; 16 GiB memory forced 9. Resubmitted with 3 CPUs and 6000 MiB.",
+    "all_16_shards_verified_completed": true,
+    "dependency_resubmission": "Completed array IDs expired from Slurm dependency tracking; accounting verified all shards successful before resubmission."
+  },
+  "summary": {
+    "lf_sft": {
+      "examples": 500,
+      "correct": 183,
+      "accuracy": 0.366,
+      "standard_error": 0.021542701780417423,
+      "answers_parsed": 500,
+      "answer_parse_rate": 1.0,
+      "completion_tokens": 174328,
+      "original_generation_seconds": 1811.5844087372534,
+      "math_verify_seconds": 3.4387484786566347,
+      "accuracy_wilson_95": [
+        0.32494760488221347,
+        0.40909571836148256
+      ],
+      "truncation_rate": 0.31,
+      "verifier_errors": 0
+    },
+    "three_pass": {
+      "examples": 500,
+      "correct": 205,
+      "accuracy": 0.41,
+      "standard_error": 0.02199545407578575,
+      "answers_parsed": 500,
+      "answer_parse_rate": 1.0,
+      "completion_tokens": 167138,
+      "original_generation_seconds": 2028.6224592107465,
+      "math_verify_seconds": 3.5787747497670352,
+      "accuracy_wilson_95": [
+        0.3677350694076764,
+        0.453637311875403
+      ],
+      "truncation_rate": 0.244,
+      "verifier_errors": 0
+    },
+    "hidden_replay": {
+      "examples": 500,
+      "correct": 202,
+      "accuracy": 0.404,
+      "standard_error": 0.021944657664224338,
+      "answers_parsed": 500,
+      "answer_parse_rate": 1.0,
+      "completion_tokens": 164849,
+      "original_generation_seconds": 1828.846213256009,
+      "math_verify_seconds": 2.774087507976219,
+      "accuracy_wilson_95": [
+        0.36187922469306827,
+        0.44758464867554987
+      ],
+      "truncation_rate": 0.224,
+      "verifier_errors": 0
+    }
+  },
+  "paired_comparisons": {
+    "lf_sft_vs_three_pass": {
+      "both_correct": 150,
+      "left_only_correct": 33,
+      "right_only_correct": 55,
+      "both_wrong": 262,
+      "accuracy_delta_right_minus_left": 0.044,
+      "exact_mcnemar_p": 0.024622831581791713
+    },
+    "lf_sft_vs_hidden_replay": {
+      "both_correct": 149,
+      "left_only_correct": 34,
+      "right_only_correct": 53,
+      "both_wrong": 264,
+      "accuracy_delta_right_minus_left": 0.038,
+      "exact_mcnemar_p": 0.053003113010960085
+    },
+    "three_pass_vs_hidden_replay": {
+      "both_correct": 173,
+      "left_only_correct": 32,
+      "right_only_correct": 29,
+      "both_wrong": 266,
+      "accuracy_delta_right_minus_left": -0.006,
+      "exact_mcnemar_p": 0.7981526273057203
+    }
+  },
+  "wandb": {
+    "id": "ua0cn7sp",
+    "url": "https://wandb.ai/xidulu-umass-amherst/nanochat-online-rl/runs/ua0cn7sp"
+  },
+  "coverage_verified": true
+}

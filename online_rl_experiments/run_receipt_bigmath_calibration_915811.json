@@ -1,0 +1,31 @@
+{
+  "submitted_at_utc": "2026-09-28T02:53:06.548401+00:00",
+  "array_job": 915811,
+  "merge_job": 915812,
+  "dependency": "afterok:915811",
+  "account": "enalisn1_fall2026",
+  "output": "results/bigmath-calibration-20260927",
+  "array": "0-7%4",
+  "shards_per_model": 4,
+  "total_responses": 32768,
+  "prompts_per_model": 2048,
+  "samples_per_prompt": 8,
+  "checkpoint_identity": {
+    "standard": {
+      "path": "/weka/scratch/jhu/enalisn1/xiw/nanochat/online_rl_experiments/results/899298/checkpoints/model_000300.pt",
+      "sha256": "ea01dc0b2d77d01aa74233b38b5a70ff28bd4c1964e15eebb2e9adb13274dccf",
+      "metadata_sha256": "933b14e01751bf7156ed91e67d7141cb30490b316d9f14cec6af891e4f893531"
+    },
+    "three_pass": {
+      "path": "/weka/scratch/jhu/enalisn1/xiw/nanochat/online_rl_experiments/results/906530/checkpoints/model_000300.pt",
+      "sha256": "cd7f70058e25ee0170c535e9d2eaadad1a49d01fd7218f052673426a41a9eabb",
+      "metadata_sha256": "8ef3c955c01caeff34651531b6d410a9e151a5b5a02a99994ea9773c0a426fd3"
+    }
+  },
+  "subset_sha256": "1e82eea5744d5a3f432261cb774b4cb8397c4015824ddefe6c4c2a2d54f84feb",
+  "eligible_questions": 232263,
+  "strata": 60,
+  "unit_tests_passed": 3,
+  "optimizer_updates": 0,
+  "training_jobs_modified": false
+}

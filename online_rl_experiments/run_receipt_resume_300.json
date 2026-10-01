@@ -1,0 +1,40 @@
+{
+  "job_id": 875331,
+  "parent_job_id": 870904,
+  "status_at_handoff": "running",
+  "status_note": "Check results/875331/completed.json and Slurm for final completion.",
+  "wandb": {
+    "id": "iuygi78k",
+    "url": "https://wandb.ai/xidulu-umass-amherst/nanochat-online-rl/runs/iuygi78k"
+  },
+  "start_step": 50,
+  "target_step": 300,
+  "additional_batches": 250,
+  "world_size": 4,
+  "gpu": "NVIDIA A100-SXM4-80GB",
+  "global_sequences_per_update": 128,
+  "gradient_accumulation_steps": 4,
+  "microbatch_size_per_gpu": 8,
+  "resume": {
+    "checkpoint": "/weka/scratch/jhu/enalisn1/xiw/nanochat/online_rl_experiments/results/870904/checkpoints/model_000050.pt",
+    "completed_step": 50,
+    "optimizer_path": "/weka/scratch/jhu/enalisn1/xiw/nanochat/online_rl_experiments/results/870904/checkpoints/optim_000050_rank0.pt",
+    "optimizer_sha256": "ff381899a52e315cea276f17a95ef1e43f779500723f48749f4d0888490720fb",
+    "optimizer_updates": 50,
+    "data_epoch": 0,
+    "data_cursor": 800,
+    "parent_output": "results/870904"
+  },
+  "checkpoint_sha256": "6751f973055c5e4feb43684b9c4208fa33f17af301d2e8ba96a47a4e5afed2db",
+  "trainer_sha256": "c468bd885688108b303726807bf52df2efc5884e8fa90d747a44ca89cb232b6c",
+  "verifier_sha256": "b241a30cbd6adb76982d02d86e511da4f8c27a041bd364f008ecbd2d58c93cf7",
+  "validation": {
+    "targeted_tests_passed": 40,
+    "optimizer_restore_confirmed_in_gpu_log": true,
+    "source_snapshots_verified": true,
+    "first_resumed_update": 51,
+    "restored_batch_prompt_ids_match": true,
+    "restored_batch_exact_completion_matches": 128,
+    "restored_batch_responses": 128
+  }
+}

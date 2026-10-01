@@ -1,0 +1,71 @@
+{
+  "submitted_at_utc": "2026-09-29T20:55:28.846316+00:00",
+  "account": "enalisn1_fall2026",
+  "eval_array": 936300,
+  "merge_job": 936507,
+  "checkpoint": {
+    "checkpoint": "/weka/scratch/jhu/enalisn1/xiw/nanochat/online_rl_experiments/results/922491/checkpoints/model_001300.pt",
+    "checkpoint_sha256": "d3b8332945b341810c2b1c483fd433c45c702c6b4da86a027ca92654d100de87",
+    "metadata_sha256": "225d4ad51b625bc4d3108c7986afa71a4030d68168b2454bf666874ad9269dec",
+    "step": 1300,
+    "model_config": {
+      "sequence_len": 2048,
+      "vocab_size": 32768,
+      "n_layer": 20,
+      "n_head": 10,
+      "n_kv_head": 10,
+      "n_embd": 1280,
+      "window_pattern": "SSSL",
+      "latent_feedback": true,
+      "latent_feedback_mode": "gate_product",
+      "weight_tying": true
+    }
+  },
+  "examples": 1319,
+  "decode_mode": "soft",
+  "temperature": 0.0,
+  "max_new_tokens": 1024,
+  "gsm8k_shots": 0,
+  "gsm8k_prompt_format": "chat",
+  "verifier": "Math-Verify",
+  "shards": 8,
+  "max_concurrent_gpus": 4,
+  "output": "results/gsm8k-rl-936300",
+  "status": "completed",
+  "source_sha256": {
+    "evaluate_rl_gsm8k.py": "283841751b7702269577625b5ce8d8c8daff19272b6a0d55a6ea380b45415270",
+    "evaluate_rl_gsm8k.slurm": "45a17a8b13876bd48570e5857efa59fec944f506a206748507fdd1b16895988f",
+    "merge_rl_gsm8k.slurm": "fb2a1020ab885b99ce6722d532f1f2281c0f6ed768358b97418ae05dedfc0be4",
+    "report_rl_gsm8k.py": "a05466d8395f357e3be7672b0f5b5c53a1e25ecba9f4de04f149e72f4ae5f192",
+    "verifier.py": "b241a30cbd6adb76982d02d86e511da4f8c27a041bd364f008ecbd2d58c93cf7"
+  },
+  "dependency": null,
+  "original_merge_job": 936307,
+  "recovery": "All 8 GPU shards saved complete generation and metric files, then failed only in upstream Markdown rendering (KeyError standard). Validated all 1319 rows with canonical dataset checks and full repository merger in a temporary directory. Replaced blocked merge job with fixed report wrapper; no inference rerun.",
+  "recovery_source_sha256": {
+    "evaluate_rl_gsm8k.py": "d0ed2c9bde6c00ddf21ca3246853331ffb6a2a817f97638ef3780c89c7d8f63d",
+    "merge_rl_gsm8k.py": "f33e0fdd6e99c025d0184092ea19091c16397286b6758687269997e4d20827f0",
+    "merge_rl_gsm8k.slurm": "60f73597be6ce7555a22cfba694573d501ec1b1856b1b20006dcbac9796c9914"
+  },
+  "completed_at_utc": "2026-09-29T21:12:40.578806+00:00",
+  "results": {
+    "examples": 1319,
+    "correct": 826,
+    "accuracy": 0.6262319939347991,
+    "accuracy_wilson_95": [
+      0.5997915346640373,
+      0.6519393116740172
+    ],
+    "truncated": 13,
+    "truncation_rate": 0.009855951478392721,
+    "mean_completion_tokens": 192.74526156178922,
+    "verifier_errors": 0,
+    "answer_parse_rate": 0.9863532979529946
+  },
+  "wandb": {
+    "id": "26pf4zmw",
+    "url": "https://wandb.ai/xidulu-umass-amherst/nanochat-online-rl/runs/26pf4zmw"
+  },
+  "report_recovery": "Merged metadata was reserialized by the parent merger. Validated metadata equality by JSON contents and retained both original and evaluation-file hashes. Final CPU-only grading and W&B logging completed successfully.",
+  "final_report_sha256": "e6490079e5f150bedf0f1b9447445db0b05ab694d14b2e06c35f3967b7049611"
+}

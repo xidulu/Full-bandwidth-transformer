@@ -1,0 +1,19 @@
+{
+  "source_step": 1250,
+  "target_step": 1300,
+  "source_optimizer_updates": 1250,
+  "data_cursor": 121600,
+  "data_epoch": 0,
+  "data_start_step": 300,
+  "global_sequences": 4096,
+  "local_sequences": 1024,
+  "model_tensors": 151,
+  "optimizer_states": 148,
+  "hashes": {
+    "model_001250.pt": "ef5bdeb80f52a743459a4548ef9f50ea1f7e6d1a0a453c85fa8e432c6140403b",
+    "meta_001250.json": "510d84127226a3d30328aecb0e1d1992ae07a6ca048f92a429be310612996e73",
+    "optim_001250_rank0.pt": "12e6be03320773117f7842c1147d72eaec5757088091d5f31c6649855bb2758a",
+    "main.py": "8c994cd0ee1199838030286a596b4d593322e9b957ce5673d794a5672b6a2a6f",
+    "restart_big_math_lf512.slurm": "e6db732e3f7481d76c9cbe1c21d2021e279a7f726daeafb2e1d18d6ba315639b"
+  }
+}

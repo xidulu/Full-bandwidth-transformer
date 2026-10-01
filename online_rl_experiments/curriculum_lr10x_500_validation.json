@@ -1,0 +1,22 @@
+{
+  "source_step": 1250,
+  "target_step": 1750,
+  "additional_updates": 500,
+  "old_lr": 1e-06,
+  "new_lr": 1e-05,
+  "model_tensors": 151,
+  "optimizer_states": 148,
+  "optimizer_restore_configured": true,
+  "curriculum_origin_step": 1250,
+  "curriculum_refresh_step": 1275,
+  "curriculum_sha256": "9d91a3594c6acc22c274469442ec6fc0c42af7c90ca1ed051d0470f50c5dc3ae",
+  "data_sha256": "02d362006faf63939091d05ab78c04bc9f2a0c418c30ceff795d865c65258531",
+  "global_prompts": 512,
+  "global_sequences": 4096,
+  "world_size": 4,
+  "hashes": {
+    "model_001250.pt": "ef5bdeb80f52a743459a4548ef9f50ea1f7e6d1a0a453c85fa8e432c6140403b",
+    "meta_001250.json": "510d84127226a3d30328aecb0e1d1992ae07a6ca048f92a429be310612996e73",
+    "optim_001250_rank0.pt": "12e6be03320773117f7842c1147d72eaec5757088091d5f31c6649855bb2758a"
+  }
+}
