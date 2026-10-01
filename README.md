@@ -56,6 +56,30 @@ Best MATH-500 result: tie between `concat_projection + fused` and `gate_product 
 Across both benchmarks, the clearest signal is that `fused` decoding improves the FBT checkpoints relative to their own `standard` decoding. For paired comparisons on the same examples, use the McNemar counts/p-values in the saved `metrics.json` or `metrics_math_verify.json` files rather than independent binomial error bars.
 
 
+## Online RL post-training
+
+We post-train the standard and `gate_product` latent-feedback (LF) SFT checkpoints with fully online policy gradients: each update uses fresh vLLM rollouts from the current policy, eight responses per question, and binary Math-Verify rewards. Advantages are normalized within each question's group; the loss is summed over response tokens and divided by the global response-token count (DAPO-style token normalization). This is a simple on-policy objective without PPO clipping or a reference KL penalty. Truncated training responses receive zero reward.
+
+The LF runs use soft decoding and three-pass likelihood estimation: pass 1 uses token embeddings, passes 2 and 3 mix embeddings with the preceding pass's hidden states, and only pass 3 has gradients. Initial RL uses 300 updates on the training split of `nlile/hendrycks-MATH-benchmark`. LF continuation uses `SynthLabsAI/Big-Math-RL-Verified`: 950 updates with 128 questions per update, then a 50-update comparison of uniform sampling against a curriculum calibrated by source and difficulty. The final stage uses **512 questions × 8 responses = 4,096 responses per update** on four GPUs (microbatch 8 per GPU, 128 accumulation steps). These evaluated runs use learning rate `1e-6` and a 1,024-token rollout limit. The curriculum favors strata with mixed correct/incorrect groups while retaining uniform exploration. Metrics are logged in the [nanochat-online-rl W&B project](https://wandb.ai/xidulu-umass-amherst/nanochat-online-rl).
+
+### MATH-500 before and after RL
+
+All results use all 500 questions, zero-shot chat prompts, greedy decoding, and Math-Verify grading. The following LF comparison uses **soft decoding with a 1,024-new-token budget** throughout:
+
+| LF checkpoint / stage | Correct | Accuracy |
+|---|---:|---:|
+| SFT baseline, before RL (SFT step 4,407) | 200/500 | 40.0% |
+| Initial RL, step 300 (run `906530`) | 215/500 | 43.0% |
+| Big-Math + large batch, uniform sampling, step 1,300 (run `920647`) | 217/500 | 43.4% |
+| Big-Math + large batch, curriculum, step 1,300 (run `922491`) | 231/500 | **46.2%** |
+
+Curriculum RL improves over LF-SFT by **6.2 percentage points**. The paired comparison has 163 both correct, 37 baseline-only correct, 68 RL-only correct, and 232 both wrong (exact McNemar p=0.00322). These results refer to the step-1,300 checkpoints; the later continuation and 10×-learning-rate experiment are not included.
+
+Separately, the **standard model with standard decoding and a 512-new-token budget** improves from **173/500 (34.6%)** before RL to **200/500 (40.0%)** after the initial 300 updates (run `899298`). Its paired counts are 143 both correct, 30 baseline-only correct, 57 RL-only correct, and 270 both wrong (p=0.00501). The different token budgets preclude a matched standard-versus-LF comparison here.
+
+[Machine-readable results and checkpoint identities](online_rl_experiments/reports/math500_rl_summary.json).
+
+
 ## Reproduce the standard-vs-FBT math pipeline
 
 **Note: You not necessarily need to test different variations**

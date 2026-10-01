@@ -1,0 +1,110 @@
+{
+  "benchmark": "MATH-500",
+  "examples": 500,
+  "prompt_format": "zero-shot chat",
+  "temperature": 0.0,
+  "verifier": "Math-Verify 0.9.0",
+  "lf_soft_1024": {
+    "max_new_tokens": 1024,
+    "decode_mode": "soft",
+    "models": {
+      "lf_sft": {
+        "correct": 200,
+        "accuracy": 0.4,
+        "truncation_rate": 0.162,
+        "checkpoint": "chatsft_checkpoints/d20-from40k-lf-k2-gate_product-openmath-train5m-k3-anygpu/model_004407.pt",
+        "checkpoint_sha256": "4e729475cd7d69ebb051791e21a3f221a36ed28bac64973c98a9dddba5e7ff98",
+        "metadata_sha256": "c2c160df08337cd51270270f6ebaeea409bf43f56707e4e181137ea88a906b27",
+        "step": 4407
+      },
+      "initial_rl": {
+        "correct": 215,
+        "accuracy": 0.43,
+        "truncation_rate": 0.048,
+        "checkpoint": "online_rl_experiments/results/906530/checkpoints/model_000300.pt",
+        "checkpoint_sha256": "cd7f70058e25ee0170c535e9d2eaadad1a49d01fd7218f052673426a41a9eabb",
+        "metadata_sha256": "8ef3c955c01caeff34651531b6d410a9e151a5b5a02a99994ea9773c0a426fd3",
+        "step": 300
+      },
+      "uniform": {
+        "correct": 217,
+        "accuracy": 0.434,
+        "truncation_rate": 0.034,
+        "checkpoint": "online_rl_experiments/results/920647/checkpoints/model_001300.pt",
+        "checkpoint_sha256": "e75dc7252d83c4ed5b6d523837d9d8d0b1e2a3331e7251c1a3b8c52368199e5c",
+        "metadata_sha256": "26aa2b130eb417023bc0fdc2196d777917ee5fccae0f80e62a6c46d6c14a8731",
+        "step": 1300
+      },
+      "curriculum": {
+        "correct": 231,
+        "accuracy": 0.462,
+        "truncation_rate": 0.04,
+        "checkpoint": "online_rl_experiments/results/922491/checkpoints/model_001300.pt",
+        "checkpoint_sha256": "d3b8332945b341810c2b1c483fd433c45c702c6b4da86a027ca92654d100de87",
+        "metadata_sha256": "225d4ad51b625bc4d3108c7986afa71a4030d68168b2454bf666874ad9269dec",
+        "step": 1300
+      }
+    },
+    "paired_baseline_vs_post_training": {
+      "initial_rl": {
+        "both_correct": 159,
+        "left_only_correct": 41,
+        "right_only_correct": 56,
+        "both_wrong": 244,
+        "accuracy_delta_right_minus_left": 0.03,
+        "exact_mcnemar_p": 0.15481578503443227
+      },
+      "uniform": {
+        "both_correct": 158,
+        "left_only_correct": 42,
+        "right_only_correct": 59,
+        "both_wrong": 241,
+        "accuracy_delta_right_minus_left": 0.034,
+        "exact_mcnemar_p": 0.11091834966063964
+      },
+      "curriculum": {
+        "both_correct": 163,
+        "left_only_correct": 37,
+        "right_only_correct": 68,
+        "both_wrong": 232,
+        "accuracy_delta_right_minus_left": 0.062,
+        "exact_mcnemar_p": 0.003220989868798485
+      }
+    },
+    "paired_uniform_vs_curriculum": {
+      "both_correct": 202,
+      "left_only_correct": 15,
+      "right_only_correct": 29,
+      "both_wrong": 254,
+      "accuracy_delta_right_minus_left": 0.028,
+      "exact_mcnemar_p": 0.04876676590447507
+    }
+  },
+  "standard_512": {
+    "max_new_tokens": 512,
+    "decode_mode": "standard",
+    "baseline": {
+      "correct": 173,
+      "accuracy": 0.346,
+      "checkpoint": "chatsft_checkpoints/d20-standard-60k-openmath-train5m-k1-anygpu/model_004407.pt"
+    },
+    "initial_rl": {
+      "correct": 200,
+      "accuracy": 0.4,
+      "checkpoint": "online_rl_experiments/results/899298/checkpoints/model_000300.pt",
+      "checkpoint_sha256": "ea01dc0b2d77d01aa74233b38b5a70ff28bd4c1964e15eebb2e9adb13274dccf",
+      "metadata_sha256": "933b14e01751bf7156ed91e67d7141cb30490b316d9f14cec6af891e4f893531"
+    },
+    "paired": {
+      "both_correct": 143,
+      "baseline_only_correct": 30,
+      "rl_only_correct": 57,
+      "both_wrong": 270
+    },
+    "exact_mcnemar_p": 0.005013598900146091
+  },
+  "source_reports": [
+    "online_rl_experiments/results/math500-initial-rl-1024-comparison-933611/comparison.json",
+    "online_rl_experiments/results/math500-rl-904082/comparison.json"
+  ]
+}
