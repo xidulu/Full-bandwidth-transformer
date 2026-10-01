@@ -62,6 +62,14 @@ We post-train the standard and `gate_product` latent-feedback (LF) SFT checkpoin
 
 The LF runs use soft decoding and three-pass likelihood estimation: pass 1 uses token embeddings, passes 2 and 3 mix embeddings with the preceding pass's hidden states, and only pass 3 has gradients. Initial RL uses 300 updates on the training split of `nlile/hendrycks-MATH-benchmark`. LF continuation uses `SynthLabsAI/Big-Math-RL-Verified`: 950 updates with 128 questions per update, then a 50-update comparison of uniform sampling against a curriculum calibrated by source and difficulty. The final stage uses **512 questions × 8 responses = 4,096 responses per update** on four GPUs (microbatch 8 per GPU, 128 accumulation steps). These evaluated runs use learning rate `1e-6` and a 1,024-token rollout limit. The curriculum favors strata with mixed correct/incorrect groups while retaining uniform exploration. Metrics are logged in the [nanochat-online-rl W&B project](https://wandb.ai/xidulu-umass-amherst/nanochat-online-rl).
 
+### Reward during initial RL
+
+![Training reward across the initial 300 RL updates for standard, LF three-pass, and LF hidden-state replay.](online_rl_experiments/reports/initial_math_rl_rewards.png)
+
+The three runs are [standard (`899298`)](https://wandb.ai/xidulu-umass-amherst/nanochat-online-rl/runs/0ffmpzn7), [LF three-pass (`906530`)](https://wandb.ai/xidulu-umass-amherst/nanochat-online-rl/runs/3c8brfjr), and [LF hidden-state replay (`906531`)](https://wandb.ai/xidulu-umass-amherst/nanochat-online-rl/runs/8lluvyq5). The figure shows **training reward on the Hendrycks-MATH training split**, with 128 questions × 8 responses per update and a 1,024-token rollout budget. Faint curves show each update; bold curves show a trailing 25-update mean. All three improve by about 11 percentage points between the first and last 25 updates. This sampled training reward is distinct from the held-out MATH-500 accuracy below.
+
+[Vector figure](online_rl_experiments/reports/initial_math_rl_rewards.svg) · [Per-update data](online_rl_experiments/reports/initial_math_rl_rewards.csv) · [Reproduce the plot](online_rl_experiments/reports/plot_initial_math_rl_rewards.py) (run with Matplotlib; `--extract` refreshes data from the original logs, including the first two preflight updates).
+
 ### MATH-500 before and after RL
 
 All results use all 500 questions, zero-shot chat prompts, greedy decoding, and Math-Verify grading. The following LF comparison uses **soft decoding with a 1,024-new-token budget** throughout:

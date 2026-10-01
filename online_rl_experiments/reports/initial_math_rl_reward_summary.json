@@ -1,0 +1,30 @@
+{
+  "metric": "reward/mean",
+  "smoothing": "trailing 25 updates, full windows only",
+  "dataset": "nlile/hendrycks-MATH-benchmark",
+  "split": "train",
+  "max_new_tokens": 1024,
+  "temperature": 1.0,
+  "lr": 1e-06,
+  "reward": "Binary Math-Verify correctness; truncated training responses receive zero.",
+  "runs": {
+    "standard": {
+      "job_id": "899298",
+      "first_25_mean": 0.3853515625,
+      "last_25_mean": 0.4984765625,
+      "gain_percentage_points": 11.312499999999998
+    },
+    "three_pass": {
+      "job_id": "906530",
+      "first_25_mean": 0.4125,
+      "last_25_mean": 0.5215625,
+      "gain_percentage_points": 10.906250000000007
+    },
+    "hidden_replay": {
+      "job_id": "906531",
+      "first_25_mean": 0.4101171875,
+      "last_25_mean": 0.52125,
+      "gain_percentage_points": 11.113281250000002
+    }
+  }
+}
