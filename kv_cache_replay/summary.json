@@ -1,0 +1,202 @@
+{
+  "checkpoint": "/weka/scratch/jhu/enalisn1/xiw/nanochat/online_rl_experiments/results/945294/checkpoints/model_001675.pt",
+  "checkpoint_step": 1675,
+  "checkpoint_sha256": "853072f928b01bfb617eaf51d62ed46e2999b2bb0faf65a157a01be7b570cb25",
+  "metadata_sha256": "2d477e15573dbdee67034fa07ada5a769d09fd93cda389133a8fe5af83b2109e",
+  "model_config": {
+    "sequence_len": 2048,
+    "vocab_size": 32768,
+    "n_layer": 20,
+    "n_head": 10,
+    "n_kv_head": 10,
+    "n_embd": 1280,
+    "window_pattern": "SSSL",
+    "latent_feedback": true,
+    "latent_feedback_mode": "gate_product",
+    "weight_tying": true
+  },
+  "dataset": "HuggingFaceH4/MATH-500",
+  "split": "test",
+  "dataset_sha256": {
+    "00000.parquet": "0e8aa28c4324d6ac98f1e58812954c17d3367db19e41af5f9505e7f5b302f171"
+  },
+  "gpu": "NVIDIA H100 NVL",
+  "attention_backend": "fa3",
+  "compute_dtype": "torch.bfloat16",
+  "generation_backend": "nanochat.Engine",
+  "decode_mode": "soft",
+  "temperature": 0.0,
+  "top_k": null,
+  "cache_alignment": "prompt + generated[:-1]; final sampled token has not been consumed",
+  "pass_definition": "1=ordinary; later passes fuse shifted previous hidden only on response inputs",
+  "job_id": 948880,
+  "job_state": "COMPLETED",
+  "exit_code": "0:0",
+  "account": "enalisn1",
+  "qos": "scavenger",
+  "elapsed_seconds": 30,
+  "results_dir": "results/948880",
+  "completed_examples": 4,
+  "total_sampled_tokens": 1670,
+  "rollouts": [
+    {
+      "index": 0,
+      "prompt_tokens": 71,
+      "generated_tokens": 438,
+      "cached_response_tokens": 437,
+      "stop_reason": "terminal_token"
+    },
+    {
+      "index": 1,
+      "prompt_tokens": 138,
+      "generated_tokens": 742,
+      "cached_response_tokens": 741,
+      "stop_reason": "terminal_token"
+    },
+    {
+      "index": 2,
+      "prompt_tokens": 63,
+      "generated_tokens": 327,
+      "cached_response_tokens": 326,
+      "stop_reason": "terminal_token"
+    },
+    {
+      "index": 3,
+      "prompt_tokens": 30,
+      "generated_tokens": 163,
+      "cached_response_tokens": 162,
+      "stop_reason": "terminal_token"
+    }
+  ],
+  "aggregate": {
+    "oracle_hidden": {
+      "k": {
+        "relative_l2": 0.00985108472774432,
+        "cosine": 0.9999514780703641
+      },
+      "v": {
+        "relative_l2": 0.009538821900604962,
+        "cosine": 0.9999545052971763
+      },
+      "logits": {
+        "kl_true_to_replay_mean": 9.698484273194154e-05,
+        "top1_agreement": 0.9994011767610105,
+        "sampled_logp_abs_error_mean": 0.0017239084642960462
+      }
+    },
+    "pass_01": {
+      "k": {
+        "relative_l2": 0.21933392445791267,
+        "cosine": 0.9759462662470808
+      },
+      "v": {
+        "relative_l2": 0.27730541107588,
+        "cosine": 0.9631223489521603
+      },
+      "logits": {
+        "kl_true_to_replay_mean": 0.014911446345880807,
+        "top1_agreement": 0.9874251361378653,
+        "sampled_logp_abs_error_mean": 0.02517520887916629
+      }
+    },
+    "pass_02": {
+      "k": {
+        "relative_l2": 0.026626006042329474,
+        "cosine": 0.9996455275681337
+      },
+      "v": {
+        "relative_l2": 0.0317216612271045,
+        "cosine": 0.999496865149741
+      },
+      "logits": {
+        "kl_true_to_replay_mean": 0.0005680339188439755,
+        "top1_agreement": 0.9976047689329365,
+        "sampled_logp_abs_error_mean": 0.0036549150306260225
+      }
+    },
+    "pass_03": {
+      "k": {
+        "relative_l2": 0.011732421455120443,
+        "cosine": 0.9999311750003563
+      },
+      "v": {
+        "relative_l2": 0.012182973025533145,
+        "cosine": 0.9999257877576605
+      },
+      "logits": {
+        "kl_true_to_replay_mean": 0.00016498503243279837,
+        "top1_agreement": 0.9988023766500508,
+        "sampled_logp_abs_error_mean": 0.0019228798138956444
+      }
+    },
+    "pass_04": {
+      "k": {
+        "relative_l2": 0.01083294331089795,
+        "cosine": 0.9999413236302719
+      },
+      "v": {
+        "relative_l2": 0.010915898713876809,
+        "cosine": 0.9999404213295304
+      },
+      "logits": {
+        "kl_true_to_replay_mean": 0.00012137360395199667,
+        "top1_agreement": 0.9994011767610105,
+        "sampled_logp_abs_error_mean": 0.00198231432998196
+      }
+    },
+    "pass_08": {
+      "k": {
+        "relative_l2": 0.010741015770656623,
+        "cosine": 0.9999423151998182
+      },
+      "v": {
+        "relative_l2": 0.010784637356393683,
+        "cosine": 0.9999418453605187
+      },
+      "logits": {
+        "kl_true_to_replay_mean": 0.00011308626633948364,
+        "top1_agreement": 0.998203576539091,
+        "sampled_logp_abs_error_mean": 0.0019068621085401804
+      }
+    },
+    "pass_16": {
+      "k": {
+        "relative_l2": 0.010726556425274845,
+        "cosine": 0.9999424704483253
+      },
+      "v": {
+        "relative_l2": 0.0107917262106063,
+        "cosine": 0.9999417685851314
+      },
+      "logits": {
+        "kl_true_to_replay_mean": 0.00012641815956375942,
+        "top1_agreement": 0.998203576539091,
+        "sampled_logp_abs_error_mean": 0.0020344127847221932
+      }
+    },
+    "pass_32": {
+      "k": {
+        "relative_l2": 0.010735504641254508,
+        "cosine": 0.9999423744185321
+      },
+      "v": {
+        "relative_l2": 0.010802794804563871,
+        "cosine": 0.9999416498567782
+      },
+      "logits": {
+        "kl_true_to_replay_mean": 0.00011318813343961098,
+        "top1_agreement": 0.9988023766500508,
+        "sampled_logp_abs_error_mean": 0.0019415664451035064
+      }
+    }
+  },
+  "validation": {
+    "tests_passed": 13,
+    "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=..:. ../.venv/bin/python -m pytest test_replay_experiment.py ../tests/test_feedback_decoding.py -q -p no:cacheprovider"
+  },
+  "cancelled_submission": {
+    "job_id": 948875,
+    "reason": "resubmitted on scavenger account after regular account quota delay",
+    "state": "CANCELLED"
+  }
+}

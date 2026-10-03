@@ -1,0 +1,317 @@
+{
+  "training_job": 945294,
+  "created_at_utc": "2026-10-01T21:52:40.181757+00:00",
+  "examples": 500,
+  "max_new_tokens": 1024,
+  "decode_mode": "soft",
+  "temperature": 0.0,
+  "top_k": null,
+  "shards_per_checkpoint": 8,
+  "max_concurrent_gpus": 8,
+  "comparison_output": "results/math500-lr10x-945294-1024-comparison",
+  "baselines": [
+    {
+      "name": "lf_sft",
+      "output": "results/math500-soft-924333",
+      "checkpoint": "/weka/scratch/jhu/enalisn1/xiw/nanochat_cache/chatsft_checkpoints/d20-from40k-lf-k2-gate_product-openmath-train5m-k3-anygpu/model_004407.pt",
+      "checkpoint_sha256": "4e729475cd7d69ebb051791e21a3f221a36ed28bac64973c98a9dddba5e7ff98",
+      "metadata_sha256": "c2c160df08337cd51270270f6ebaeea409bf43f56707e4e181137ea88a906b27",
+      "step": 4407,
+      "model_config": {
+        "sequence_len": 2048,
+        "vocab_size": 32768,
+        "n_layer": 20,
+        "n_head": 10,
+        "n_kv_head": 10,
+        "n_embd": 1280,
+        "window_pattern": "SSSL",
+        "latent_feedback": true,
+        "latent_feedback_mode": "gate_product",
+        "weight_tying": true
+      }
+    },
+    {
+      "name": "initial_rl",
+      "output": "results/math500-soft-933611",
+      "checkpoint": "/weka/scratch/jhu/enalisn1/xiw/nanochat/online_rl_experiments/results/906530/checkpoints/model_000300.pt",
+      "checkpoint_sha256": "cd7f70058e25ee0170c535e9d2eaadad1a49d01fd7218f052673426a41a9eabb",
+      "metadata_sha256": "8ef3c955c01caeff34651531b6d410a9e151a5b5a02a99994ea9773c0a426fd3",
+      "step": 300,
+      "model_config": {
+        "sequence_len": 2048,
+        "vocab_size": 32768,
+        "n_layer": 20,
+        "n_head": 10,
+        "n_kv_head": 10,
+        "n_embd": 1280,
+        "window_pattern": "SSSL",
+        "latent_feedback": true,
+        "latent_feedback_mode": "gate_product",
+        "weight_tying": true
+      }
+    },
+    {
+      "name": "uniform",
+      "output": "results/math500-soft-924201",
+      "checkpoint": "/weka/scratch/jhu/enalisn1/xiw/nanochat/online_rl_experiments/results/920647/checkpoints/model_001300.pt",
+      "checkpoint_sha256": "e75dc7252d83c4ed5b6d523837d9d8d0b1e2a3331e7251c1a3b8c52368199e5c",
+      "metadata_sha256": "26aa2b130eb417023bc0fdc2196d777917ee5fccae0f80e62a6c46d6c14a8731",
+      "step": 1300,
+      "model_config": {
+        "sequence_len": 2048,
+        "vocab_size": 32768,
+        "n_layer": 20,
+        "n_head": 10,
+        "n_kv_head": 10,
+        "n_embd": 1280,
+        "window_pattern": "SSSL",
+        "latent_feedback": true,
+        "latent_feedback_mode": "gate_product",
+        "weight_tying": true
+      }
+    },
+    {
+      "name": "curriculum",
+      "output": "results/math500-soft-924202",
+      "checkpoint": "/weka/scratch/jhu/enalisn1/xiw/nanochat/online_rl_experiments/results/922491/checkpoints/model_001300.pt",
+      "checkpoint_sha256": "d3b8332945b341810c2b1c483fd433c45c702c6b4da86a027ca92654d100de87",
+      "metadata_sha256": "225d4ad51b625bc4d3108c7986afa71a4030d68168b2454bf666874ad9269dec",
+      "step": 1300,
+      "model_config": {
+        "sequence_len": 2048,
+        "vocab_size": 32768,
+        "n_layer": 20,
+        "n_head": 10,
+        "n_kv_head": 10,
+        "n_embd": 1280,
+        "window_pattern": "SSSL",
+        "latent_feedback": true,
+        "latent_feedback_mode": "gate_product",
+        "weight_tying": true
+      }
+    }
+  ],
+  "checkpoints": [
+    {
+      "name": "lr10x_step_1525",
+      "checkpoint": "/weka/scratch/jhu/enalisn1/xiw/nanochat/online_rl_experiments/results/945294/checkpoints/model_001525.pt",
+      "metadata": "/weka/scratch/jhu/enalisn1/xiw/nanochat/online_rl_experiments/results/945294/checkpoints/meta_001525.json",
+      "step": 1525,
+      "checkpoint_sha256": "09d082d3aea4ecbbcfed924109f80b0a0c897536ea2c36079edb143a4741a4aa",
+      "metadata_sha256": "4d3ac72c887bd3ad0615ac17fec834324e5624d93718885d564c5a035ef7b968",
+      "model_config": {
+        "sequence_len": 2048,
+        "vocab_size": 32768,
+        "n_layer": 20,
+        "n_head": 10,
+        "n_kv_head": 10,
+        "n_embd": 1280,
+        "window_pattern": "SSSL",
+        "latent_feedback": true,
+        "latent_feedback_mode": "gate_product",
+        "weight_tying": true
+      },
+      "output": "results/math500-lr10x-945294-step1525-1024"
+    },
+    {
+      "name": "lr10x_step_1550",
+      "checkpoint": "/weka/scratch/jhu/enalisn1/xiw/nanochat/online_rl_experiments/results/945294/checkpoints/model_001550.pt",
+      "metadata": "/weka/scratch/jhu/enalisn1/xiw/nanochat/online_rl_experiments/results/945294/checkpoints/meta_001550.json",
+      "step": 1550,
+      "checkpoint_sha256": "1d1f503b0ab838e427b533527186c78a5b73ed3a492b1c22255d82e356051db7",
+      "metadata_sha256": "128bdd0cc710d10ddcb36b1af0a389cacb5d8a46a81d546a86b205daa6742458",
+      "model_config": {
+        "sequence_len": 2048,
+        "vocab_size": 32768,
+        "n_layer": 20,
+        "n_head": 10,
+        "n_kv_head": 10,
+        "n_embd": 1280,
+        "window_pattern": "SSSL",
+        "latent_feedback": true,
+        "latent_feedback_mode": "gate_product",
+        "weight_tying": true
+      },
+      "output": "results/math500-lr10x-945294-step1550-1024"
+    },
+    {
+      "name": "lr10x_step_1575",
+      "checkpoint": "/weka/scratch/jhu/enalisn1/xiw/nanochat/online_rl_experiments/results/945294/checkpoints/model_001575.pt",
+      "metadata": "/weka/scratch/jhu/enalisn1/xiw/nanochat/online_rl_experiments/results/945294/checkpoints/meta_001575.json",
+      "step": 1575,
+      "checkpoint_sha256": "87c5137bd3cdc90cddca9ba0ddeda01a4e2e111e96037457af2e73f341b489b2",
+      "metadata_sha256": "834c1235a3db8e20527f7909535954185f27e0a737eb20d08df334f5f19b91fb",
+      "model_config": {
+        "sequence_len": 2048,
+        "vocab_size": 32768,
+        "n_layer": 20,
+        "n_head": 10,
+        "n_kv_head": 10,
+        "n_embd": 1280,
+        "window_pattern": "SSSL",
+        "latent_feedback": true,
+        "latent_feedback_mode": "gate_product",
+        "weight_tying": true
+      },
+      "output": "results/math500-lr10x-945294-step1575-1024"
+    },
+    {
+      "name": "lr10x_step_1600",
+      "checkpoint": "/weka/scratch/jhu/enalisn1/xiw/nanochat/online_rl_experiments/results/945294/checkpoints/model_001600.pt",
+      "metadata": "/weka/scratch/jhu/enalisn1/xiw/nanochat/online_rl_experiments/results/945294/checkpoints/meta_001600.json",
+      "step": 1600,
+      "checkpoint_sha256": "5e919c2abdfe7b384d14168f20522e9124a53904bc4083504a8536c5edb7464a",
+      "metadata_sha256": "c149cfeb6299a38eb421bafee7ae13660904cfb2b28444ceaf4749cfa40f8c43",
+      "model_config": {
+        "sequence_len": 2048,
+        "vocab_size": 32768,
+        "n_layer": 20,
+        "n_head": 10,
+        "n_kv_head": 10,
+        "n_embd": 1280,
+        "window_pattern": "SSSL",
+        "latent_feedback": true,
+        "latent_feedback_mode": "gate_product",
+        "weight_tying": true
+      },
+      "output": "results/math500-lr10x-945294-step1600-1024"
+    },
+    {
+      "name": "lr10x_step_1625",
+      "checkpoint": "/weka/scratch/jhu/enalisn1/xiw/nanochat/online_rl_experiments/results/945294/checkpoints/model_001625.pt",
+      "metadata": "/weka/scratch/jhu/enalisn1/xiw/nanochat/online_rl_experiments/results/945294/checkpoints/meta_001625.json",
+      "step": 1625,
+      "checkpoint_sha256": "db47504a1ca2113a7b41ca2c4f0858bbe1b78dc64ff0920855f9791d1a4ba842",
+      "metadata_sha256": "2f8194b83c213e4b7b62501a4e9dbae3be8f85e4000ce74846f1cdb1acc723f9",
+      "model_config": {
+        "sequence_len": 2048,
+        "vocab_size": 32768,
+        "n_layer": 20,
+        "n_head": 10,
+        "n_kv_head": 10,
+        "n_embd": 1280,
+        "window_pattern": "SSSL",
+        "latent_feedback": true,
+        "latent_feedback_mode": "gate_product",
+        "weight_tying": true
+      },
+      "output": "results/math500-lr10x-945294-step1625-1024"
+    },
+    {
+      "name": "lr10x_step_1650",
+      "checkpoint": "/weka/scratch/jhu/enalisn1/xiw/nanochat/online_rl_experiments/results/945294/checkpoints/model_001650.pt",
+      "metadata": "/weka/scratch/jhu/enalisn1/xiw/nanochat/online_rl_experiments/results/945294/checkpoints/meta_001650.json",
+      "step": 1650,
+      "checkpoint_sha256": "f49a41a5d71572240577e65a5753249470700a6d3525939fdf79dc408dba188a",
+      "metadata_sha256": "d82031b0a639eba2abe9b5e51606491bc529b4fc892a00b505c4b9367718f1c1",
+      "model_config": {
+        "sequence_len": 2048,
+        "vocab_size": 32768,
+        "n_layer": 20,
+        "n_head": 10,
+        "n_kv_head": 10,
+        "n_embd": 1280,
+        "window_pattern": "SSSL",
+        "latent_feedback": true,
+        "latent_feedback_mode": "gate_product",
+        "weight_tying": true
+      },
+      "output": "results/math500-lr10x-945294-step1650-1024"
+    },
+    {
+      "name": "lr10x_step_1675",
+      "checkpoint": "/weka/scratch/jhu/enalisn1/xiw/nanochat/online_rl_experiments/results/945294/checkpoints/model_001675.pt",
+      "metadata": "/weka/scratch/jhu/enalisn1/xiw/nanochat/online_rl_experiments/results/945294/checkpoints/meta_001675.json",
+      "step": 1675,
+      "checkpoint_sha256": "853072f928b01bfb617eaf51d62ed46e2999b2bb0faf65a157a01be7b570cb25",
+      "metadata_sha256": "2d477e15573dbdee67034fa07ada5a769d09fd93cda389133a8fe5af83b2109e",
+      "model_config": {
+        "sequence_len": 2048,
+        "vocab_size": 32768,
+        "n_layer": 20,
+        "n_head": 10,
+        "n_kv_head": 10,
+        "n_embd": 1280,
+        "window_pattern": "SSSL",
+        "latent_feedback": true,
+        "latent_feedback_mode": "gate_product",
+        "weight_tying": true
+      },
+      "output": "results/math500-lr10x-945294-step1675-1024"
+    },
+    {
+      "name": "lr10x_step_1700",
+      "checkpoint": "/weka/scratch/jhu/enalisn1/xiw/nanochat/online_rl_experiments/results/945294/checkpoints/model_001700.pt",
+      "metadata": "/weka/scratch/jhu/enalisn1/xiw/nanochat/online_rl_experiments/results/945294/checkpoints/meta_001700.json",
+      "step": 1700,
+      "checkpoint_sha256": "589e2b668a110d07151d3c4e00536a928645348b678c9495b9d6c62b0f19ff31",
+      "metadata_sha256": "7442876a8c3433d1b84b308ebb8ccc7d3a39dd137f42326ded62d6113ccdd3e5",
+      "model_config": {
+        "sequence_len": 2048,
+        "vocab_size": 32768,
+        "n_layer": 20,
+        "n_head": 10,
+        "n_kv_head": 10,
+        "n_embd": 1280,
+        "window_pattern": "SSSL",
+        "latent_feedback": true,
+        "latent_feedback_mode": "gate_product",
+        "weight_tying": true
+      },
+      "output": "results/math500-lr10x-945294-step1700-1024"
+    },
+    {
+      "name": "lr10x_step_1725",
+      "checkpoint": "/weka/scratch/jhu/enalisn1/xiw/nanochat/online_rl_experiments/results/945294/checkpoints/model_001725.pt",
+      "metadata": "/weka/scratch/jhu/enalisn1/xiw/nanochat/online_rl_experiments/results/945294/checkpoints/meta_001725.json",
+      "step": 1725,
+      "checkpoint_sha256": "ae86b701cc9334c1bd187ab641b3f73900ef8bb89aba92716c50c0e04b965d30",
+      "metadata_sha256": "482736b1b957bf13174cb24ce56e4d3c245ade7f58238c5745d2ae6dbe42841e",
+      "model_config": {
+        "sequence_len": 2048,
+        "vocab_size": 32768,
+        "n_layer": 20,
+        "n_head": 10,
+        "n_kv_head": 10,
+        "n_embd": 1280,
+        "window_pattern": "SSSL",
+        "latent_feedback": true,
+        "latent_feedback_mode": "gate_product",
+        "weight_tying": true
+      },
+      "output": "results/math500-lr10x-945294-step1725-1024"
+    },
+    {
+      "name": "lr10x_step_1750",
+      "checkpoint": "/weka/scratch/jhu/enalisn1/xiw/nanochat/online_rl_experiments/results/945294/checkpoints/model_001750.pt",
+      "metadata": "/weka/scratch/jhu/enalisn1/xiw/nanochat/online_rl_experiments/results/945294/checkpoints/meta_001750.json",
+      "step": 1750,
+      "checkpoint_sha256": "208a80a2f105b444ad5c64439151c4e18333fad3dce9d9ad8d3cf8767c8ffeee",
+      "metadata_sha256": "30484328563e2e4b3c993b877c6936586e4924f567a17dcc6091ebe4bcc5d6b0",
+      "model_config": {
+        "sequence_len": 2048,
+        "vocab_size": 32768,
+        "n_layer": 20,
+        "n_head": 10,
+        "n_kv_head": 10,
+        "n_embd": 1280,
+        "window_pattern": "SSSL",
+        "latent_feedback": true,
+        "latent_feedback_mode": "gate_product",
+        "weight_tying": true
+      },
+      "output": "results/math500-lr10x-945294-step1750-1024"
+    }
+  ],
+  "source_sha256": {
+    "evaluate_curriculum_checkpoints_math500.slurm": "2cfa3a4be5ce4289fe0152c1c6012a0ce2684d6a18de25e634743ef1a8aecd7b",
+    "merge_curriculum_checkpoints_math500.slurm": "11917ecfabda699886a071bc2be8f33ba7eebb909ffda8f1e93d6dedf44fe2c6",
+    "report_curriculum_checkpoints_math500.py": "f683c0e1c50d22fdbbee4322e208f88903cac0f77ae6da9e9822136a93479a8d",
+    "evaluate_rl_math500.py": "c6121b73555480c5c63355a6a5d4a1b8e2e39382443de122bf8b46950bea79c1",
+    "../fbt_experiments/evaluate_math500.py": "7587eb556987f33f943f3caded663cb73d08e884b13eb577150d764b688f8a92",
+    "../fbt_experiments/regrade_math500_math_verify.py": "660581dff3d40f5241db5b793f4ea7f52fa002421d737d1033bffa74bd88b453",
+    "../nanochat/engine.py": "2b0d0e79c35cf95dccde046b4c3c3e707e8c7f9cdb11b5285905a8a514a70cb5",
+    "../nanochat/gpt.py": "bee2292e7f56fe683dbb0e44413c44ef97b47779ee3dd8130bbae6b59673f1a2"
+  },
+  "receipt": "run_receipt_curriculum_lr10x_math500_1024_951162.json"
+}

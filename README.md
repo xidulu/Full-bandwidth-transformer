@@ -1,6 +1,8 @@
 # An open sourced reproduction of Full-bandwidth transformer https://arxiv.org/abs/2608.08888 (based on Nanochat)
 
-### Update from Sep 30: The model is post-trainable ! The reward is climbing ! See "Online RL post-training"
+### Update from Sep 30: The model is post-trainable using vLLM as rollout engine! The reward is climbing ! See "Online RL post-training"
+
+### Off policy RL will be next !
 
 ## Introduction
 
