@@ -24,6 +24,7 @@ from nanochat.optim import MuonAdamW
 
 # Our custom Flash Attention module that automatically uses FA3 when compatible and SDPA fallback otherwise
 from nanochat.flash_attention import flash_attn
+from nanochat.multi_pass import multi_pass_loss
 
 EMBEDDING_INIT_STD = 0.8
 LM_HEAD_INIT_STD = 0.001
@@ -811,6 +812,20 @@ class GPT(nn.Module):
         assert not return_hidden or num_forward_passes == 1, "Hidden-state returns require a single forward pass"
         assert feedback_hidden is not None or feedback_mask is None, "feedback_mask requires feedback_hidden"
 
+        if num_forward_passes > 1:
+            assert kv_cache is None, "Multi-pass feedback does not use a KV cache"
+            assert feedback_hidden is None, "Decode-time feedback requires a single forward pass"
+            return multi_pass_loss(
+                self,
+                idx,
+                targets,
+                num_forward_passes,
+                feedback_masks=feedback_masks,
+                feedback_jitter=feedback_jitter,
+                loss_reduction=loss_reduction,
+                return_loss_components=return_loss_components,
+            )
+
         token_embeddings = self._embed_tokens(idx)
         token_inputs = self._prepare_token_inputs(token_embeddings, kv_cache)
         if feedback_hidden is not None:
@@ -831,41 +846,9 @@ class GPT(nn.Module):
                 token_inputs = torch.where(feedback_mask.unsqueeze(-1), fused_inputs, token_inputs)
 
         output, hidden = self._forward_once(idx, token_inputs, targets, kv_cache, loss_reduction)
-        if num_forward_passes == 1:
-            if return_hidden:
-                return output, hidden
-            return (output, output.unsqueeze(0)) if return_loss_components else output
-
-        assert self.latent_feedback is not None, "Multi-pass training requires GPTConfig(latent_feedback=True)"
-        assert targets is not None, "Multi-pass feedback is currently implemented only for the training objective"
-        assert kv_cache is None, "Multi-pass feedback does not use a KV cache"
-        B, T = idx.shape
-        assert T > 1, "Multi-pass feedback requires at least two token positions"
-        assert feedback_masks is not None, "Multi-pass feedback requires explicit prefix/reset masks"
-        expected_shape = (num_forward_passes - 1, B, T)
-        assert feedback_masks.shape == expected_shape, f"Expected feedback_masks shape {expected_shape}, got {feedback_masks.shape}"
-        assert feedback_masks.dtype == torch.bool
-
-        feedback_losses = []
-        for pass_idx in range(num_forward_passes - 1):
-            previous_hidden = hidden[:, :-1]
-            if self.training and feedback_jitter > 0.0:
-                noise = torch.empty_like(previous_hidden).uniform_(-feedback_jitter, feedback_jitter)
-                previous_hidden = previous_hidden + noise
-
-            fused_suffix = self.latent_feedback(previous_hidden, token_embeddings[:, 1:])
-            fused_inputs = torch.cat((token_inputs[:, :1], fused_suffix), dim=1)
-            feedback_mask = feedback_masks[pass_idx]
-            pass_inputs = torch.where(feedback_mask.unsqueeze(-1), fused_inputs, token_inputs)
-            pass_loss, hidden = self._forward_once(idx, pass_inputs, targets, None, loss_reduction)
-            feedback_losses.append(pass_loss)
-
-        # L = L_standard + lambda * mean(L_feedback), with lambda fixed to 1 for now.
-        feedback_loss = torch.stack(feedback_losses, dim=0).mean(dim=0)
-        total_loss = output + feedback_loss
-        if return_loss_components:
-            return total_loss, torch.stack((output, *feedback_losses), dim=0)
-        return total_loss
+        if return_hidden:
+            return output, hidden
+        return (output, output.unsqueeze(0)) if return_loss_components else output
 
     @torch.inference_mode()
     def generate(self, tokens, max_tokens, temperature=1.0, top_k=None, seed=42):

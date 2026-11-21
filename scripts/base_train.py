@@ -32,6 +32,7 @@ from nanochat.tokenizer import get_tokenizer, get_token_bytes
 from nanochat.checkpoint_manager import save_checkpoint, load_checkpoint, find_last_step, _patch_missing_config_keys
 from nanochat.loss_eval import evaluate_bpb_per_pass
 from nanochat.train_utils import get_active_forward_passes, get_feedback_start_step
+from nanochat.multi_pass import RecomputeForward, RECOMPUTE_MODES
 from nanochat.engine import Engine
 from nanochat.flash_attention import HAS_FA3
 from scripts.base_eval import evaluate_core
@@ -60,6 +61,7 @@ parser.add_argument("--latent-feedback-mode", type=str, default="gate_product", 
 parser.add_argument("--feedback-jitter", type=float, default=0.02, help="half-width of uniform jitter applied to carried hidden states")
 parser.add_argument("--feedback-prefix-mixin", action=argparse.BooleanOptionalAction, default=True, help="sample an independent plain prefix for each packed document on feedback passes")
 parser.add_argument("--feedback-start-fraction", type=float, default=0.0, help="fraction of optimization steps to train with K=1 before enabling all configured forward passes")
+parser.add_argument("--recompute", type=str, default="none", choices=RECOMPUTE_MODES, help="activation recomputation for multi-pass training. none: keep the graphs of all K passes. pass: compute passes 1 to K-1 again in the backward pass (less memory, more compute)")
 # Training horizon (only one used, in order of precedence)
 parser.add_argument("--num-iterations", type=int, default=-1, help="explicit number of optimization steps (-1 = disable)")
 parser.add_argument("--target-flops", type=float, default=-1.0, help="calculate num_iterations to reach target_flops (-1 = disable)")
@@ -93,6 +95,8 @@ parser.add_argument("--wandb-resume", type=str, default="allow", choices=["allow
 args = parser.parse_args()
 if args.feedback_jitter < 0:
     parser.error("--feedback-jitter must be non-negative")
+if args.recompute != "none" and args.fp8:
+    parser.error("Do not use --recompute with --fp8. This combination has no test.")
 if not math.isfinite(args.feedback_start_fraction) or not 0.0 <= args.feedback_start_fraction <= 1.0:
     parser.error("--feedback-start-fraction must be in [0, 1]")
 if args.resume_from_step != -1 and args.init_from_model_tag is not None:
@@ -422,6 +426,8 @@ def disable_fp8(model):
 
 orig_model = model # original, uncompiled model, for saving raw model state_dict and for inference/evaluation (because the shapes may change shape)
 model = torch.compile(model, dynamic=False) # the inputs to model will never change shape so dynamic=False is safe
+train_forward = model if args.recompute == "none" else RecomputeForward(orig_model, recompute=args.recompute)
+print0(f"Activation recomputation: {args.recompute}")
 
 # -----------------------------------------------------------------------------
 # Scaling laws and muP extrapolations to determine the optimal training horizon, batch size, learning rates, weight decay.
@@ -821,7 +827,7 @@ while True:
                 )
                 for _ in range(active_forward_passes - 1)
             ])
-        loss, pass_losses = model(
+        loss, pass_losses = train_forward(
             x,
             y,
             num_forward_passes=active_forward_passes,
