@@ -20,6 +20,7 @@ from nanochat.common import compute_init, compute_cleanup, print0, DummyWandb, g
 from nanochat.tokenizer import get_token_bytes
 from nanochat.checkpoint_manager import save_checkpoint, load_model, load_optimizer_state
 from nanochat.gpt import build_feedback_mask
+from nanochat.multi_pass import RecomputeForward, RECOMPUTE_MODES
 from nanochat.loss_eval import evaluate_bpb, evaluate_bpb_per_pass
 import torch.distributed as dist
 from nanochat.flash_attention import HAS_FA3
@@ -63,6 +64,7 @@ parser.add_argument("--final-lr-frac", type=float, default=0.0, help="final LR a
 parser.add_argument("--num-forward-passes", type=int, default=1, choices=[1, 2, 3], help="total model passes per batch; values above 1 use latent feedback")
 parser.add_argument("--feedback-jitter", type=float, default=0.02, help="half-width of uniform jitter applied to carried hidden states")
 parser.add_argument("--feedback-prefix-mixin", action=argparse.BooleanOptionalAction, default=True, help="sample an independent plain prefix for each packed document on feedback passes")
+parser.add_argument("--recompute", type=str, default="none", choices=RECOMPUTE_MODES, help="activation recomputation for multi-pass training. none: keep the graphs of all K passes. pass: compute passes 1 to K-1 again in the backward pass (less memory, more compute)")
 # Evaluation
 parser.add_argument("--eval-every", type=int, default=200, help="evaluate val bpb every N steps (-1 = disable)")
 parser.add_argument("--eval-tokens", type=int, default=40*524288, help="number of tokens to evaluate val loss on")
@@ -144,6 +146,8 @@ for name, fallback, source in [
 
 orig_model = model
 model = torch.compile(model, dynamic=False)
+train_forward = model if args.recompute == "none" else RecomputeForward(orig_model, recompute=args.recompute)
+print0(f"Activation recomputation: {args.recompute}")
 depth = model.config.n_layer
 num_flops_per_token = model.estimate_flops(args.num_forward_passes)
 tokens_per_fwdbwd = args.device_batch_size * args.max_seq_len # tokens per iteration for a single rank
@@ -558,7 +562,7 @@ while True:
                 )
                 for _ in range(args.num_forward_passes - 1)
             ])
-        loss, pass_losses = model(
+        loss, pass_losses = train_forward(
             x,
             y,
             num_forward_passes=args.num_forward_passes,
