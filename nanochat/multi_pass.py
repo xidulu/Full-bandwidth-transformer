@@ -120,8 +120,8 @@ class RecomputeForward:
     """
     A replacement for the training call of GPT.forward, with the same arguments.
 
-    Checkpoints operate only when the pass loop runs outside compiled code. Thus this
-    class compiles the parts separately and does not compile the full model.
+    This class compiles the parts separately, because measurements show that checkpoints
+    inside 1 compiled graph save less memory.
 
     recompute="pass": the backward pass computes each pass again, but not the last pass.
     recompute="none": the same computation with separate parts and no checkpoints.
